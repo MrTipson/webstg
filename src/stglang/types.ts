@@ -2,69 +2,76 @@
 export type identifier = string
 export type literal = number
 export type atom = identifier | literal
-export enum primop { "+#", "-#", "*#", "/#", "%#" }
+export enum primop { ADD = "+#", SUB = "-#", MUL = "*#", DIV = "/#", MOD = "%#", GTE = ">=#", GT = ">#", EQ = "==#", LT = "<#", LTE = "<=#", NE = "!=#" }
 
 // Top level
-export type program = bindings
-export type bindings = binding[]
-export class binding {
-	constructor(public name: identifier, public lf: lambda_form) { }
+export class program {
+	constructor(public decls: (datatype | binding)[]) { }
 
 	public toString() {
-		return `${this.name} = ${this.lf}`;
+		return this.decls.join("\n");
 	}
 }
-export class lambda_form {
-	constructor(
-		public free_vars: identifier[],
-		public update_flag: boolean,
-		public args: identifier[],
-		public expr: expression
-	) { }
+export class datatype {
+	constructor(public name: identifier, public types: identifier[], public constructors: constructor[]) { }
 
 	public toString() {
-		let free_vars = this.free_vars.join(",");
-		let args = this.args.join(",");
-		let update_flag = this.update_flag ? "\\u" : "\\n";
-		let expr;
-		if (this.expr instanceof let_expr ||
-			this.expr instanceof letrec_expr ||
-			this.expr instanceof case_expr) {
-			expr = ("\n" + String(this.expr)).replaceAll("\n", "\n    ");
-		} else {
-			expr = String(this.expr);
-		}
+		return `data ${this.name} ${this.types.join(" ")} = ${this.constructors.map(String).join(" | ")}`;
+	}
+}
+export class constructor {
+	constructor(public name: identifier, public args: (identifier | constructor)[]) { }
 
-		return `{${free_vars}} ${update_flag} {${args}} -> ${expr}`;
+	public toString() {
+		if (this.args.length == 0) {
+			return this.name;
+		}
+		let args = this.args.map(x => x instanceof constructor ? "(" + String(x) + ")" : String(x))
+		return `${this.name} ${args.join(" ")}`;
+	}
+}
+export class binding {
+	constructor(public name: identifier, public obj: heap_object) { }
+
+	public toString() {
+		return `${this.name} = ${this.obj}`;
 	}
 }
 
 // Expressions
 // TODO: atom or literal?
-export type expression = let_expr | letrec_expr | case_expr | application | constructor | builtin_op | atom
+export type expression = let_expr | letrec_expr | case_expr | call | builtin_op | atom
+export class call {
+	constructor(public name: identifier, public atoms: atom[]) { }
+
+	public toString() {
+		return `${this.name} ${this.atoms.join(" ")}`;
+	}
+}
+export class builtin_op {
+	constructor(public prim: primop, public atoms: atom[]) { }
+
+	public toString() {
+		return `${this.prim} ${this.atoms.join(" ")}`;
+	}
+}
 export class let_expr {
-	constructor(public binds: bindings, public expr: expression) { }
+	constructor(public binds: binding[], public expr: expression) { }
 
 	public toString() {
 		let pad_str = "    ";
-		let binds = this.binds
-			.map(x => String(x))
-			.join("\n")
-			.replaceAll("\n", "\n" + pad_str);
+		let binds = this.binds.join("\n").replaceAll("\n", "\n" + pad_str);
 		let expr = String(this.expr).replaceAll("\n", "\n    ");
 
 		return `let ${binds}\nin ${expr}`;
 	}
 }
 export class letrec_expr {
-	constructor(public binds: bindings, public expr: expression) { }
+	constructor(public binds: binding[], public expr: expression) { }
 
 	public toString() {
 		let pad_str = "       ";
-		let binds = this.binds
-			.map(x => String(x))
-			.join("\n")
-			.replaceAll("\n", "\n" + pad_str);
+		let binds = this.binds.join("\n").replaceAll("\n", "\n" + pad_str);
 		let expr = String(this.expr).replaceAll("\n", "\n" + pad_str);
 
 		return `letrec ${binds}\nin ${expr}`;
@@ -77,36 +84,19 @@ export class case_expr {
 		return `case ${this.expr} of\n${this.alts}`;
 	}
 }
-export class application {
-	constructor(public name: identifier, public atoms: atom[]) { }
-
-	public toString() {
-		return `${this.name} {${this.atoms.join(",")}}`;
-	}
-}
-export class constructor {
-	constructor(public constr: identifier, public atoms: atom[]) { }
-
-	public toString() {
-		return `${this.constr} {${this.atoms.join(",")}}`;
-	}
-}
-export class builtin_op {
-	constructor(public prim: primop, public atoms: atom[]) { }
-
-	public toString() {
-		return `${this.prim} {${this.atoms.join(",")}}`;
-	}
-}
 
 // Case constructs
 export class alternatives {
-	constructor(public named_alts: algebraic_alt[] | primitive_alt[], public default_alt?: default_alt) { }
+	constructor(public named_alts: algebraic_alt[], public default_alt?: default_alt) { }
 
 	public toString() {
-		let alts = this.named_alts.map(String).join("\n");
+		let alts = "";
+		if (this.named_alts.length > 0) {
+			alts += this.named_alts.join("\n");
+			alts += "\n";
+		}
 		if (this.default_alt) {
-			alts += "\n" + this.default_alt;
+			alts += this.default_alt;
 		}
 		return alts;
 	}
@@ -115,31 +105,74 @@ export class algebraic_alt {
 	constructor(public constr: identifier, public vars: identifier[], public expr: expression) { }
 
 	public toString() {
-		let pattern = `${this.constr} {${this.vars.join(",")}} -> `;
-		let pad_str = " ".repeat(pattern.length);
-		return pattern + String(this.expr).replaceAll("\n", "\n" + pad_str);
-	}
-}
-export class primitive_alt {
-	constructor(public val: literal, public expr: expression) { }
-
-	public toString() {
-		let pattern = `${this.val}# -> `;
+		let pattern = `${this.constr} ${this.vars.join(" ")} -> `;
 		let pad_str = " ".repeat(pattern.length);
 		return pattern + String(this.expr).replaceAll("\n", "\n" + pad_str);
 	}
 }
 export class default_alt {
-	constructor(public name: identifier | null, public expr: expression) { }
+	constructor(public name: identifier, public expr: expression) { }
 
 	public toString() {
-		let pattern;
-		if (this.name === null) {
-			pattern = "default -> ";
-		} else {
-			pattern = this.name + " -> ";
-		}
+		let pattern = this.name + " -> ";
 		let pad_str = " ".repeat(pattern.length);
 		return pattern + String(this.expr).replaceAll("\n", "\n" + pad_str);
+	}
+}
+
+export type heap_object = FUN | PAP | CON | THUNK | BLACKHOLE
+export class FUN {
+	constructor(public args: identifier[], public expr: expression) {
+		if (args.length == 0) {
+			throw "Function arguments cannot be empty";
+		}
+	}
+
+	public toString() {
+		let args = this.args.join(",");
+		let expr;
+		if (this.expr instanceof let_expr ||
+			this.expr instanceof letrec_expr ||
+			this.expr instanceof case_expr) {
+			expr = ("\n" + String(this.expr)).replaceAll("\n", "\n    ") + "\n";
+		} else {
+			expr = String(this.expr);
+		}
+
+		return `FUN(${args} -> ${expr})`;
+	}
+}
+export class PAP {
+	constructor(public f: FUN, public atoms: atom[]) {
+		if (atoms.length >= f.args.length) {
+			throw "Partial application must have less arguments than expected";
+		}
+	}
+
+	public toString() {
+		return `PAP(${this.f}\n${this.atoms.join(" ")})`;
+	}
+}
+export class CON {
+	constructor(public constr: identifier, public atoms: atom[]) { }
+
+	public toString() {
+		if (this.atoms.length === 0) {
+			return `CON ${this.constr}`;
+		}
+		return `CON(${this.constr} ${this.atoms.join(" ")})`;
+	}
+}
+export class THUNK {
+	constructor(public expr: expression) { }
+
+	public toString() {
+		return `THUNK(${this.expr})`;
+	}
+}
+export class BLACKHOLE {
+	constructor() { }
+	public toString() {
+		return "BLACKHOLE";
 	}
 }
