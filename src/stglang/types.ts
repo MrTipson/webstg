@@ -1,7 +1,17 @@
 // Basic types
-export type identifier = string
-export type literal = number
-export type atom = identifier | literal
+export class identifier {
+	constructor(public name: string) { }
+	public toString() {
+		return this.name;
+	}
+}
+export class literal {
+	constructor(public val: number, public isAddr = false) { }
+	public toString() {
+		return String(this.val);
+	}
+}
+export type atom = literal | identifier
 export enum primop { ADD = "+#", SUB = "-#", MUL = "*#", DIV = "/#", MOD = "%#", GTE = ">=#", GT = ">#", EQ = "==#", LT = "<#", LTE = "<=#", NE = "!=#" }
 
 // Top level
@@ -16,7 +26,7 @@ export class datatype {
 	constructor(public name: identifier, public types: identifier[], public constructors: constructor[]) { }
 
 	public toString() {
-		return `data ${this.name} ${this.types.join(" ")} = ${this.constructors.map(String).join(" | ")}`;
+		return `data ${this.name} ${this.types.join(" ")} = ${this.constructors.join(" | ")}`;
 	}
 }
 export class constructor {
@@ -24,7 +34,7 @@ export class constructor {
 
 	public toString() {
 		if (this.args.length == 0) {
-			return this.name;
+			return String(this.name);
 		}
 		let args = this.args.map(x => x instanceof constructor ? "(" + String(x) + ")" : String(x))
 		return `${this.name} ${args.join(" ")}`;
@@ -39,13 +49,12 @@ export class binding {
 }
 
 // Expressions
-// TODO: atom or literal?
 export type expression = let_expr | letrec_expr | case_expr | call | builtin_op | atom
 export class call {
-	constructor(public name: identifier, public atoms: atom[]) { }
+	constructor(public f: identifier | literal, public atoms: atom[], public known: boolean = false) { }
 
 	public toString() {
-		return `${this.name} ${this.atoms.join(" ")}`;
+		return `${this.f}_${this.known ? this.atoms.length : "?"} ${this.atoms.join(" ")}`;
 	}
 }
 export class builtin_op {
@@ -93,7 +102,7 @@ export class alternatives {
 		let alts = "";
 		if (this.named_alts.length > 0) {
 			alts += this.named_alts.join("\n");
-			alts += "\n";
+			if (this.default_alt) alts += "\n";
 		}
 		if (this.default_alt) {
 			alts += this.default_alt;
@@ -129,7 +138,7 @@ export class FUN {
 	}
 
 	public toString() {
-		let args = this.args.join(",");
+		let args = this.args.join(" ");
 		let expr;
 		if (this.expr instanceof let_expr ||
 			this.expr instanceof letrec_expr ||
@@ -143,11 +152,7 @@ export class FUN {
 	}
 }
 export class PAP {
-	constructor(public f: FUN, public atoms: atom[]) {
-		if (atoms.length >= f.args.length) {
-			throw "Partial application must have less arguments than expected";
-		}
-	}
+	constructor(public f: literal, public atoms: atom[]) { }
 
 	public toString() {
 		return `PAP(${this.f}\n${this.atoms.join(" ")})`;

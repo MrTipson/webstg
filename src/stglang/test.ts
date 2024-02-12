@@ -1,21 +1,21 @@
-import { type identifier, type literal, type atom, primop, program, datatype, constructor, binding, type expression, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, type heap_object, FUN, PAP, CON, THUNK, BLACKHOLE } from "./types"
+import { identifier, literal, type atom, primop, program, datatype, constructor, binding, type expression, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, type heap_object, FUN, PAP, CON, THUNK, BLACKHOLE } from "./types"
 
 let map_prg: program = new program([
-	new datatype("List", ["a"], [
-		new constructor("Nil", []),
-		new constructor("Cons", ["a", new constructor("List", ["a"])])
+	new datatype(new identifier("List"), [new identifier("a")], [
+		new constructor(new identifier("Nil"), []),
+		new constructor(new identifier("Cons"), [new identifier("a"), new constructor(new identifier("List"), [new identifier("a")])])
 	]),
-	new binding("nil", new CON("Nil", [])),
-	new binding("map",
-		new FUN(["f", "xs"],
-			new case_expr("xs", new alternatives([
-				new algebraic_alt("Nil", [], "nil"),
-				new algebraic_alt("Cons", ["y", "ys"],
+	new binding(new identifier("nil"), new CON(new identifier("Nil"), [])),
+	new binding(new identifier("map"),
+		new FUN([new identifier("f"), new identifier("xs")],
+			new case_expr(new identifier("xs"), new alternatives([
+				new algebraic_alt(new identifier("Nil"), [], new identifier("nil")),
+				new algebraic_alt(new identifier("Cons"), [new identifier("y"), new identifier("ys")],
 					new let_expr([
-						new binding("h", new THUNK(new call("f", ["y"]))),
-						new binding("t", new THUNK(new call("map", ["f", "ys"]))),
-						new binding("r", new CON("Cons", ["h", "t"]))
-					], "r"))
+						new binding(new identifier("h"), new THUNK(new call(new identifier("f"), [new identifier("y")]))),
+						new binding(new identifier("t"), new THUNK(new call(new identifier("map"), [new identifier("f"), new identifier("ys")]))),
+						new binding(new identifier("r"), new CON(new identifier("Cons"), [new identifier("h"), new identifier("t")]))
+					], new identifier("r")))
 			]))))
 ]);
 
@@ -24,33 +24,33 @@ export let map = String(map_prg);
 
 
 let sum_prg: program = new program([
-	new binding("nil", new CON("Nil", [])),
-	new binding("zero", new CON("Num", [0])),
-	new binding("one", new CON("Num", [1])),
-	new binding("two", new CON("Num", [2])),
-	new binding("three", new CON("Num", [3])),
-	new binding("plusInt", new FUN(["x", "y"],
-		new case_expr("x", new alternatives([
-			new algebraic_alt("Num", ["i"],
-				new case_expr("y", new alternatives([
-					new algebraic_alt("Num", ["j"],
-						new case_expr(new builtin_op(primop.ADD, ["i", "j"]), new alternatives([], new default_alt("x", new let_expr([
-							new binding("result", new CON("Num", ["x"]))
-						], "result")))))
+	new binding(new identifier("nil"), new CON(new identifier("Nil"), [])),
+	new binding(new identifier("zero"), new CON(new identifier("Num"), [new literal(0)])),
+	new binding(new identifier("one"), new CON(new identifier("Num"), [new literal(1)])),
+	new binding(new identifier("two"), new CON(new identifier("Num"), [new literal(2)])),
+	new binding(new identifier("three"), new CON(new identifier("Num"), [new literal(3)])),
+	new binding(new identifier("plusInt"), new FUN([new identifier("x"), new identifier("y")],
+		new case_expr(new identifier("x"), new alternatives([
+			new algebraic_alt(new identifier("Num"), [new identifier("i")],
+				new case_expr(new identifier("y"), new alternatives([
+					new algebraic_alt(new identifier("Num"), [new identifier("j")],
+						new case_expr(new builtin_op(primop.ADD, [new identifier("i"), new identifier("j")]), new alternatives([], new default_alt(new identifier("x"), new let_expr([
+							new binding(new identifier("result"), new CON(new identifier("Num"), [new identifier("x")]))
+						], new identifier("result"))))))
 				])))
 		])))),
-	new binding("foldl", new FUN(["f", "acc", "list"],
-		new case_expr("list", new alternatives([
-			new algebraic_alt("Nil", [], "acc"),
-			new algebraic_alt("Cons", ["h", "t"], new let_expr([
-				new binding("newAcc", new THUNK(new call("f", ["acc", "h"])))
-			], new call("foldl", ["f", "newAcc", "t"])))
+	new binding(new identifier("foldl"), new FUN([new identifier("f"), new identifier("acc"), new identifier("list")],
+		new case_expr(new identifier("list"), new alternatives([
+			new algebraic_alt(new identifier("Nil"), [], new identifier("acc")),
+			new algebraic_alt(new identifier("Cons"), [new identifier("h"), new identifier("t")], new let_expr([
+				new binding(new identifier("newAcc"), new THUNK(new call(new identifier("f"), [new identifier("acc"), new identifier("h")])))
+			], new call(new identifier("foldl"), [new identifier("f"), new identifier("newAcc"), new identifier("t")])))
 		])))),
-	new binding("sum", new FUN(["list"], new call("foldl", ["plusInt", "zero", "list"]))),
-	new binding("list1", new CON("Cons", ["one", "nil"])),
-	new binding("list2", new CON("Cons", ["two", "list1"])),
-	new binding("list3", new CON("Cons", ["three", "list2"])),
-	new binding("main", new THUNK(new call("sum", ["list3"])))
+	new binding(new identifier("sum"), new FUN([new identifier("list")], new call(new identifier("foldl"), [new identifier("plusInt"), new identifier("zero"), new identifier("list")]))),
+	new binding(new identifier("list1"), new CON(new identifier("Cons"), [new identifier("one"), new identifier("nil")])),
+	new binding(new identifier("list2"), new CON(new identifier("Cons"), [new identifier("two"), new identifier("list1")])),
+	new binding(new identifier("list3"), new CON(new identifier("Cons"), [new identifier("three"), new identifier("list2")])),
+	new binding(new identifier("main"), new THUNK(new call(new identifier("sum"), [new identifier("list3")])))
 ]);
 
 console.log(String(sum_prg));
