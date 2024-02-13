@@ -28,7 +28,6 @@ export function simulate(prog: program, n: number, eval_apply: boolean = false) 
 		while (expr && step < n) {
 			steps.push({ env: String(env), heap: String(h), stack: String(s), expr: String(expr), rule: lastrule });
 			step++; h.step++; s.step++; env.step++;
-			console.log(step);
 			let new_expr = undefined;
 			for (let rule of ruleset) {
 				//console.log(`Trying rule ${rule.name}`);

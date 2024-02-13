@@ -159,7 +159,7 @@ export class PAP {
 	constructor(public f: literal, public atoms: atom[]) { }
 
 	public toString() {
-		return `PAP(${this.f}\n${this.atoms.join(" ")})`;
+		return `PAP(${this.f} ${this.atoms.join(" ")})`;
 	}
 }
 export class CON {

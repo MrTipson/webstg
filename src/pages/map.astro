@@ -1,12 +1,16 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { sum_prg } from "../stglang/test";
+import { map_pap_prg } from "../stglang/test";
 import Program from "../layouts/Program.astro";
 ---
 
-<Layout title="List sum test.">
+<Layout title="Map test.">
 	<main>
-		<Program steps={100} prog={sum_prg} title="Sum test" eval_apply />
+		<Program
+			steps={200}
+			prog={map_pap_prg}
+			title="Map and partial application"
+		/>
 	</main>
 </Layout>
 

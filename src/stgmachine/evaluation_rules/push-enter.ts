@@ -46,7 +46,12 @@ reg({
 		if (!(s.peek() instanceof pending_arg)) return undefined;
 		let pap_args = [];
 		while (s.peek() instanceof pending_arg) {
-			pap_args.push((s.pop() as pending_arg).atom);
+			let arg: atom | undefined = (s.pop() as pending_arg).atom;
+			if (arg instanceof identifier) arg = env.find_value(arg);
+			if (!arg) {
+				console.log("PAP1: couldnd find arg in env");
+			}
+			pap_args.push(arg as literal);
 		}
 		return h.alloc(new PAP(expr, pap_args));
 	}
@@ -60,8 +65,8 @@ reg({
 		if (!(fun instanceof PAP &&
 			s.peek() instanceof pending_arg)) return undefined;
 		let pap_args = fun.atoms;
-		while (pap_args.length > 0) {
-			s.push(new pending_arg(pap_args.pop() as atom));
+		for (let i = pap_args.length - 1; i >= 0; i--) {
+			s.push(new pending_arg(pap_args[i] as atom));
 		}
 		return fun.f;
 	}

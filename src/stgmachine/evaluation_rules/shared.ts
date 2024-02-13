@@ -63,7 +63,6 @@ reg({
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
 		if (!(expr instanceof case_eval)) return undefined;
 		let e = (expr as case_eval);
-		console.log(String(expr));
 		if (!(e.val.isAddr)) return undefined;
 		let obj = h.get(e.val);
 		if (!(obj instanceof CON)) return undefined;
