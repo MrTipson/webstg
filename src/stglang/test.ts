@@ -71,7 +71,7 @@ export let map_pap_prg: program = new program([
 				new algebraic_alt(new identifier("Cons"), [new identifier("y"), new identifier("ys")],
 					new let_expr([
 						new binding(new identifier("h"), new THUNK(new call(new identifier("f"), [new identifier("y")]))),
-						new binding(new identifier("t"), new THUNK(new call(new identifier("map"), [new identifier("f"), new identifier("ys")]))),
+						new binding(new identifier("t"), new THUNK(new call(new identifier("map"), [new identifier("f"), new identifier("ys")], true))),
 						new binding(new identifier("r"), new CON(new identifier("Cons"), [new identifier("h"), new identifier("t")]))
 					], new identifier("r")))
 			])))),
@@ -85,12 +85,23 @@ export let map_pap_prg: program = new program([
 					], new identifier("result"))))
 				))
 			])))),
-	new binding(new identifier("times2list"), new THUNK(new call(new identifier("map"), [new identifier("times2")]))),
+	new binding(new identifier("times2list"), new THUNK(new call(new identifier("map"), [new identifier("times2")], true))),
 	new binding(new identifier("list1"), new CON(new identifier("Cons"), [new identifier("one"), new identifier("nil")])),
 	new binding(new identifier("list2"), new CON(new identifier("Cons"), [new identifier("two"), new identifier("list1")])),
 	new binding(new identifier("list3"), new CON(new identifier("Cons"), [new identifier("three"), new identifier("list2")])),
-	new binding(new identifier("list_x2"), new THUNK(new call(new identifier("times2list"), [new identifier("list3")]))),
-	new binding(new identifier("main"), new THUNK(new call(new identifier("times2list"), [new identifier("list_x2")])))
+	new binding(new identifier("list_x2"), new THUNK(new call(new identifier("times2list"), [new identifier("list3")], true))),
+	new binding(new identifier("list_x4"), new THUNK(new call(new identifier("times2list"), [new identifier("list_x2")], true))),
+	new binding(new identifier("forcelist"), new FUN([new identifier("list")],
+		new case_expr(new identifier("list"), new alternatives([
+			new algebraic_alt(new identifier("Nil"), [], new identifier("nil")),
+			new algebraic_alt(new identifier("Cons"), [new identifier("h"), new identifier("t")],
+				new case_expr(new identifier("h"), new alternatives([], new default_alt(new identifier("x"),
+					new case_expr(new call(new identifier("forcelist"), [new identifier("t")], true), new alternatives([], new default_alt(new identifier("y"),
+						new let_expr([
+							new binding(new identifier("result"), new CON(new identifier("Cons"), [new identifier("x"), new identifier("y")]))
+						], new identifier("result")))))))))
+		])))),
+	new binding(new identifier("main"), new THUNK(new call(new identifier("forcelist"), [new identifier("list_x4")], true)))
 ]);
 
 export let map_pap = String(map_pap_prg);
