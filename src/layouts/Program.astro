@@ -58,17 +58,13 @@ let simulated = simulate(prog, steps, eval_apply);
 <script>
 	let steps = document.getElementsByClassName("steps")[0].children.length;
 	document.onkeydown = function (event) {
-		let url = new URL(document.URL);
-		if (!url.hash) {
-			url.hash = "step0";
-		}
-		let num = Number(url.hash.substring(5));
+		let hash = document.location.hash || "#step0";
+		let num = Number(hash.substring(5));
 		if (event.key == "ArrowLeft") {
 			num = num > 0 ? num - 1 : num;
 		} else if (event.key == "ArrowRight") {
 			num = num >= steps ? steps - 1 : num + 1;
 		}
-		url.hash = `#step${num}`;
-		document.location = url.toString();
+		document.location = `#step${num}`;
 	};
 </script>
