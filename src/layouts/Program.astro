@@ -1,0 +1,73 @@
+---
+import { program } from "../stglang/types";
+import { simulate } from "../stgmachine/machine";
+import Step from "../components/Step.astro";
+interface Props {
+	prog: program;
+	title: string;
+	steps: number;
+}
+let { prog, title, steps } = Astro.props;
+let simulated = simulate(prog, steps);
+---
+
+<div class="program">
+	<div class="source">
+		<h1>{title}</h1>
+		<pre><code>{prog}</code></pre>
+	</div>
+	<div class="steps">
+		{
+			simulated.map((step, i) => (
+				<div id={"step" + i}>
+					<span>Step {i}</span>
+					<Step
+						expr={step.expr}
+						env={step.env}
+						heap={step.heap}
+						stack={step.stack}
+						rule={step.rule}
+					/>
+				</div>
+			))
+		}
+	</div>
+</div>
+
+<style>
+	.program {
+		display: flex;
+		height: 100%;
+	}
+	.steps {
+		flex-grow: 1;
+		padding: 1rem;
+		height: 100%;
+		overflow: auto;
+	}
+	.steps > div {
+		padding-top: 1rem;
+	}
+	.source {
+		width: 30%;
+		margin: 1rem;
+	}
+</style>
+
+<script>
+	let steps = document.getElementsByClassName("steps")[0].children.length;
+	document.onkeydown = function (event) {
+		let url = new URL(document.URL);
+		if (!url.hash) {
+			url.hash = "step0";
+		}
+		let num = Number(url.hash.substring(5));
+		if (event.key == "ArrowLeft") {
+			num = num > 0 ? num - 1 : num;
+		} else if (event.key == "ArrowRight") {
+			num = num >= steps ? steps - 1 : num + 1;
+		}
+		url.hash = `#step${num}`;
+		document.location = url.toString();
+	};
+</script>

@@ -3,17 +3,17 @@ import type { stack } from "./stack";
 
 export class enviroment {
 	step: number = 0;
-	current_local: Map<identifier, literal> = new Map();
-	current_global: Map<identifier, literal> = new Map();
+	current_local: Map<string, literal> = new Map();
+	current_global: Map<string, literal> = new Map();
 	// journaling so backwards steps are possible
-	added_globals: [identifier, literal][][] = [];
+	added_globals: [string, literal][][] = [];
 	// globals cannot be removed in general
-	added_locals: [identifier, literal][][] = [];
-	removed_locals: [identifier, literal][][] = [];
-	add_local(name: identifier, val: literal | identifier, stack: stack): void {
+	added_locals: [string, literal][][] = [];
+	removed_locals: [string, literal][][] = [];
+	add_local(name: identifier, val: literal | identifier): void {
 		let value: literal;
 		if (val instanceof identifier) {
-			let found = this.find_value(val as identifier, stack);
+			let found = this.find_value(val as identifier);
 			if (!found) {
 				throw "Assignment of undefined value";
 			}
@@ -25,17 +25,17 @@ export class enviroment {
 			this.added_locals[this.step] = [];
 		}
 		// we are replacing a local that had the same name
-		this.added_locals[this.step].push([name, value]);
-		if (this.current_local.has(name)) {
+		this.added_locals[this.step].push([name.name, value]);
+		if (this.current_local.has(name.name)) {
 			if (!this.removed_locals[this.step]) {
 				this.removed_locals[this.step] = [];
 			}
-			this.removed_locals[this.step].push([name, value]);
+			this.removed_locals[this.step].push([name.name, value]);
 		}
 
-		this.current_local.set(name, value);
+		this.current_local.set(name.name, value);
 	}
-	replace_locals(new_locals: Map<identifier, literal>): void {
+	replace_locals(new_locals: Map<string, literal>): void {
 		if (!this.removed_locals[this.step]) {
 			this.removed_locals[this.step] = [];
 		}
@@ -44,7 +44,6 @@ export class enviroment {
 		}
 		this.removed_locals[this.step].concat([...this.current_local.entries()]);
 		this.added_locals[this.step].concat([...new_locals.entries()]);
-		this.current_local.clear();
 		this.current_local = new Map(new_locals);
 	}
 	clear_locals(): void {
@@ -55,15 +54,20 @@ export class enviroment {
 		this.current_local.clear();
 	}
 	add_global(name: identifier, val: literal): void {
-		this.current_global.set(name, val);
+		this.current_global.set(name.name, val);
 		if (!this.added_globals[this.step]) {
 			this.added_globals[this.step] = [];
 		}
-		this.added_globals[this.step].push([name, val]);
+		this.added_globals[this.step].push([name.name, val]);
 	}
-	find_value(name: identifier, stack: stack): literal | undefined {
-		return this.current_local.get(name) ||
-			stack.find_saved_local(name) ||
-			this.current_global.get(name);
+	find_value(name: identifier): literal | undefined {
+		return this.current_local.get(name.name) ||
+			this.current_global.get(name.name);
+	}
+	private _toString(env: Map<String, literal>): string {
+		return [...env.entries()].map(([name, lit]) => `\t${name}: ${lit}`).join("\n");
+	}
+	public toString() {
+		return `Local:\n${this._toString(this.current_local)}\nGlobal:\n${this._toString(this.current_global)}`;
 	}
 }

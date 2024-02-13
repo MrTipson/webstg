@@ -2,10 +2,10 @@ import type { alternatives, atom, heap_object, identifier, literal } from "../st
 
 export type stack_object = case_cont | thunk_update | apply_args | pending_arg;
 export class case_cont {
-	constructor(public alts: alternatives, public locals: Map<identifier, literal>) { }
+	constructor(public alts: alternatives, public locals: Map<string, literal>) { }
 
 	public toString() {
-		return `case continuation:\n${this.alts}\nLocals:${this.locals}\n`;
+		return `case continuation:\n${this.alts}\nLocals:${[...this.locals.entries()].map(([name, lit]) => `\t${name}: ${lit}`).join("\n")}\n`;
 	}
 }
 
@@ -35,37 +35,32 @@ export class pending_arg {
 
 export class stack {
 	step: number = 0;
-	i: number = 0;
 	// Current state of the stack
 	current: stack_object[] = [];
 	// Changes for each simulated stack
 	added: stack_object[][] = [];
 	removed: stack_object[][] = [];
 	public push(obj: stack_object): void {
-		let pos = this.i++;
-		this.current[pos] = obj;
+		this.current.push(obj);
 		if (!this.added[this.step]) {
 			this.added[this.step] = [];
 		}
 		this.added[this.step].push(obj);
+		//console.log("i push", obj, this.current);
 	}
-	public peek(): stack_object {
-		let pos = this.i - 1;
-		if (this.current[pos]) {
-			return this.current[pos];
-		} else {
-			throw `Peek: Invalid stack address ${pos}`;
-		}
+	public peek(): stack_object | undefined {
+		return this.current[this.current.length - 1];
 	}
 	public peekn(n: number): stack_object[] {
-		let from = this.i - n;
+		let from = this.current.length - n;
 		if (from < 0) from = 0;
-		return this.current.splice(from, this.i).reverse();
+		return this.current.slice(from, this.current.length).reverse();
 	}
-	public pop(): stack_object {
-		let obj = this.current[--this.i];
+	public pop(): stack_object | undefined {
+		//console.trace();
+		let obj = this.current.pop();
 		if (!obj) {
-			throw `Pop: Invalid/empty stack`;
+			return undefined;
 		}
 		if (!this.removed[this.step]) {
 			this.removed[this.step] = [];
@@ -74,14 +69,17 @@ export class stack {
 		return obj;
 	}
 	public find_saved_local(name: identifier): literal | undefined {
-		for (let j = this.i; j >= 0; j--) {
+		for (let j = this.current.length; j >= 0; j--) {
 			let el = this.current[j];
 			if (el instanceof case_cont) {
 				let locals = (el as case_cont).locals;
-				let x = locals.get(name);
+				let x = locals.get(name.name);
 				if (x) return x;
 			}
 		}
 		return undefined;
+	}
+	public toString() {
+		return this.current.join("\n");
 	}
 }

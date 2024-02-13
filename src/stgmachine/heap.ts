@@ -37,7 +37,7 @@ export class heap {
 			this.removed[this.step].push([addr.val, this.current[addr.val]])
 			this.added[this.step].push([addr.val, obj]);
 		}
-		this.current[addr.val];
+		this.current[addr.val] = obj;
 	}
 	public free(addr: literal): void {
 		let obj = this.current[addr.val];
@@ -48,5 +48,8 @@ export class heap {
 			this.removed[this.step] = [];
 		}
 		this.removed[this.step].push([addr.val, obj]);
+	}
+	public toString() {
+		return this.current.map((x, i) => `0x${i.toString(16)}: ${x}`).join("\n");
 	}
 }

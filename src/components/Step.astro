@@ -1,0 +1,45 @@
+---
+interface Step {
+	stack: string;
+	heap: string;
+	env: string;
+	expr: string;
+	rule: string;
+}
+
+const { stack, heap, env, expr, rule } = Astro.props;
+---
+
+<div class="expression">
+	<h3>Expression {rule ? `[Last rule: ${rule}]` : ""}</h3>
+	<pre><code>{expr}</code></pre>
+</div>
+<div class="machine">
+	<div class="component">
+		<h3>Enviroment</h3>
+		<pre><code>{env}</code></pre>
+	</div>
+	<div class="component">
+		<h3>Stack</h3>
+		<pre><code>{stack}</code></pre>
+	</div>
+	<div class="component">
+		<h3>Heap</h3>
+		<pre><code>{heap}</code></pre>
+	</div>
+</div>
+<style>
+	.machine {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+	}
+	h3 {
+		margin: 0.5rem;
+	}
+	.component {
+		flex-grow: 1;
+		flex-shrink: 1;
+		margin: 1rem;
+	}
+</style>

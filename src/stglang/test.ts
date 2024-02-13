@@ -23,7 +23,7 @@ console.log(String(map_prg));
 export let map = String(map_prg);
 
 
-let sum_prg: program = new program([
+export let sum_prg: program = new program([
 	new binding(new identifier("nil"), new CON(new identifier("Nil"), [])),
 	new binding(new identifier("zero"), new CON(new identifier("Num"), [new literal(0)])),
 	new binding(new identifier("one"), new CON(new identifier("Num"), [new literal(1)])),
@@ -44,13 +44,13 @@ let sum_prg: program = new program([
 			new algebraic_alt(new identifier("Nil"), [], new identifier("acc")),
 			new algebraic_alt(new identifier("Cons"), [new identifier("h"), new identifier("t")], new let_expr([
 				new binding(new identifier("newAcc"), new THUNK(new call(new identifier("f"), [new identifier("acc"), new identifier("h")])))
-			], new call(new identifier("foldl"), [new identifier("f"), new identifier("newAcc"), new identifier("t")])))
+			], new call(new identifier("foldl"), [new identifier("f"), new identifier("newAcc"), new identifier("t")], true)))
 		])))),
-	new binding(new identifier("sum"), new FUN([new identifier("list")], new call(new identifier("foldl"), [new identifier("plusInt"), new identifier("zero"), new identifier("list")]))),
+	new binding(new identifier("sum"), new FUN([new identifier("list")], new call(new identifier("foldl"), [new identifier("plusInt"), new identifier("zero"), new identifier("list")], true))),
 	new binding(new identifier("list1"), new CON(new identifier("Cons"), [new identifier("one"), new identifier("nil")])),
 	new binding(new identifier("list2"), new CON(new identifier("Cons"), [new identifier("two"), new identifier("list1")])),
 	new binding(new identifier("list3"), new CON(new identifier("Cons"), [new identifier("three"), new identifier("list2")])),
-	new binding(new identifier("main"), new THUNK(new call(new identifier("sum"), [new identifier("list3")])))
+	new binding(new identifier("main"), new THUNK(new call(new identifier("sum"), [new identifier("list3")], true)))
 ]);
 
 console.log(String(sum_prg));

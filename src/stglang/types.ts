@@ -8,7 +8,7 @@ export class identifier {
 export class literal {
 	constructor(public val: number, public isAddr = false) { }
 	public toString() {
-		return String(this.val);
+		return this.isAddr ? "0x" + this.val.toString(16) : String(this.val);
 	}
 }
 export type atom = literal | identifier
@@ -49,7 +49,7 @@ export class binding {
 }
 
 // Expressions
-export type expression = let_expr | letrec_expr | case_expr | call | builtin_op | atom
+export type expression = let_expr | letrec_expr | case_expr | call | builtin_op | atom | case_eval
 export class call {
 	constructor(public f: identifier | literal, public atoms: atom[], public known: boolean = false) { }
 
@@ -90,7 +90,15 @@ export class case_expr {
 	constructor(public expr: expression, public alts: alternatives) { }
 
 	public toString() {
-		return `case ${this.expr} of\n${this.alts}`;
+		return `case ${this.expr} of${("\n" + this.alts).replaceAll("\n", "\n  ")}`;
+	}
+}
+
+export class case_eval {
+	constructor(public val: literal, public alts: alternatives) { }
+
+	public toString() {
+		return `case ${this.val} of${("\n" + this.alts).replaceAll("\n", "\n  ")}`;
 	}
 }
 
@@ -131,11 +139,7 @@ export class default_alt {
 
 export type heap_object = FUN | PAP | CON | THUNK | BLACKHOLE
 export class FUN {
-	constructor(public args: identifier[], public expr: expression) {
-		if (args.length == 0) {
-			throw "Function arguments cannot be empty";
-		}
-	}
+	constructor(public args: identifier[], public expr: expression, public env?: Map<string, literal>) { }
 
 	public toString() {
 		let args = this.args.join(" ");
@@ -169,10 +173,10 @@ export class CON {
 	}
 }
 export class THUNK {
-	constructor(public expr: expression) { }
+	constructor(public expr: expression, public env: Map<string, literal> = new Map()) { }
 
 	public toString() {
-		return `THUNK(${this.expr})`;
+		return `THUNK(${this.expr}): ${[...this.env.entries()].map(([k, v]) => `${k}..${v}`).join(" ")}`;
 	}
 }
 export class BLACKHOLE {

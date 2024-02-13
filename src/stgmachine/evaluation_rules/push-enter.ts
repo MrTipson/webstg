@@ -29,7 +29,7 @@ reg({
 		let stack_objs = s.peekn(n);
 		if (stack_objs.length != n || stack_objs.some(x => !(x instanceof pending_arg))) return undefined;
 		for (let i = 0; i < n; i++) {
-			env.add_local(fun.args[i], (s.pop() as pending_arg).atom, s);
+			env.add_local(fun.args[i], (s.pop() as pending_arg).atom);
 		}
 		return fun.expr;
 	}
