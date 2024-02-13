@@ -7,7 +7,7 @@ import { stack } from "./stack";
 import { enviroment } from "./enviroment";
 
 
-export function simulate(prog: program, n: number) {
+export function simulate(prog: program, n: number, eval_apply: boolean = false) {
 	let step = 0;
 	let h = new heap();
 	let s = new stack();
@@ -19,8 +19,7 @@ export function simulate(prog: program, n: number) {
 		}
 	}
 
-	const push_enter = true;
-	const ruleset = rs_shared.concat(push_enter ? rs_pushenter : rs_evalapply);
+	const ruleset = rs_shared.concat(eval_apply ? rs_evalapply : rs_pushenter);
 
 	let steps: { env: string, heap: string, stack: string, expr: string, rule: string | undefined }[] = [];
 	let expr: expression = new identifier('main');
