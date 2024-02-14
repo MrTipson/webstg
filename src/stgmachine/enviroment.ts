@@ -1,4 +1,4 @@
-import { identifier, type literal } from "../stglang/types";
+import { identifier, literal } from "../stglang/types";
 import type { stack } from "./stack";
 
 export class enviroment {
@@ -11,16 +11,7 @@ export class enviroment {
 	added_locals: [string, literal][][] = [];
 	removed_locals: [string, literal][][] = [];
 	add_local(name: identifier, val: literal | identifier): void {
-		let value: literal;
-		if (val instanceof identifier) {
-			let found = this.find_value(val as identifier);
-			if (!found) {
-				throw "Assignment of undefined value";
-			}
-			value = found;
-		} else {
-			value = val;
-		}
+		let value = val instanceof literal ? val : this.find_value(val as identifier);
 		if (!this.added_locals[this.step]) {
 			this.added_locals[this.step] = [];
 		}
@@ -60,9 +51,11 @@ export class enviroment {
 		}
 		this.added_globals[this.step].push([name.name, val]);
 	}
-	find_value(name: identifier): literal | undefined {
-		return this.current_local.get(name.name) ||
+	find_value(name: identifier): literal {
+		let val = this.current_local.get(name.name) ||
 			this.current_global.get(name.name);
+		if (val) return val;
+		throw new Error(`Identifier ${name.name} not in enviroment`);
 	}
 	private _toString(env: Map<String, literal>): string {
 		return [...env.entries()].map(([name, lit]) => `\t${name}: ${lit}`).join("\n");

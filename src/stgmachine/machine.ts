@@ -5,9 +5,10 @@ import { binding, identifier, type heap_object, type expression, program, FUN, d
 import { heap } from "./heap";
 import { stack } from "./stack";
 import { enviroment } from "./enviroment";
+import { rungc } from "./garbage_collection";
 
 
-export function simulate(prog: program, n: number, eval_apply: boolean = false) {
+export function simulate(prog: program, n: number, eval_apply: boolean = false, garbage_collection: boolean = false) {
 	let step = 0;
 	let h = new heap();
 	let s = new stack();
@@ -30,6 +31,7 @@ export function simulate(prog: program, n: number, eval_apply: boolean = false) 
 		while (expr && step < n) {
 			steps.push({ env: String(env), heap: String(h), stack: String(s), expr: String(expr), rule: lastrule });
 			step++; h.step++; s.step++; env.step++;
+			if (garbage_collection) rungc(expr, env, s, h);
 			let new_expr = undefined;
 			for (let rule of ruleset) {
 				//console.log(`Trying rule ${rule.name}`);

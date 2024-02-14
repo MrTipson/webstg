@@ -13,7 +13,8 @@ reg({
 		if (!(expr instanceof call)) return undefined;
 		let call_expr = expr as call;
 		for (let i = call_expr.atoms.length - 1; i >= 0; i--) {
-			s.push(new pending_arg(call_expr.atoms[i]));
+			let value = call_expr.atoms[i];
+			s.push(new pending_arg(value instanceof literal ? value : env.find_value(value)));
 		}
 		return call_expr.f;
 	}
@@ -29,7 +30,7 @@ reg({
 		let stack_objs = s.peekn(n);
 		if (stack_objs.length != n || stack_objs.some(x => !(x instanceof pending_arg))) return undefined;
 		for (let i = 0; i < n; i++) {
-			env.add_local(fun.args[i], (s.pop() as pending_arg).atom);
+			env.add_local(fun.args[i], (s.pop() as pending_arg).value);
 		}
 		return fun.expr;
 	}
@@ -46,12 +47,7 @@ reg({
 		if (!(s.peek() instanceof pending_arg)) return undefined;
 		let pap_args = [];
 		while (s.peek() instanceof pending_arg) {
-			let arg: atom | undefined = (s.pop() as pending_arg).atom;
-			if (arg instanceof identifier) arg = env.find_value(arg);
-			if (!arg) {
-				console.log("PAP1: couldnd find arg in env");
-			}
-			pap_args.push(arg as literal);
+			pap_args.push((s.pop() as pending_arg).value);
 		}
 		return h.alloc(new PAP(expr, pap_args));
 	}
@@ -64,9 +60,9 @@ reg({
 		let fun = h.get(expr);
 		if (!(fun instanceof PAP &&
 			s.peek() instanceof pending_arg)) return undefined;
-		let pap_args = fun.atoms;
+		let pap_args = fun.atoms.map<literal>(x => x instanceof literal ? x : env.find_value(x));
 		for (let i = pap_args.length - 1; i >= 0; i--) {
-			s.push(new pending_arg(pap_args[i] as atom));
+			s.push(new pending_arg(pap_args[i]));
 		}
 		return fun.f;
 	}

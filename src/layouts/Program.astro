@@ -7,9 +7,10 @@ interface Props {
 	title: string;
 	steps: number;
 	eval_apply?: boolean;
+	garbage_collection?: boolean;
 }
-let { prog, title, steps, eval_apply } = Astro.props;
-let simulated = simulate(prog, steps, eval_apply);
+let { prog, title, steps, eval_apply, garbage_collection } = Astro.props;
+let simulated = simulate(prog, steps, eval_apply, garbage_collection);
 ---
 
 <div class="program">

@@ -4,7 +4,7 @@ export class heap {
 	step: number = 0;
 	i: number = 0;
 	// Current state of the heap
-	current: heap_object[] = [];
+	current: (heap_object | undefined)[] = [];
 	// Changes for each simulated step
 	added: [number, heap_object][][] = [];
 	removed: [number, heap_object][][] = [];
@@ -34,7 +34,7 @@ export class heap {
 			if (!this.added[this.step]) {
 				this.added[this.step] = [];
 			}
-			this.removed[this.step].push([addr.val, this.current[addr.val]])
+			this.removed[this.step].push([addr.val, this.current[addr.val] as heap_object]);
 			this.added[this.step].push([addr.val, obj]);
 		}
 		this.current[addr.val] = obj;
@@ -48,8 +48,12 @@ export class heap {
 			this.removed[this.step] = [];
 		}
 		this.removed[this.step].push([addr.val, obj]);
+		this.current[addr.val] = undefined;
 	}
 	public toString() {
-		return this.current.map((x, i) => `0x${i.toString(16)}: ${x}`).join("\n");
+		return this.current
+			.map((x, i) => x ? `0x${i.toString(16)}: ${x}` : undefined)
+			.filter(x => x)
+			.join("\n");
 	}
 }

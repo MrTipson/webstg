@@ -16,21 +16,11 @@ reg({
 			for (let bind of binds) {
 				let obj = bind.obj;
 				if (obj instanceof PAP) {
-					let values = obj.atoms.map(x => x instanceof literal ? x : env.find_value(x));
-					if (values.some(x => x === undefined)) {
-						console.log("undefined variable during PAP construction");
-						return undefined;
-					} else {
-						obj = new PAP(obj.f, values as literal[]);
-					}
+					let values = obj.atoms.map<literal>(x => x instanceof literal ? x : env.find_value(x));
+					obj = new PAP(obj.f, values);
 				} else if (obj instanceof CON) {
-					let values = obj.atoms.map(x => x instanceof literal ? x : env.find_value(x));
-					if (values.some(x => x === undefined)) {
-						console.log("undefined variable during CON construction");
-						return undefined;
-					} else {
-						obj = new CON(obj.constr, values as literal[]);
-					}
+					let values = obj.atoms.map<literal>(x => x instanceof literal ? x : env.find_value(x));
+					obj = new CON(obj.constr, values);
 				} else if (obj instanceof THUNK) {
 					let used = used_vars(obj);
 					let closure_env = [...env.current_local.entries()].filter(([k, v]) => used.includes(k));
@@ -148,7 +138,6 @@ reg({
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
 		if (!(expr instanceof call && expr.known)) return undefined;
 		let addr = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
-		if (!addr) return undefined;
 		let obj = h.get(addr);
 		if (!(obj instanceof FUN &&
 			obj.args.length == expr.atoms.length)) return undefined;
@@ -165,7 +154,6 @@ reg({
 		if (!(expr instanceof builtin_op)) return undefined;
 		// Assume its a binop
 		let [e1, e2] = expr.atoms.map(x => x instanceof literal ? x : env.find_value(x));
-		if (!e1 || !e2) throw "Primop expression is undefined";
 		if (e1.isAddr || e2.isAddr) throw "Primop expression is an address";
 		switch (expr.prim) {
 			case primop.ADD: return new literal(e1.val + e2.val);

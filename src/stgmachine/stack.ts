@@ -18,18 +18,18 @@ export class thunk_update {
 }
 
 export class apply_args {
-	constructor(public atoms: atom[]) { }
+	constructor(public values: literal[]) { }
 
 	public toString() {
-		return `eval/apply args: ${this.atoms}`;
+		return `eval/apply args: ${this.values}`;
 	}
 }
 
 export class pending_arg {
-	constructor(public atom: atom) { }
+	constructor(public value: literal) { }
 
 	public toString() {
-		return `Arg ${this.atom}`;
+		return `Arg ${this.value}`;
 	}
 }
 

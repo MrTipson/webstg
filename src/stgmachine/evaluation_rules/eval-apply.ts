@@ -12,7 +12,6 @@ reg({
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
 		if (!(expr instanceof call)) return undefined;
 		let f = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
-		if (!f) return undefined;
 		let fun = h.get(f);
 		if (!(fun instanceof FUN &&
 			fun.args.length == expr.atoms.length)) return undefined;
@@ -28,14 +27,16 @@ reg({
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
 		if (!(expr instanceof call)) return undefined;
 		let f = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
-		if (!f) return undefined;
 		let fun = h.get(f);
 		if (!(fun instanceof FUN &&
 			fun.args.length < expr.atoms.length)) return undefined;
 		for (let i = 0; i < expr.atoms.length; i++) {
 			env.add_local(fun.args[i], expr.atoms[i]);
 		}
-		s.push(new apply_args(expr.atoms.slice(fun.args.length, expr.atoms.length)))
+		let args = expr.atoms
+			.slice(fun.args.length, expr.atoms.length)
+			.map<literal>(x => x instanceof literal ? x : env.find_value(x));
+		s.push(new apply_args(args))
 		return fun.expr;
 	}
 });
@@ -45,7 +46,6 @@ reg({
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
 		if (!(expr instanceof call)) return undefined;
 		let f = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
-		if (!f) return undefined;
 		let fun = h.get(f);
 		if (!(fun instanceof FUN &&
 			fun.args.length > expr.atoms.length)) return undefined;
@@ -58,9 +58,8 @@ reg({
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
 		if (!(expr instanceof call)) return undefined;
 		let f = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
-		if (!f) return undefined;
 		if (!(h.get(f) instanceof THUNK)) return undefined;
-		s.push(new apply_args(expr.atoms));
+		s.push(new apply_args(expr.atoms.map<literal>(x => x instanceof literal ? x : env.find_value(x))));
 		return f;
 	}
 });
@@ -70,7 +69,6 @@ reg({
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
 		if (!(expr instanceof call)) return undefined;
 		let f = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
-		if (!f) return undefined;
 		let pap = h.get(f);
 		if (!(pap instanceof PAP)) return undefined;
 		return new call(pap.f, pap.atoms.concat(expr.atoms));
@@ -83,9 +81,8 @@ reg({
 		if (!(s.peek() instanceof apply_args)) return undefined;
 		if (!(expr instanceof literal || expr instanceof identifier)) return undefined;
 		let f = expr instanceof literal ? expr : env.find_value(expr);
-		if (!f) return undefined;
 		let pap = h.get(f);
 		if (!(pap instanceof PAP || pap instanceof FUN)) return undefined;
-		return new call(f, (s.pop() as apply_args).atoms);
+		return new call(f, (s.pop() as apply_args).values);
 	}
 });
