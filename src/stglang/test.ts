@@ -108,3 +108,60 @@ export let map_pap_prg: program = new program([
 ]);
 
 export let map_pap = String(map_pap_prg);
+
+export let fib_prg: program = new program([
+	new binding(new identifier("nil"), new CON(new identifier("Nil"), [])),
+	new binding(new identifier("plusInt"), new FUN([new identifier("x"), new identifier("y")],
+		new case_expr(new identifier("x"), new alternatives([
+			new algebraic_alt(new identifier("Num"), [new identifier("i")],
+				new case_expr(new identifier("y"), new alternatives([
+					new algebraic_alt(new identifier("Num"), [new identifier("j")],
+						new case_expr(new builtin_op(primop.ADD, [new identifier("i"), new identifier("j")]), new alternatives([], new default_alt(new identifier("x"), new let_expr([
+							new binding(new identifier("result"), new CON(new identifier("Num"), [new identifier("x")]))
+						], new identifier("result"))))))
+				])))
+		])))),
+	new binding(new identifier("zipWith"), new FUN([new identifier("f"), new identifier("x"), new identifier("y")],
+		new case_expr(new identifier("x"), new alternatives([
+			new algebraic_alt(new identifier("Nil"), [], new identifier("nil")),
+			new algebraic_alt(new identifier("Cons"), [new identifier("hx"), new identifier("tx")],
+				new case_expr(new identifier("y"), new alternatives([
+					new algebraic_alt(new identifier("Nil"), [], new identifier("nil")),
+					new algebraic_alt(new identifier("Cons"), [new identifier("hy"), new identifier("ty")],
+						new let_expr([
+							new binding(new identifier("fxy"), new THUNK(new call(new identifier("f"), [new identifier("hx"), new identifier("hy")]))),
+							new binding(new identifier("fxys"), new THUNK(new call(new identifier("zipWith"), [new identifier("f"), new identifier("tx"), new identifier("ty")]))),
+							new binding(new identifier("zippedList"), new CON(new identifier("Cons"), [new identifier("fxy"), new identifier("fxys")]))
+						], new identifier("zippedList")))
+				]))
+			)
+		])))),
+	new binding(new identifier("forcen"), new FUN([new identifier("n"), new identifier("list")],
+		new case_expr(new builtin_op(primop.GT, [new identifier("n"), new literal(0)]), new alternatives([
+			new algebraic_alt(new identifier("False"), [], new identifier("nil")),
+			new algebraic_alt(new identifier("True"), [], new case_expr(new identifier("list"), new alternatives([
+				new algebraic_alt(new identifier("Nil"), [], new identifier("nil")),
+				new algebraic_alt(new identifier("Cons"), [new identifier("h"), new identifier("t")],
+					new case_expr(new identifier("h"), new alternatives([], new default_alt(new identifier("x"),
+						new case_expr(new builtin_op(primop.SUB, [new identifier("n"), new literal(1)]), new alternatives([], new default_alt(new identifier("n"),
+							new case_expr(new call(new identifier("forcen"), [new identifier("n"), new identifier("t")]), new alternatives([], new default_alt(new identifier("y"),
+								new let_expr([
+									new binding(new identifier("result"), new CON(new identifier("Cons"), [new identifier("x"), new identifier("y")]))
+								], new identifier("result")))))
+						)))))
+					))
+			])))
+		])))),
+	new binding(new identifier("zero"), new CON(new identifier("Num"), [new literal(0)])),
+	new binding(new identifier("fib"), new THUNK(new letrec_expr([
+		new binding(new identifier("fib0"), new CON(new identifier("Cons"), [new identifier("zero"), new identifier("fib1")])),
+		new binding(new identifier("fib1"), new THUNK(new let_expr([
+			new binding(new identifier("one"), new CON(new identifier("Num"), [new literal(1)])),
+			new binding(new identifier("tmp"), new CON(new identifier("Cons"), [new identifier("one"), new identifier("fib2")]))
+		], new identifier("tmp")))),
+		new binding(new identifier("fib2"), new THUNK(new call(new identifier("zipWith"), [new identifier("plusInt"), new identifier("fib0"), new identifier("fib1")])))
+	], new identifier("fib2")))),
+	new binding(new identifier("main"), new THUNK(new call(new identifier("forcen"), [new literal(10), new identifier("fib")])))
+]);
+
+export let fib = String(fib_prg);

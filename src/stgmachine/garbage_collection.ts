@@ -74,7 +74,6 @@ export function rungc(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!flags[i]) {
 			let addr = new literal(i, true);
 			if (h.get(addr)) {
-				console.log("Hello i free", i.toString(16));
 				h.free(addr);
 			}
 		}

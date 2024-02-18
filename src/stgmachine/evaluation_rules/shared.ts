@@ -1,4 +1,4 @@
-import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, primop, case_eval, PAP } from "../../stglang/types";
+import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, primop, case_eval, PAP, letrec_expr, type heap_object } from "../../stglang/types";
 import type { enviroment } from "../enviroment";
 import type { heap } from "../heap";
 import { case_cont, thunk_update, type stack } from "../stack";
@@ -36,6 +36,42 @@ reg({
 			return e.expr;
 		}
 		return undefined;
+	}
+});
+
+reg({
+	name: "LETREC",
+	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
+		if (!(expr instanceof letrec_expr)) return undefined;
+		let e = (expr as letrec_expr);
+		let binds = e.binds;
+		let objs: heap_object[] = [];
+		for (let i = 0; i < binds.length; i++) {
+			let obj = binds[i].obj;
+			if (obj instanceof PAP) {
+				obj = new PAP(obj.f, obj.atoms);
+			} else if (obj instanceof CON) {
+				obj = new CON(obj.constr, obj.atoms);
+			} else if (obj instanceof THUNK) {
+				obj = new THUNK(obj.expr);
+			} else if (obj instanceof FUN) {
+				obj = new FUN(obj.args, obj.expr);
+			}
+			let addr = h.alloc(obj);
+			env.add_local(binds[i].name, addr);
+			objs[i] = obj;
+		}
+		for (let i = 0; i < binds.length; i++) {
+			let obj = objs[i];
+			if (obj instanceof PAP || obj instanceof CON) {
+				obj.atoms = obj.atoms.map<literal>(x => x instanceof literal ? x : env.find_value(x));
+			} else if (obj instanceof THUNK || obj instanceof FUN) {
+				let used = used_vars(obj);
+				let closure_env = [...env.current_local.entries()].filter(([k, v]) => used.includes(k));
+				obj.env = new Map(closure_env);
+			}
+		}
+		return e.expr;
 	}
 });
 
