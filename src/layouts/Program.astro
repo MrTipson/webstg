@@ -64,7 +64,7 @@ let simulated = simulate(prog, steps, eval_apply, garbage_collection);
 		if (event.key == "ArrowLeft") {
 			num = num > 0 ? num - 1 : num;
 		} else if (event.key == "ArrowRight") {
-			num = num >= steps ? steps - 1 : num + 1;
+			num = num < steps - 1 ? num + 1 : num;
 		}
 		document.location = `#step${num}`;
 	};
