@@ -1,7 +1,7 @@
-import { CON, FUN, PAP, THUNK, literal, type expression, call, case_eval } from "../stglang/types";
-import type { enviroment } from "./enviroment";
-import type { heap } from "./heap";
-import { case_cont, pending_arg, thunk_update, type stack, apply_args } from "./stack";
+import { CON, FUN, PAP, THUNK, literal, type expression, call, case_eval } from "@/stglang/types";
+import type { enviroment } from "@/stgmachine/enviroment";
+import type { heap } from "@/stgmachine/heap";
+import { case_cont, pending_arg, thunk_update, type stack, apply_args } from "@/stgmachine/stack";
 
 export function rungc(expr: expression, env: enviroment, s: stack, h: heap) {
 	let roots = [...env.current_local.values(), ...env.current_global.values()];

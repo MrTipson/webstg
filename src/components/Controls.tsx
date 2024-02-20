@@ -1,14 +1,16 @@
-import { stg_machine } from "../stgmachine/machine";
+import { stg_machine } from "@/stgmachine/machine";
+import { Button } from "@/components/ui/button";
 
-export default function Controls({ machine, setMachine, setStep }: { machine: stg_machine, setMachine: Function, setStep: Function }) {
+export default function Controls({ className, machine, setMachine, setStep }: { className?: string, machine: stg_machine, setMachine: Function, setStep: Function }) {
 
 	function next() {
 		machine.step();
-		setMachine(machine);
 		setStep(machine.step_number);
 	}
 
 	return (
-		<button onClick={next}>Next step</button>
+		<div className={className}>
+			<Button onClick={next}>Next step</Button>
+		</div>
 	);
 }

@@ -1,8 +1,8 @@
-import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, primop, case_eval, PAP, letrec_expr, type heap_object } from "../../stglang/types";
-import type { enviroment } from "../enviroment";
-import type { heap } from "../heap";
-import { case_cont, thunk_update, type stack } from "../stack";
-import { register_rule, used_vars, type Rule } from "./types";
+import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, primop, case_eval, PAP, letrec_expr, type heap_object } from "@/stglang/types";
+import type { enviroment } from "@/stgmachine/enviroment";
+import type { heap } from "@/stgmachine/heap";
+import { case_cont, thunk_update, type stack } from "@/stgmachine/stack";
+import { register_rule, used_vars, type Rule } from "@/stgmachine/evaluation_rules/types";
 
 export const rules = new Array<Rule>();
 let reg = (x: Rule) => register_rule(rules, x);

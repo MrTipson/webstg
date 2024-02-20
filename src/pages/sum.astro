@@ -1,7 +1,7 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import { sum_prg } from "../stglang/test";
-import Program from "../layouts/Program.astro";
+import Layout from "@/layouts/Layout.astro";
+import { sum_prg } from "@/stglang/test";
+import Program from "@/layouts/Program.astro";
 ---
 
 <Layout title="List sum test.">
@@ -9,13 +9,3 @@ import Program from "../layouts/Program.astro";
 		<Program steps={100} prog={sum_prg} title="Sum test" eval_apply />
 	</main>
 </Layout>
-
-<style>
-	main {
-		position: relative;
-		color: white;
-		font-size: 20px;
-		line-height: 1.6;
-		height: 100%;
-	}
-</style>

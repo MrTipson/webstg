@@ -1,7 +1,7 @@
 ---
-import { program } from "../stglang/types";
-import { simulate } from "../stgmachine/machine";
-import Step from "../components/Step.astro";
+import { program } from "@/stglang/types";
+import { simulate } from "@/stgmachine/machine";
+import Step from "@/components/Step.astro";
 interface Props {
 	prog: program;
 	title: string;
@@ -13,15 +13,15 @@ let { prog, title, steps, eval_apply, garbage_collection } = Astro.props;
 let simulated = simulate(prog, steps, eval_apply, garbage_collection);
 ---
 
-<div class="program">
-	<div class="source">
+<div class="flex h-full font-semibold">
+	<div class="w-[30%] m-4">
 		<h1>{title}</h1>
 		<pre><code>{prog}</code></pre>
 	</div>
-	<div class="steps">
+	<div class="flex-grow p-4 h-full overflow-auto">
 		{
 			simulated.map((step, i) => (
-				<div id={"step" + i}>
+				<div class="pt-4" id={"step" + i}>
 					<span>Step {i}</span>
 					<Step
 						expr={step.expr}
@@ -36,23 +36,9 @@ let simulated = simulate(prog, steps, eval_apply, garbage_collection);
 	</div>
 </div>
 
-<style>
-	.program {
-		display: flex;
-		height: 100%;
-	}
-	.steps {
-		flex-grow: 1;
-		padding: 1rem;
-		height: 100%;
-		overflow: auto;
-	}
-	.steps > div {
-		padding-top: 1rem;
-	}
-	.source {
-		width: 30%;
-		margin: 1rem;
+<style is:global>
+	pre {
+		@apply rounded-lg;
 	}
 </style>
 

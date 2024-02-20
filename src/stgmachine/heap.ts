@@ -1,4 +1,4 @@
-import { type heap_object, literal } from "../stglang/types";
+import { type heap_object, literal } from "@/stglang/types";
 
 export class heap {
 	step: number = 0;

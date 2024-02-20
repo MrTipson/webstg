@@ -1,5 +1,5 @@
-import { identifier, literal } from "../stglang/types";
-import type { stack } from "./stack";
+import { identifier, literal } from "@/stglang/types";
+import type { stack } from "@/stgmachine/stack";
 
 export class enviroment {
 	step: number = 0;

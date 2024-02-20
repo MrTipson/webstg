@@ -1,11 +1,11 @@
-import { rules as rs_evalapply } from "./evaluation_rules/eval-apply";
-import { rules as rs_pushenter } from "./evaluation_rules/push-enter";
-import { rules as rs_shared } from "./evaluation_rules/shared";
-import { binding, identifier, type heap_object, type expression, program, FUN, datatype, call, let_expr, THUNK, letrec_expr, case_expr } from "../stglang/types";
-import { heap } from "./heap";
-import { stack } from "./stack";
-import { enviroment } from "./enviroment";
-import { rungc } from "./garbage_collection";
+import { rules as rs_evalapply } from "@/stgmachine/evaluation_rules/eval-apply";
+import { rules as rs_pushenter } from "@/stgmachine/evaluation_rules/push-enter";
+import { rules as rs_shared } from "@/stgmachine/evaluation_rules/shared";
+import { binding, identifier, type heap_object, type expression, program, FUN, datatype, call, let_expr, THUNK, letrec_expr, case_expr } from "@/stglang/types";
+import { heap } from "@/stgmachine/heap";
+import { stack } from "@/stgmachine/stack";
+import { enviroment } from "@/stgmachine/enviroment";
+import { rungc } from "@/stgmachine/garbage_collection";
 
 export class stg_machine {
 	public step_number: number;

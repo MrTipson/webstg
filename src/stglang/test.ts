@@ -1,4 +1,4 @@
-import { identifier, literal, type atom, primop, program, datatype, constructor, binding, type expression, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, type heap_object, FUN, PAP, CON, THUNK, BLACKHOLE } from "./types"
+import { identifier, literal, type atom, primop, program, datatype, constructor, binding, type expression, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, type heap_object, FUN, PAP, CON, THUNK, BLACKHOLE } from "@/stglang/types";
 
 let map_prg: program = new program([
 	new datatype(new identifier("List"), [new identifier("a")], [

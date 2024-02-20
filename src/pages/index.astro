@@ -1,11 +1,10 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Card from "../components/Card.astro";
-import { map, sum, fib } from "../stglang/test";
+import Layout from "@/layouts/Layout.astro";
+import { map, sum, fib } from "@/stglang/test";
 ---
 
 <Layout title="Test page.">
-	<main>
+	<main class="m-auto p-4 w-fit max-w-[calc(100%-2rem)] text-primary text-xl">
 		<h1>Testing page</h1>
 		<pre><code>{map}</code></pre>
 		<pre><code>{sum}</code></pre>
@@ -14,28 +13,7 @@ import { map, sum, fib } from "../stglang/test";
 </Layout>
 
 <style>
-	main {
-		margin: auto;
-		padding: 1rem;
-		width: 800px;
-		max-width: calc(100% - 2rem);
-		color: white;
-		font-size: 20px;
-		line-height: 1.6;
-	}
-	h1 {
-		font-size: 4rem;
-		font-weight: 700;
-		line-height: 1;
-		text-align: center;
-		margin-bottom: 1em;
-	}
 	pre {
-		font-size: 0.8em;
-		font-weight: bold;
-		background: rgba(var(--accent-light), 12%);
-		color: rgb(var(--accent-light));
-		border-radius: 4px;
-		padding: 0.3em 0.4em;
+		@apply rounded p-3 m-2;
 	}
 </style>

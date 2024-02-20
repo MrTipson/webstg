@@ -1,8 +1,8 @@
-import { FUN, PAP, THUNK, call, literal, type expression, identifier } from "../../stglang/types";
-import { register_rule, type Rule } from "./types";
-import type { enviroment } from "../enviroment";
-import type { heap } from "../heap";
-import { apply_args, type stack } from "../stack";
+import { FUN, PAP, THUNK, call, literal, type expression, identifier } from "@/stglang/types";
+import { register_rule, type Rule } from "@/stgmachine/evaluation_rules/types";
+import type { enviroment } from "@/stgmachine/enviroment";
+import type { heap } from "@/stgmachine/heap";
+import { apply_args, type stack } from "@/stgmachine/stack";
 
 export const rules = new Array<Rule>();
 let reg = (x: Rule) => register_rule(rules, x);

@@ -1,8 +1,8 @@
-import { call, literal, type expression, FUN, identifier, PAP, type atom } from "../../stglang/types";
-import { register_rule, type Rule } from "./types";
-import type { enviroment } from "../enviroment";
-import type { heap } from "../heap";
-import { pending_arg, type stack } from "../stack";
+import { call, literal, type expression, FUN, identifier, PAP, type atom } from "@/stglang/types";
+import { register_rule, type Rule } from "@/stgmachine/evaluation_rules/types";
+import type { enviroment } from "@/stgmachine/enviroment";
+import type { heap } from "@/stgmachine/heap";
+import { pending_arg, type stack } from "@/stgmachine/stack";
 
 export const rules = new Array<Rule>();
 let reg = (x: Rule) => register_rule(rules, x);
