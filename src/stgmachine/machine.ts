@@ -7,46 +7,75 @@ import { stack } from "./stack";
 import { enviroment } from "./enviroment";
 import { rungc } from "./garbage_collection";
 
+export class stg_machine {
+	public step_number: number;
+	public readonly prog: program;
+	public readonly eval_apply: boolean;
+	public readonly garbage_collection: boolean;
+
+	public readonly h = new heap();
+	public readonly s = new stack();
+	public readonly env = new enviroment();
+
+	private ruleset;
+	public expr: expression;
+	public lastrule: string | undefined;
+
+	constructor(prog: program, eval_apply: boolean = false, garbage_collection: boolean = false) {
+		this.step_number = 0;
+		this.prog = prog;
+		annotate_known_function_calls(prog);
+
+		this.eval_apply = eval_apply;
+		this.ruleset = rs_shared.concat(eval_apply ? rs_evalapply : rs_pushenter);
+
+		this.garbage_collection = garbage_collection;
+		this.expr = new identifier("main");
+
+		for (let decl of prog.decls) {
+			if (decl instanceof binding) {
+				this.env.add_global(decl.name, this.h.alloc(decl.obj));
+			}
+		}
+		if (this.garbage_collection) rungc(this.expr, this.env, this.s, this.h);
+		this.step_number++; this.h.step++; this.s.step++; this.env.step++;
+	}
+
+	step(): boolean {
+		try {
+			let new_expr = undefined;
+			for (let rule of this.ruleset) {
+				//console.log(`Trying rule ${rule.name}`);
+				new_expr = rule.apply(this.expr, this.env, this.s, this.h);
+				if (new_expr) {
+					this.lastrule = rule.name;
+					this.expr = new_expr;
+					if (this.garbage_collection) rungc(this.expr, this.env, this.s, this.h);
+					this.step_number++; this.h.step++; this.s.step++; this.env.step++;
+					return true;
+				}
+			}
+		} catch (e) {
+			console.log("ERROR:", e);
+		}
+		return false;
+	}
+}
 
 export function simulate(prog: program, n: number, eval_apply: boolean = false, garbage_collection: boolean = false) {
-	let step = 0;
-	let h = new heap();
-	let s = new stack();
-	let env = new enviroment();
-
-	annotate_known_function_calls(prog);
-
-	for (let decl of prog.decls) {
-		if (decl instanceof binding) {
-			env.add_global(decl.name, h.alloc(decl.obj));
-		}
-	}
-
-	const ruleset = rs_shared.concat(eval_apply ? rs_evalapply : rs_pushenter);
-
+	let machine = new stg_machine(prog, eval_apply, garbage_collection);
 	let steps: { env: string, heap: string, stack: string, expr: string, rule: string | undefined }[] = [];
-	let expr: expression = new identifier('main');
-	let lastrule: string | undefined;
-	try {
-		while (expr && step < n) {
-			steps.push({ env: String(env), heap: String(h), stack: String(s), expr: String(expr), rule: lastrule });
-			step++; h.step++; s.step++; env.step++;
-			if (garbage_collection) rungc(expr, env, s, h);
-			let new_expr = undefined;
-			for (let rule of ruleset) {
-				//console.log(`Trying rule ${rule.name}`);
-				new_expr = rule.apply(expr, env, s, h);
-				if (new_expr) {
-					lastrule = rule.name;
-					expr = new_expr;
-					break;
-				};
-			}
-			if (!new_expr) break;
-		}
-	} catch (e) {
-		console.log("ERROR:", e);
+
+	while (machine.step_number < n && machine.step()) {
+		steps.push({
+			env: String(machine.env),
+			heap: String(machine.h),
+			stack: String(machine.s),
+			expr: String(machine.expr),
+			rule: machine.lastrule
+		});
 	}
+
 	return steps;
 }
 
