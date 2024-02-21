@@ -41,7 +41,7 @@ export class heap {
 	}
 	public free(addr: literal): void {
 		let obj = this.current[addr.val];
-		if (!obj) {
+		if (!obj || !addr.isAddr) {
 			throw `Free: Invalid heap address ${addr}`;
 		}
 		if (!this.removed[this.step]) {
@@ -49,6 +49,32 @@ export class heap {
 		}
 		this.removed[this.step].push([addr.val, obj]);
 		this.current[addr.val] = undefined;
+	}
+	public back(): void {
+		if (this.step <= 0) return;
+		this.step--;
+		//console.log("Before", this.current);
+		if (this.added[this.step]) {
+			for (let i = this.added[this.step].length - 1; i >= 0; i--) {
+				let [addr, obj] = this.added[this.step][i];
+				this.current[addr] = undefined;
+
+				// either undefined or false is falsey
+				let was_replaced = this.removed[this.step]
+					?.map(([a, o]) => a)
+					.includes(addr);
+				if (!was_replaced && (addr === this.i - 1)) {
+					this.i--;
+				}
+			}
+			this.added[this.step] = [];
+		}
+		if (this.removed[this.step]) {
+			for (let [addr, obj] of this.removed[this.step]) {
+				this.current[addr] = obj;
+			}
+			this.removed[this.step] = [];
+		}
 	}
 	public toString() {
 		return this.current

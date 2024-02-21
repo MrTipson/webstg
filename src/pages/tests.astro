@@ -1,0 +1,11 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { status, reason } from "@/tests/backtest";
+---
+
+<Layout title="List sum test.">
+	<main>
+		<span>{status}</span>
+		<span>{reason}</span>
+	</main>
+</Layout>

@@ -68,16 +68,23 @@ export class stack {
 		this.removed[this.step].push(obj);
 		return obj;
 	}
-	public find_saved_local(name: identifier): literal | undefined {
-		for (let j = this.current.length; j >= 0; j--) {
-			let el = this.current[j];
-			if (el instanceof case_cont) {
-				let locals = (el as case_cont).locals;
-				let x = locals.get(name.name);
-				if (x) return x;
+	public back() {
+		if (this.step <= 0) return;
+		this.step--;
+		if (this.added[this.step]) {
+			while (this.added[this.step].length > 0) {
+				this.added[this.step].pop();
+				this.current.pop();
 			}
 		}
-		return undefined;
+		if (this.removed[this.step]) {
+			while (this.removed[this.step].length > 0) {
+				let obj = this.removed[this.step].pop();
+				if (obj) {
+					this.current.push(obj);
+				}
+			}
+		}
 	}
 	public toString() {
 		return this.current.join("\n");

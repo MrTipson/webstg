@@ -19,6 +19,7 @@ export class stg_machine {
 
 	private ruleset;
 	public expr: expression;
+	public exprs: expression[] = [];
 	public lastrule: string | undefined;
 
 	constructor(prog: program, eval_apply: boolean = false, garbage_collection: boolean = false) {
@@ -39,6 +40,7 @@ export class stg_machine {
 		}
 		if (this.garbage_collection) rungc(this.expr, this.env, this.s, this.h);
 		this.step_number++; this.h.step++; this.s.step++; this.env.step++;
+		this.exprs[this.step_number] = this.expr;
 	}
 
 	step(): boolean {
@@ -52,9 +54,24 @@ export class stg_machine {
 					this.expr = new_expr;
 					if (this.garbage_collection) rungc(this.expr, this.env, this.s, this.h);
 					this.step_number++; this.h.step++; this.s.step++; this.env.step++;
+					this.exprs[this.step_number] = this.expr;
 					return true;
 				}
 			}
+		} catch (e) {
+			console.log("ERROR:", e);
+		}
+		return false;
+	}
+
+	step_back(): boolean {
+		try {
+			if (this.step_number <= 1) {
+				return false;
+			}
+			this.step_number--; this.h.back(); this.s.back(); this.env.back();
+			this.expr = this.exprs[this.step_number];
+			return true;
 		} catch (e) {
 			console.log("ERROR:", e);
 		}

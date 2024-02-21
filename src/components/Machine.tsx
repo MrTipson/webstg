@@ -21,19 +21,19 @@ export default function Machine() {
 		<div className="h-full flex flex-col">
 			<ExpressionView machine={machine}></ExpressionView>
 			<ResizablePanelGroup direction="horizontal">
-				<ResizablePanel>
+				<ResizablePanel defaultSize={30}>
 					<ProgramView machine={machine} className="h-full" />
 				</ResizablePanel>
 				<ResizableHandle withHandle />
-				<ResizablePanel>
+				<ResizablePanel defaultSize={30}>
 					<HeapView machine={machine} className="h-full" />
 				</ResizablePanel>
 				<ResizableHandle withHandle />
-				<ResizablePanel>
+				<ResizablePanel defaultSize={30}>
 					<ResizablePanelGroup direction="vertical">
-						<ResizablePanel><StackView machine={machine} className="h-full" /></ResizablePanel>
+						<ResizablePanel defaultSize={30}><StackView machine={machine} className="h-full" /></ResizablePanel>
 						<ResizableHandle withHandle />
-						<ResizablePanel><EnviromentView machine={machine} className="h-full" /></ResizablePanel>
+						<ResizablePanel defaultSize={30}><EnviromentView machine={machine} className="h-full" /></ResizablePanel>
 					</ResizablePanelGroup>
 				</ResizablePanel>
 			</ResizablePanelGroup>

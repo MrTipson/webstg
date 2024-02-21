@@ -165,7 +165,7 @@ reg({
 		if (!obj) return undefined;
 		let cont = s.pop() as thunk_update;
 		h.set(cont.addr, obj);
-		return expr;
+		return cont.addr;
 	}
 });
 
