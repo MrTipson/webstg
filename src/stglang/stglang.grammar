@@ -1,0 +1,45 @@
+@top Program { Binding* }
+
+kw<term> { @specialize[@name={term}]<Identifier, term> }
+
+Binding { Identifier "=" heap_object }
+
+heap_object[@isGroup=HeapObject] { FUN | CON | THUNK }
+FUN { kw<"FUN"> "(" Identifier+ "->" expression ")" }
+CON { kw<"CON"> "(" Identifier atom* ")" }
+THUNK { kw<"THUNK"> "(" expression ")" }
+
+expression[@isGroup=Expression] {
+	atom |
+	Call |
+	Primop |
+	Let_expr |
+	Letrec_expr |
+	Case_expr
+}
+
+Let_expr { kw<"let"> Binding+ kw<"in"> expression }
+Letrec_expr { kw<"letrec"> Binding+ kw<"in"> expression }
+
+Case_expr {	kw<"case"> expression kw<"of"> Alternative+ }
+Alternative { Identifier+ "->" ~expression }
+
+Call { Identifier atom+ }
+
+Op<expr> { expr }
+Primop { atom Operator atom }
+Operator { Op<"+#"> | Op<"-#"> | Op<"*#"> | Op<"/#"> | Op<"%#"> |
+Op<">=#"> | Op<">#"> | Op<"==#"> | Op<"<#"> | Op<"<=#"> | Op<"!=#"> }
+atom { Identifier | Literal }
+
+@tokens {
+	Identifier { $[a-zA-Z_]$[a-zA-Z_0-9]* }
+	Literal { ("0"|$[1-9]$[0-9]*)("."$[0-9]+)? }
+	LineComment { "--" ![\n]* }
+	space { $[ \t\n\r]+ }
+	"(" ")" "=" "->"
+}
+
+@skip { space | LineComment }
+
+@external propSource stgHighlight from "./highlight"

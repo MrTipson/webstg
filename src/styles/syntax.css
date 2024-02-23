@@ -1,0 +1,31 @@
+:root {
+	--syntax-variable: rgb(74, 185, 254);
+	--syntax-heapobj: rgb(227, 151, 240);
+	--syntax-punctuation: rgb(227, 151, 240);
+	--syntax-keyword: rgb(15, 71, 176);
+	--syntax-number: rgb(172, 230, 139);
+}
+
+.dark {
+	--syntax-variable: rgb(74, 185, 254);
+	--syntax-heapobj: rgb(227, 151, 240);
+	--syntax-punctuation: rgb(227, 151, 240);
+	--syntax-keyword: rgb(15, 71, 176);
+	--syntax-number: rgb(172, 230, 139);
+}
+
+.tok-variableName {
+	color: var(--syntax-variable);
+}
+.tok-typeName {
+	color: var(--syntax-heapobj);
+}
+.tok-punctuation {
+	color: var(--syntax-punctuation);
+}
+.tok-keyword {
+	color: var(--syntax-keyword);
+}
+.tok-number {
+	color: var(--syntax-number);
+}

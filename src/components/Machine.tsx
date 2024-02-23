@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/resizable";
 
 export default function Machine() {
+	// set machine is called *only* when a new program is loaded, but will be mutated while stepping
 	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(sum_prg, false, true));
 	const [step, setStep] = useState(0);
 
