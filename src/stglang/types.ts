@@ -1,36 +1,39 @@
 // Basic types
 export class identifier {
-	constructor(public name: string) { }
+	constructor(public name: string, public from: number = -1, public to: number = -1) { }
 	public toString() {
 		return this.name;
 	}
 }
 export class literal {
-	constructor(public val: number, public isAddr = false) { }
+	constructor(public val: number, public isAddr = false, public from: number = -1, public to: number = -1) { }
 	public toString() {
 		return this.isAddr ? "0x" + this.val.toString(16) : String(this.val);
 	}
 }
 export type atom = literal | identifier
-export enum primop { ADD = "+#", SUB = "-#", MUL = "*#", DIV = "/#", MOD = "%#", GTE = ">=#", GT = ">#", EQ = "==#", LT = "<#", LTE = "<=#", NE = "!=#" }
+export type primop = "+#" | "-#" | "*#" | "/#" | "%#" | ">=#" | ">#" | "==#" | "<#" | "<=#" | "!=#";
 
 // Top level
 export class program {
-	constructor(public decls: (datatype | binding)[]) { }
+	constructor(public decls: (datatype | binding)[], public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		return this.decls.join("\n");
 	}
 }
 export class datatype {
-	constructor(public name: identifier, public types: identifier[], public constructors: constructor[]) { }
+	constructor(
+		public name: identifier, public types: identifier[], public constructors: constructor[],
+		from: number = -1, to: number = -1
+	) { }
 
 	public toString() {
 		return `data ${this.name} ${this.types.join(" ")} = ${this.constructors.join(" | ")}`;
 	}
 }
 export class constructor {
-	constructor(public name: identifier, public args: (identifier | constructor)[]) { }
+	constructor(public name: identifier, public args: (identifier | constructor)[], public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		if (this.args.length == 0) {
@@ -41,7 +44,7 @@ export class constructor {
 	}
 }
 export class binding {
-	constructor(public name: identifier, public obj: heap_object) { }
+	constructor(public name: identifier, public obj: heap_object, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		return `${this.name} = ${this.obj}`;
@@ -51,21 +54,22 @@ export class binding {
 // Expressions
 export type expression = let_expr | letrec_expr | case_expr | call | builtin_op | atom | case_eval
 export class call {
-	constructor(public f: identifier | literal, public atoms: atom[], public known: boolean = false) { }
+	constructor(public f: atom, public atoms: atom[], public known: boolean = false, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
-		return `${this.f}_${this.known ? this.atoms.length : "?"} ${this.atoms.join(" ")}`;
+		//return `${this.f}_${this.known ? this.atoms.length : "?"} ${this.atoms.join(" ")}`;
+		return `${this.f} ${this.atoms.join(" ")}`;
 	}
 }
 export class builtin_op {
-	constructor(public prim: primop, public atoms: atom[]) { }
+	constructor(public prim: primop, public atoms: atom[], public from: number = -1, public to: number = -1) { }
 
 	public toString() {
-		return `${this.prim} ${this.atoms.join(" ")}`;
+		return ` ${this.atoms.join(" " + this.prim + " ")}`;
 	}
 }
 export class let_expr {
-	constructor(public binds: binding[], public expr: expression) { }
+	constructor(public binds: binding[], public expr: expression, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		let pad_str = "    ";
@@ -76,7 +80,7 @@ export class let_expr {
 	}
 }
 export class letrec_expr {
-	constructor(public binds: binding[], public expr: expression) { }
+	constructor(public binds: binding[], public expr: expression, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		let pad_str = "       ";
@@ -87,15 +91,15 @@ export class letrec_expr {
 	}
 }
 export class case_expr {
-	constructor(public expr: expression, public alts: alternatives) { }
+	constructor(public expr: expression, public alts: alternatives, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
-		return `case ${this.expr} of${("\n" + this.alts).replaceAll("\n", "\n  ")}`;
+		return `case ${this.expr} of {${("\n" + this.alts).replaceAll("\n", "\n  ")}\n}`;
 	}
 }
 
 export class case_eval {
-	constructor(public val: literal, public alts: alternatives) { }
+	constructor(public val: literal, public alts: alternatives, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		return `case ${this.val} of${("\n" + this.alts).replaceAll("\n", "\n  ")}`;
@@ -104,7 +108,7 @@ export class case_eval {
 
 // Case constructs
 export class alternatives {
-	constructor(public named_alts: algebraic_alt[], public default_alt?: default_alt) { }
+	constructor(public named_alts: algebraic_alt[], public default_alt?: default_alt, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		let alts = "";
@@ -119,27 +123,27 @@ export class alternatives {
 	}
 }
 export class algebraic_alt {
-	constructor(public constr: identifier, public vars: identifier[], public expr: expression) { }
+	constructor(public constr: identifier, public vars: identifier[], public expr: expression, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		let pattern = `${this.constr} ${this.vars.join(" ")} -> `;
 		let pad_str = " ".repeat(pattern.length);
-		return pattern + String(this.expr).replaceAll("\n", "\n" + pad_str);
+		return pattern + String(this.expr).replaceAll("\n", "\n" + pad_str) + ";";
 	}
 }
 export class default_alt {
-	constructor(public name: identifier, public expr: expression) { }
+	constructor(public name: identifier, public expr: expression, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		let pattern = this.name + " -> ";
 		let pad_str = " ".repeat(pattern.length);
-		return pattern + String(this.expr).replaceAll("\n", "\n" + pad_str);
+		return pattern + String(this.expr).replaceAll("\n", "\n" + pad_str) + ";";
 	}
 }
 
 export type heap_object = FUN | PAP | CON | THUNK | BLACKHOLE
 export class FUN {
-	constructor(public args: identifier[], public expr: expression, public env?: Map<string, literal>) { }
+	constructor(public args: identifier[], public expr: expression, public env?: Map<string, literal>, public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		let args = this.args.join(" ");
@@ -156,14 +160,14 @@ export class FUN {
 	}
 }
 export class PAP {
-	constructor(public f: literal, public atoms: atom[]) { }
+	constructor(public f: literal, public atoms: atom[], public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		return `PAP(${this.f} ${this.atoms.join(" ")})`;
 	}
 }
 export class CON {
-	constructor(public constr: identifier, public atoms: atom[]) { }
+	constructor(public constr: identifier, public atoms: atom[], public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		if (this.atoms.length === 0) {
@@ -173,10 +177,11 @@ export class CON {
 	}
 }
 export class THUNK {
-	constructor(public expr: expression, public env: Map<string, literal> = new Map()) { }
+	constructor(public expr: expression, public env: Map<string, literal> = new Map(), public from: number = -1, public to: number = -1) { }
 
 	public toString() {
-		return `THUNK(${this.expr}): ${[...this.env.entries()].map(([k, v]) => `${k}..${v}`).join(" ")}`;
+		//return `THUNK(${this.expr}): ${[...this.env.entries()].map(([k, v]) => `${k}..${v}`).join(" ")}`;
+		return `THUNK(${this.expr})`;
 	}
 }
 export class BLACKHOLE {

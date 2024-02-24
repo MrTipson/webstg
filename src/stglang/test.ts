@@ -1,4 +1,4 @@
-import { identifier, literal, type atom, primop, program, datatype, constructor, binding, type expression, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, type heap_object, FUN, PAP, CON, THUNK, BLACKHOLE } from "@/stglang/types";
+import { identifier, literal, type atom, type primop, program, datatype, constructor, binding, type expression, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, type heap_object, FUN, PAP, CON, THUNK, BLACKHOLE } from "@/stglang/types";
 
 let map_prg: program = new program([
 	new datatype(new identifier("List"), [new identifier("a")], [
@@ -23,6 +23,10 @@ export let map = String(map_prg);
 
 
 export let sum_prg: program = new program([
+	new datatype(new identifier("List"), [new identifier("a")], [
+		new constructor(new identifier("Nil"), []),
+		new constructor(new identifier("Cons"), [new identifier("a"), new constructor(new identifier("List"), [new identifier("a")])])
+	]),
 	new binding(new identifier("nil"), new CON(new identifier("Nil"), [])),
 	new binding(new identifier("zero"), new CON(new identifier("Num"), [new literal(0)])),
 	new binding(new identifier("one"), new CON(new identifier("Num"), [new literal(1)])),
@@ -33,7 +37,7 @@ export let sum_prg: program = new program([
 			new algebraic_alt(new identifier("Num"), [new identifier("i")],
 				new case_expr(new identifier("y"), new alternatives([
 					new algebraic_alt(new identifier("Num"), [new identifier("j")],
-						new case_expr(new builtin_op(primop.ADD, [new identifier("i"), new identifier("j")]), new alternatives([], new default_alt(new identifier("x"), new let_expr([
+						new case_expr(new builtin_op("+#", [new identifier("i"), new identifier("j")]), new alternatives([], new default_alt(new identifier("x"), new let_expr([
 							new binding(new identifier("result"), new CON(new identifier("Num"), [new identifier("x")]))
 						], new identifier("result"))))))
 				])))
@@ -76,7 +80,7 @@ export let map_pap_prg: program = new program([
 		new FUN([new identifier("x")],
 			new case_expr(new identifier("x"), new alternatives([
 				new algebraic_alt(new identifier("Num"), [new identifier("x")], new case_expr(
-					new builtin_op(primop.MUL, [new identifier("x"), new literal(2)]),
+					new builtin_op("*#", [new identifier("x"), new literal(2)]),
 					new alternatives([], new default_alt(new identifier("x"), new let_expr([
 						new binding(new identifier("result"), new CON(new identifier("Num"), [new identifier("x")]))
 					], new identifier("result"))))
@@ -116,7 +120,7 @@ export let fib_prg: program = new program([
 			new algebraic_alt(new identifier("Num"), [new identifier("i")],
 				new case_expr(new identifier("y"), new alternatives([
 					new algebraic_alt(new identifier("Num"), [new identifier("j")],
-						new case_expr(new builtin_op(primop.ADD, [new identifier("i"), new identifier("j")]), new alternatives([], new default_alt(new identifier("x"), new let_expr([
+						new case_expr(new builtin_op("+#", [new identifier("i"), new identifier("j")]), new alternatives([], new default_alt(new identifier("x"), new let_expr([
 							new binding(new identifier("result"), new CON(new identifier("Num"), [new identifier("x")]))
 						], new identifier("result"))))))
 				])))
@@ -137,13 +141,13 @@ export let fib_prg: program = new program([
 			)
 		])))),
 	new binding(new identifier("forcen"), new FUN([new identifier("n"), new identifier("list")],
-		new case_expr(new builtin_op(primop.GT, [new identifier("n"), new literal(0)]), new alternatives([
+		new case_expr(new builtin_op(">#", [new identifier("n"), new literal(0)]), new alternatives([
 			new algebraic_alt(new identifier("False"), [], new identifier("nil")),
 			new algebraic_alt(new identifier("True"), [], new case_expr(new identifier("list"), new alternatives([
 				new algebraic_alt(new identifier("Nil"), [], new identifier("nil")),
 				new algebraic_alt(new identifier("Cons"), [new identifier("h"), new identifier("t")],
 					new case_expr(new identifier("h"), new alternatives([], new default_alt(new identifier("x"),
-						new case_expr(new builtin_op(primop.SUB, [new identifier("n"), new literal(1)]), new alternatives([], new default_alt(new identifier("n"),
+						new case_expr(new builtin_op("-#", [new identifier("n"), new literal(1)]), new alternatives([], new default_alt(new identifier("n"),
 							new case_expr(new call(new identifier("forcen"), [new identifier("n"), new identifier("t")]), new alternatives([], new default_alt(new identifier("y"),
 								new let_expr([
 									new binding(new identifier("result"), new CON(new identifier("Cons"), [new identifier("x"), new identifier("y")]))

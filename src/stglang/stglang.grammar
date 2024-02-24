@@ -1,15 +1,24 @@
-@top Program { Binding* }
+@top Program { (Binding | Datatype)* }
 
 kw<term> { @specialize[@name={term}]<Identifier, term> }
 
+Datatype { kw<"data"> Identifier Generic_types{Identifier*} "=" Constructors }
+Constructors { Constructor ("|" Constructor)* }
+Constructor { Identifier Subconstructors ~con }
+Subconstructors { Subconstructor*}
+Subconstructor { ~con Identifier | "(" Identifier+ ")" }
+
 Binding { Identifier "=" heap_object }
 
-heap_object[@isGroup=HeapObject] { FUN | CON | THUNK }
-FUN { kw<"FUN"> "(" Identifier+ "->" expression ")" }
-CON { kw<"CON"> "(" Identifier atom* ")" }
-THUNK { kw<"THUNK"> "(" expression ")" }
+heap_object { FUN_obj | CON_obj | THUNK_obj }
+FUN_obj { kw<"FUN"> "(" FUN_args { Identifier+ } "->" expression ")" }
+CON_obj {
+	kw<"CON"> "(" Identifier CON_fields { atom+ } ")" |
+	kw<"CON"> Identifier
+}
+THUNK_obj { kw<"THUNK"> "(" expression ")" }
 
-expression[@isGroup=Expression] {
+expression {
 	atom |
 	Call |
 	Primop |
@@ -18,13 +27,17 @@ expression[@isGroup=Expression] {
 	Case_expr
 }
 
-Let_expr { kw<"let"> Binding+ kw<"in"> expression }
-Letrec_expr { kw<"letrec"> Binding+ kw<"in"> expression }
+Let_expr { kw<"let"> Let_binds kw<"in"> expression }
+Letrec_expr { kw<"letrec"> Let_binds kw<"in"> expression }
+Let_binds { Binding+ }
 
-Case_expr {	kw<"case"> expression kw<"of"> Alternative+ }
-Alternative { Identifier+ "->" ~expression }
+Case_expr {	kw<"case"> expression kw<"of"> "{" Alts "}"}
+Alts { Alternative ";"? | Alternative ";" Alts }
+Alternative { Identifier Pattern_binds "->" expression}
+Pattern_binds { Identifier* }
 
-Call { Identifier atom+ }
+Call { Identifier Call_args }
+Call_args { atom+ }
 
 Op<expr> { expr }
 Primop { atom Operator atom }
@@ -35,11 +48,11 @@ atom { Identifier | Literal }
 @tokens {
 	Identifier { $[a-zA-Z_]$[a-zA-Z_0-9]* }
 	Literal { ("0"|$[1-9]$[0-9]*)("."$[0-9]+)? }
-	LineComment { "--" ![\n]* }
+	lineComment { "--" ![\n]* }
 	space { $[ \t\n\r]+ }
-	"(" ")" "=" "->"
+	"(" ")" "=" "->" "|" "{" "}"
 }
 
-@skip { space | LineComment }
+@skip { space | lineComment }
 
 @external propSource stgHighlight from "./highlight"

@@ -1,4 +1,4 @@
-import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, primop, case_eval, PAP, letrec_expr, type heap_object } from "@/stglang/types";
+import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, type primop, case_eval, PAP, letrec_expr, type heap_object } from "@/stglang/types";
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import { case_cont, thunk_update, type stack } from "@/stgmachine/stack";
@@ -192,20 +192,21 @@ reg({
 		let [e1, e2] = expr.atoms.map(x => x instanceof literal ? x : env.find_value(x));
 		if (e1.isAddr || e2.isAddr) throw "Primop expression is an address";
 		switch (expr.prim) {
-			case primop.ADD: return new literal(e1.val + e2.val);
-			case primop.SUB: return new literal(e1.val - e2.val);
-			case primop.MUL: return new literal(e1.val * e2.val);
-			case primop.DIV: return new literal(e1.val / e2.val);
-			case primop.MOD: return new literal(e1.val % e2.val);
+			case "+#": return new literal(e1.val + e2.val);
+			case "-#": return new literal(e1.val - e2.val);
+			case "*#": return new literal(e1.val * e2.val);
+			case "/#": return new literal(e1.val / e2.val);
+			case "%#": return new literal(e1.val % e2.val);
 			default:
 				let res: boolean;
 				switch (expr.prim) {
-					case primop.LTE: res = e1.val <= e2.val; break;
-					case primop.LT: res = e1.val < e2.val; break;
-					case primop.EQ: res = e1.val == e2.val; break;
-					case primop.NE: res = e1.val != e2.val; break;
-					case primop.GT: res = e1.val > e2.val; break;
-					case primop.GTE: res = e1.val >= e2.val; break;
+					case "<=#": res = e1.val <= e2.val; break;
+					case "<#": res = e1.val < e2.val; break;
+					case "==#": res = e1.val == e2.val; break;
+					case "!=#": res = e1.val != e2.val; break;
+					case ">#": res = e1.val > e2.val; break;
+					case ">=#": res = e1.val >= e2.val; break;
+					default: throw new Error(`Invalid primop ${expr.prim}`);
 				}
 				return h.alloc(new CON(new identifier(res ? "True" : "False"), []));
 		}
