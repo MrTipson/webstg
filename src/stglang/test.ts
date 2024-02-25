@@ -1,6 +1,7 @@
 import { identifier, literal, type atom, type primop, program, datatype, constructor, binding, type expression, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, type heap_object, FUN, PAP, CON, THUNK, BLACKHOLE } from "@/stglang/types";
 
 let map_prg: program = new program([
+	new datatype(new identifier("Number"), [new identifier("a")], [new constructor(new identifier("Num"), [new identifier("a")])]),
 	new datatype(new identifier("List"), [new identifier("a")], [
 		new constructor(new identifier("Nil"), []),
 		new constructor(new identifier("Cons"), [new identifier("a"), new constructor(new identifier("List"), [new identifier("a")])])
@@ -23,6 +24,7 @@ export let map = String(map_prg);
 
 
 export let sum_prg: program = new program([
+	new datatype(new identifier("Number"), [new identifier("a")], [new constructor(new identifier("Num"), [new identifier("a")])]),
 	new datatype(new identifier("List"), [new identifier("a")], [
 		new constructor(new identifier("Nil"), []),
 		new constructor(new identifier("Cons"), [new identifier("a"), new constructor(new identifier("List"), [new identifier("a")])])
@@ -60,6 +62,7 @@ export let sum = String(sum_prg);
 
 
 export let map_pap_prg: program = new program([
+	new datatype(new identifier("Number"), [new identifier("a")], [new constructor(new identifier("Num"), [new identifier("a")])]),
 	new datatype(new identifier("List"), [new identifier("a")], [
 		new constructor(new identifier("Nil"), []),
 		new constructor(new identifier("Cons"), [new identifier("a"), new constructor(new identifier("List"), [new identifier("a")])])
@@ -114,6 +117,11 @@ export let map_pap_prg: program = new program([
 export let map_pap = String(map_pap_prg);
 
 export let fib_prg: program = new program([
+	new datatype(new identifier("Number"), [new identifier("a")], [new constructor(new identifier("Num"), [new identifier("a")])]),
+	new datatype(new identifier("List"), [new identifier("a")], [
+		new constructor(new identifier("Nil"), []),
+		new constructor(new identifier("Cons"), [new identifier("a"), new constructor(new identifier("List"), [new identifier("a")])])
+	]),
 	new binding(new identifier("nil"), new CON(new identifier("Nil"), [])),
 	new binding(new identifier("plusInt"), new FUN([new identifier("x"), new identifier("y")],
 		new case_expr(new identifier("x"), new alternatives([

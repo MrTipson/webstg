@@ -23,7 +23,7 @@ export default function Machine() {
 			<ExpressionView machine={machine}></ExpressionView>
 			<ResizablePanelGroup direction="horizontal">
 				<ResizablePanel defaultSize={30}>
-					<ProgramView machine={machine} className="h-full" />
+					<ProgramView machine={machine} setMachine={setMachine} setStep={setStep} className="h-full" />
 				</ResizablePanel>
 				<ResizableHandle withHandle />
 				<ResizablePanel defaultSize={30}>

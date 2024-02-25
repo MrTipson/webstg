@@ -1,58 +1,68 @@
 import { sum_prg } from "@/stglang/test";
 import { stg_machine } from "@/stgmachine/machine";
-import React, { useState, type FormEvent } from "react";
+import React, { useState, type ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { parser as stg_parser } from "@/stglang/parser";
-import { highlightCode, classHighlighter } from "@lezer/highlight";
-import type { LRParser } from "@lezer/lr";
+import { highlightTree, classHighlighter } from "@lezer/highlight";
+import { build_ast } from "@/stglang/ASTBuilder";
 
-export default function ProgramView({ className, machine }: { className?: string, machine: stg_machine }) {
+export default function ProgramView({ className, machine, setMachine, setStep }:
+	{
+		className?: string,
+		machine: stg_machine,
+		setMachine: Function,
+		setStep: Function
+	}) {
 	const [parser, setParser] = useState(stg_parser);
 	const [programText, setProgramText] = useState(String(sum_prg));
-	const [highlighted, setHighlighted] = useState<React.DetailedReactHTMLElement<React.HTMLAttributes<HTMLElement>, HTMLElement>>(highlight(programText));
+	const [highlighted, setHighlighted] = useState(highlight(programText));
 	const [editable, setEditable] = useState(false);
 
-	function toggleEditable() {
-
-		setEditable(!editable);
+	function loadProgram() {
+		try {
+			const ast = build_ast(programText);
+			setMachine(new stg_machine(ast, false, true));
+			setStep(0);
+		} catch (e) { // build ast can throw an error
+			console.log(e);
+			return;
+		}
 	}
 
 	function highlight(code: string) {
 		let children: any[] = [];
-		function emit(text: string, classes: string) {
-			if (classes) {
-				children.push(React.createElement("span", { className: classes }, text));
-			} else {
-				children.push(text);
+		let start = 0;
+		function putStyle(from: number, to: number, classes: string) {
+			if (start < from) {
+				children.push(code.substring(start, from));
 			}
-		}
-		function emitBreak() {
-			children.push("\n");
+			let text = code.substring(from, to);
+			children.push(React.createElement("span", { className: classes }, text));
+			start = to;
 		}
 
-		highlightCode(
-			code,
+		highlightTree(
 			parser.parse(code),
 			classHighlighter,
-			emit,
-			emitBreak,
+			putStyle
 		);
 		return React.createElement("code", undefined, ...children);
 	}
 
-	function inputHandler(e: FormEvent) {
-		let code = (e.target as HTMLPreElement).innerText;
+	function inputHandler(e: ChangeEvent<HTMLTextAreaElement>) {
+		let code = e.target.value;
+		setProgramText(code);
 		setHighlighted(highlight(code));
 	}
 
 	return (
 		<div className={"relative " + className}>
-			<pre className="absolute inset-0 bg-transparent text-transparent caret-primary"
-				contentEditable={editable} suppressContentEditableWarning onInput={inputHandler}>
-				<code>{programText}</code>
-			</pre>
-			<pre className="absolute inset-0 pointer-events-none bg-transparent">{highlighted}</pre>
-			<Button onClick={toggleEditable} className="absolute right-2 top-2">{editable ? "Load program" : "Edit"}</Button>
+			<code>
+				<textarea className="absolute inset-0 bg-transparent text-transparent caret-primary p-4 font-semibold resize-none selection:text-transparent selection:bg-accent"
+					onChange={inputHandler} defaultValue={programText} spellCheck={false} />
+			</code>
+			<pre className="absolute inset-0 pointer-events-none bg-transparent text-wrap">{highlighted}</pre>
+			<Button onClick={loadProgram} className="absolute right-2 top-2">Load program</Button>
 		</div>
 	);
 }

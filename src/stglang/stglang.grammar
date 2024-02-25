@@ -31,8 +31,8 @@ Let_expr { kw<"let"> Let_binds kw<"in"> expression }
 Letrec_expr { kw<"letrec"> Let_binds kw<"in"> expression }
 Let_binds { Binding+ }
 
-Case_expr {	kw<"case"> expression kw<"of"> "{" Alts "}"}
-Alts { Alternative ";"? | Alternative ";" Alts }
+Case_expr {	kw<"case"> expression kw<"of"> "{" Alts {alts} "}"}
+alts { Alternative ";"? | Alternative ";" alts }
 Alternative { Identifier Pattern_binds "->" expression}
 Pattern_binds { Identifier* }
 
