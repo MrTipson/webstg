@@ -4,6 +4,7 @@
 	--syntax-punctuation: rgb(227, 151, 240);
 	--syntax-keyword: rgb(15, 71, 176);
 	--syntax-number: rgb(172, 230, 139);
+	--syntax-error: rgba(255, 0, 0, 15%);
 }
 
 .dark {
@@ -28,4 +29,7 @@
 }
 .tok-number {
 	color: var(--syntax-number);
+}
+.syntax-error {
+	background-color: var(--syntax-error);
 }

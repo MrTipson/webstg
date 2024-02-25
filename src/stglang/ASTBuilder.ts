@@ -1,6 +1,14 @@
 import { parser } from "./parser.js"
 import { identifier, literal, program, datatype, constructor, binding, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, FUN, PAP, CON, THUNK, BLACKHOLE } from "@/stglang/types";
 
+export class STGSyntaxError extends Error {
+	constructor(m: string, public from: number, public to: number) {
+		super(m);
+		// https://github.com/microsoft/TypeScript-wiki/blob/81fe7b91664de43c02ea209492ec1cea7f3661d0/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+		Object.setPrototypeOf(this, STGSyntaxError.prototype);
+	}
+}
+
 export function build_ast(code: string): program {
 	const tree = parser.parse(code);
 
@@ -47,7 +55,7 @@ export function build_ast(code: string): program {
 				case "Literal":
 					args.push(new literal(Number(code.substring(n.from, n.to)), false, n.from, n.to));
 					break;
-				case "⚠": throw new Error("Invalid program");
+				case "⚠": throw new STGSyntaxError("Invalid program", n.from, n.to);
 			}
 		},
 		leave(n) {
@@ -79,7 +87,6 @@ export function build_ast(code: string): program {
 					return;
 				}
 				case "Alternative":
-					console.log("alternative", args);
 					if (constructors.includes(args[0].name)) {
 						constr = algebraic_alt;
 						break;
@@ -89,10 +96,9 @@ export function build_ast(code: string): program {
 						args.push(alt);
 						return;
 					} else {
-						throw new Error("Unknown constructor in alternative");
+						throw new STGSyntaxError(`Unknown constructor in alternative`, n.from, n.to);
 					}
 				case "Primop":
-					console.log("primop", args);
 					let primop = new builtin_op(args[1], [args[0], args[2]], n.from, n.to);
 					args = stack.pop();
 					args.push(primop);
@@ -111,13 +117,16 @@ export function build_ast(code: string): program {
 					return;
 				case "CON_obj":
 					constr = CON;
+					if (!constructors.includes(args[0].name)) throw new STGSyntaxError("Constructor doesn't exist", n.from, n.to);
 					if (args.length == 1) args.push([]);
 					break;
 				case "Alts": {
 					let alts: (algebraic_alt | default_alt)[] = args;
 					let named_alts = alts.filter(x => x instanceof algebraic_alt) as algebraic_alt[];
 					let default_alts = alts.filter(x => x instanceof default_alt) as default_alt[];
-					if (default_alts.length > 1) throw new Error("More than one default case alternative");
+					if (default_alts.length > 1) {
+						throw new STGSyntaxError(`More than one default case alternative`, n.from, n.to);
+					}
 					args = stack.pop();
 					args.push(new alternatives(named_alts, default_alts[0], n.from, n.to));
 					return;
