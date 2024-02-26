@@ -4,7 +4,8 @@
 	--syntax-punctuation: rgb(227, 151, 240);
 	--syntax-keyword: rgb(15, 71, 176);
 	--syntax-number: rgb(172, 230, 139);
-	--syntax-error: rgba(255, 0, 0, 15%);
+	--syntax-error: 255, 0, 0;
+	--current-expression: rgba(255, 255, 0, 0.35);
 }
 
 .dark {
@@ -31,5 +32,9 @@
 	color: var(--syntax-number);
 }
 .syntax-error {
-	background-color: var(--syntax-error);
+	border: 1px solid rgba(var(--syntax-error), 60%);
+	background-color: rgba(var(--syntax-error), 25%);
+}
+.current-expression {
+	background-color: var(--current-expression);
 }

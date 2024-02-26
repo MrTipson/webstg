@@ -152,7 +152,7 @@ reg({
 			s.peek() instanceof case_cont)) return undefined;
 		let cont = s.pop() as case_cont;
 		env.replace_locals(cont.locals);
-		return new case_eval(expr, cont.alts);
+		return new case_eval(expr, cont.alts, cont.alts.from, cont.alts.to);
 	}
 });
 

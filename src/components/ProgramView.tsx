@@ -16,19 +16,30 @@ import {
 } from "@/components/ui/select";
 import examples from "@/stglang/examples";
 
-export default function ProgramView({ className, machine, setMachine, setStep, loaded, setLoaded }:
+export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded }:
 	{
 		className?: string,
 		machine: stg_machine,
 		setMachine: Function,
+		step: number,
 		setStep: Function,
 		loaded: boolean,
 		setLoaded: Function
 	}) {
 	const [parser, setParser] = useState(stg_parser);
 	const [programText, setProgramText] = useState(String(sum_prg));
-	const [highlighted, setHighlighted] = useState(highlight(programText));
+	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined)
 	const { toast } = useToast();
+
+	let highlighted;
+	if (error) {
+		highlighted = highlight(programText, true, error.from, error.to, "syntax-error");
+	} else if (loaded) {
+		// from and to might be -1, but it shouldnt cause any issues
+		highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, "current-expression")
+	} else {
+		highlighted = highlight(programText);
+	}
 
 	function toggleEditable() {
 		if (loaded) {
@@ -51,37 +62,39 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 					description: e.message,
 					variant: "destructive"
 				});
-				setHighlighted(highlight(programText, true, e.from, e.to, e.message));
+				setError({ from: e.from, to: e.to });
 			}
 		}
 	}
 
-	function highlight(code: string, isError = false, errorFrom = -1, errorTo = -1, errorMessage = "") {
+	function highlight(code: string, mark = false, markFrom = -1, markTo = -1, markClass = "") {
 		let children: any[] = [];
 		let tmpChildren: any[] = [];
 		let start = 0;
-		let inError = false;
+		let inMark = false;
 		function putStyle(from: number, to: number, classes: string) {
-			if (isError && errorTo >= start) {
-				if (!inError && from >= errorFrom) { // do we need to start the error span
-					if (start < errorFrom) {
-						children.push(code.substring(start, errorFrom));
-						start = errorFrom;
+			if (mark && markTo >= start) {
+				if (!inMark && from >= markFrom) { // do we need to start the error span
+					if (start < markFrom) {
+						children.push(code.substring(start, markFrom));
+						start = markFrom;
 					}
 					tmpChildren = children;
 					children = [];
-					inError = true;
-					if (errorFrom === errorTo && tmpChildren.length > 0) {
+					inMark = true;
+					// Parsing errors have markFrom==markTo (no token in source)
+					// So we use last child before the error
+					if (markFrom === markTo && tmpChildren.length > 0) {
 						children.push(tmpChildren.pop());
 					}
 				}
-				if (inError) {
-					if (from >= errorTo) {
-						if (start < errorTo) {
-							children.push(code.substring(start, errorTo));
-							start = errorTo;
+				if (inMark) {
+					if (from >= markTo) {
+						if (start < markTo) {
+							children.push(code.substring(start, markTo));
+							start = markTo;
 						}
-						let el = React.createElement("span", { className: "syntax-error", title: errorMessage }, ...children);
+						let el = React.createElement("span", { className: markClass }, ...children);
 						children = tmpChildren;
 						children.push(el);
 					}
@@ -107,16 +120,16 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 		const selected = examples.filter(({ name, code }) => name === s)[0];
 		if (selected) {
 			let { name, code } = selected;
-			// We need to assign here because setProgramText only impacts next render
 			setProgramText(code);
-			setHighlighted(highlight(code));
+			setLoaded(false);
+			setError(undefined);
 		}
 	}
 
 	function inputHandler(e: ChangeEvent<HTMLTextAreaElement>) {
 		let code = e.target.value;
 		setProgramText(code);
-		setHighlighted(highlight(code));
+		setError(undefined);
 	}
 
 	return (
@@ -133,7 +146,7 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 						})}
 					</SelectContent>
 				</Select>
-				<Button onClick={toggleEditable} className="">{loaded ? "Edit program" : "Load program"}</Button>
+				<Button onClick={toggleEditable}>{loaded ? "Edit" : "Load"}</Button>
 			</div>
 			<div className={"relative grow m-2"}>
 				<code>
