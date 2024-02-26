@@ -16,6 +16,7 @@ import {
 export default function Machine() {
 	// set machine is called *only* when a new program is loaded, but will be mutated while stepping
 	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(sum_prg, false, true));
+	const [loaded, setLoaded] = useState(false);
 	const [step, setStep] = useState(0);
 
 	return (
@@ -23,22 +24,34 @@ export default function Machine() {
 			<ExpressionView machine={machine}></ExpressionView>
 			<ResizablePanelGroup direction="horizontal">
 				<ResizablePanel defaultSize={30}>
-					<ProgramView machine={machine} setMachine={setMachine} setStep={setStep} className="h-full" />
+					<ProgramView machine={machine} setMachine={setMachine} setStep={setStep}
+						loaded={loaded} setLoaded={setLoaded}
+						className="h-full" />
 				</ResizablePanel>
 				<ResizableHandle withHandle />
-				<ResizablePanel defaultSize={30}>
-					<HeapView machine={machine} className="h-full" />
-				</ResizablePanel>
-				<ResizableHandle withHandle />
-				<ResizablePanel defaultSize={30}>
-					<ResizablePanelGroup direction="vertical">
-						<ResizablePanel defaultSize={30}><StackView machine={machine} className="h-full" /></ResizablePanel>
+				{loaded &&
+					<>
+						<ResizablePanel defaultSize={30}>
+							<HeapView machine={machine} className="h-full" />
+						</ResizablePanel>
 						<ResizableHandle withHandle />
-						<ResizablePanel defaultSize={30}><EnviromentView machine={machine} className="h-full" /></ResizablePanel>
-					</ResizablePanelGroup>
-				</ResizablePanel>
+						<ResizablePanel defaultSize={30}>
+							<ResizablePanelGroup direction="vertical">
+								<ResizablePanel defaultSize={30}><StackView machine={machine} className="h-full" /></ResizablePanel>
+								<ResizableHandle withHandle />
+								<ResizablePanel defaultSize={30}><EnviromentView machine={machine} className="h-full" /></ResizablePanel>
+							</ResizablePanelGroup>
+						</ResizablePanel>
+						<Controls className="absolute bottom-6 left-0 right-0 m-auto w-fit" machine={machine} setMachine={setMachine} setStep={setStep} />
+					</>
+					|| // not loaded
+					<>
+						<ResizablePanel defaultSize={60} className="flex flex-col justify-center">
+							<span className="text-center text-primary text-2xl font-bold">Load a program to begin simulation</span>
+						</ResizablePanel>
+					</>
+				}
 			</ResizablePanelGroup>
-			<Controls className="absolute bottom-6 left-0 right-0 m-auto w-fit" machine={machine} setMachine={setMachine} setStep={setStep} />
 		</div>
 	);
 }

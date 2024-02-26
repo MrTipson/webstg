@@ -55,7 +55,7 @@ export function build_ast(code: string): program {
 				case "Literal":
 					args.push(new literal(Number(code.substring(n.from, n.to)), false, n.from, n.to));
 					break;
-				case "⚠": throw new STGSyntaxError("Invalid program", n.from, n.to);
+				case "⚠": throw new STGSyntaxError("Unexpected token", n.from, n.to);
 			}
 		},
 		leave(n) {

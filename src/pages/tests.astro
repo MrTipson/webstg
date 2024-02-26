@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { build_ast, out } from "@/stglang/ASTBuilder";
+import { build_ast } from "@/stglang/ASTBuilder";
 import { sum_prg } from "@/stglang/test";
 import { status, reason } from "@/tests/backtest";
 let ast: any = "";
@@ -14,7 +14,6 @@ ast = build_ast(String(sum_prg));
 			<span>{reason}</span>
 		</div>
 		<pre>{sum_prg}</pre>
-		<pre>{out}</pre>
 		<pre>{ast}</pre>
 	</main>
 </Layout>

@@ -1,26 +1,40 @@
-import { sum_prg } from "@/stglang/test";
+import { map_pap_prg, sum_prg, fib_prg } from "@/stglang/test";
 import { stg_machine } from "@/stgmachine/machine";
-import React, { useState, type ChangeEvent } from "react";
+import React, { useState, type ChangeEvent, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { parser as stg_parser } from "@/stglang/parser";
 import { highlightTree, classHighlighter } from "@lezer/highlight";
 import { STGSyntaxError, build_ast } from "@/stglang/ASTBuilder";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import examples from "@/stglang/examples";
 
-export default function ProgramView({ className, machine, setMachine, setStep }:
+export default function ProgramView({ className, machine, setMachine, setStep, loaded, setLoaded }:
 	{
 		className?: string,
 		machine: stg_machine,
 		setMachine: Function,
-		setStep: Function
+		setStep: Function,
+		loaded: boolean,
+		setLoaded: Function
 	}) {
 	const [parser, setParser] = useState(stg_parser);
 	const [programText, setProgramText] = useState(String(sum_prg));
 	const [highlighted, setHighlighted] = useState(highlight(programText));
 	const { toast } = useToast();
 
-	function loadProgram() {
+	function toggleEditable() {
+		if (loaded) {
+			setLoaded(false);
+			return;
+		}
 		try {
 			const ast = build_ast(programText);
 			setMachine(new stg_machine(ast, false, true));
@@ -29,6 +43,7 @@ export default function ProgramView({ className, machine, setMachine, setStep }:
 				title: "Success",
 				description: "You can now step through the execution"
 			});
+			setLoaded(true);
 		} catch (e) { // build ast can throw an error
 			if (e instanceof STGSyntaxError) {
 				toast({
@@ -88,6 +103,16 @@ export default function ProgramView({ className, machine, setMachine, setStep }:
 		return React.createElement("code", undefined, ...children);
 	}
 
+	function selectExample(s: string) {
+		const selected = examples.filter(({ name, code }) => name === s)[0];
+		if (selected) {
+			let { name, code } = selected;
+			// We need to assign here because setProgramText only impacts next render
+			setProgramText(code);
+			setHighlighted(highlight(code));
+		}
+	}
+
 	function inputHandler(e: ChangeEvent<HTMLTextAreaElement>) {
 		let code = e.target.value;
 		setProgramText(code);
@@ -95,13 +120,28 @@ export default function ProgramView({ className, machine, setMachine, setStep }:
 	}
 
 	return (
-		<div className={"relative " + className}>
-			<code>
-				<textarea className="absolute inset-0 bg-transparent text-transparent caret-primary p-4 font-semibold resize-none selection:text-transparent selection:bg-accent"
-					onChange={inputHandler} defaultValue={programText} spellCheck={false} />
-			</code>
-			<pre className="absolute inset-0 pointer-events-none bg-transparent text-wrap">{highlighted}</pre>
-			<Button onClick={loadProgram} className="absolute right-2 top-2">Load program</Button>
+		<div className={className + " relative flex flex-col"}>
+			<div className="flex flex-wrap gap-2 mx-4 items-baseline">
+				<h3 className="font-semibold text-xl m-3">Program view</h3>
+				<Select onValueChange={selectExample}>
+					<SelectTrigger className="w-[180px]">
+						<SelectValue placeholder="Select example" />
+					</SelectTrigger>
+					<SelectContent>
+						{examples.map(({ name, code }, i) => {
+							return <SelectItem key={i} value={name}>{name}</SelectItem>;
+						})}
+					</SelectContent>
+				</Select>
+				<Button onClick={toggleEditable} className="">{loaded ? "Edit program" : "Load program"}</Button>
+			</div>
+			<div className={"relative grow m-2"}>
+				<code>
+					<textarea className="absolute inset-0 bg-transparent text-transparent caret-primary p-4 font-semibold resize-none selection:text-transparent selection:bg-accent"
+						onChange={inputHandler} value={programText} spellCheck={false} disabled={loaded} />
+				</code>
+				<pre className="absolute inset-0 pointer-events-none bg-transparent text-wrap">{highlighted}</pre>
+			</div>
 			<Toaster />
 		</div>
 	);
