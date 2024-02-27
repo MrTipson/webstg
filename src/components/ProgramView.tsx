@@ -1,6 +1,6 @@
 import { map_pap_prg, sum_prg, fib_prg } from "@/stglang/test";
 import { stg_machine } from "@/stgmachine/machine";
-import React, { useState, type ChangeEvent, useContext } from "react";
+import React, { useState, type ChangeEvent, useContext, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { parser as stg_parser } from "@/stglang/parser";
 import { highlightTree, classHighlighter } from "@lezer/highlight";
@@ -29,8 +29,11 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	}) {
 	const [parser, setParser] = useState(stg_parser);
 	const [programText, setProgramText] = useState(String(sum_prg));
-	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined)
+	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined);
+	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined)
 	const { toast } = useToast();
+
+	useEffect(() => currentExpressionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
 
 	let highlighted;
 	if (error) {
@@ -48,15 +51,15 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 			enviroment.push({ from: val.from, to: val.to, value: String(val) });
 		}
 		// from and to might be -1, but it shouldnt cause any issues
+		let props: Object = { className: "current-expression" };
 		if (machine.expr instanceof identifier || machine.expr instanceof literal) {
 			let val = machine.expr;
 			if (val instanceof identifier) {
 				val = machine.env.find_value(val);
 			}
-			highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, { className: "current-expression with-value", "data-value": val }, enviroment);
-		} else {
-			highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, { className: "current-expression" }, enviroment);
+			props = { className: "current-expression with-value", "data-value": val, ref: currentExpressionRef };
 		}
+		highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, props, enviroment);
 	} else {
 		highlighted = highlight(programText);
 	}
@@ -189,12 +192,15 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 				</Select>
 				<Button onClick={toggleEditable}>{loaded ? "Edit" : "Load"}</Button>
 			</div>
-			<div className={"relative grow m-2"}>
-				<code>
-					<textarea className="absolute inset-0 bg-transparent text-transparent caret-primary p-4 font-semibold resize-none selection:text-transparent selection:bg-accent"
-						onChange={inputHandler} value={programText} spellCheck={false} disabled={loaded} />
-				</code>
-				<pre className="absolute inset-0 pointer-events-none bg-transparent text-wrap">{highlighted}</pre>
+			<div className={"relative grow m-2 overflow-y-auto"}>
+				<div className="h-max relative m-2">
+					<code>
+						<textarea className={"absolute inset-0 bg-transparent text-transparent caret-primary p-4 font-semibold \
+							resize-none selection:bg-accent selection:text-transparent w-full h-full overflow-visible" + (!loaded ? "" : " pointer-events-none")}
+							onChange={inputHandler} value={programText} spellCheck={false} disabled={loaded} />
+					</code>
+					<pre className={"relative z-10 bg-transparent text-wrap selection:bg-accent" + (loaded ? "" : " pointer-events-none")}>{highlighted}</pre>
+				</div>
 			</div>
 			<Toaster />
 		</div>
