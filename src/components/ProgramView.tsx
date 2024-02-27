@@ -15,6 +15,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import examples from "@/stglang/examples";
+import { identifier, literal } from "@/stglang/types";
 
 export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded }:
 	{
@@ -33,10 +34,18 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 
 	let highlighted;
 	if (error) {
-		highlighted = highlight(programText, true, error.from, error.to, "syntax-error");
+		highlighted = highlight(programText, true, error.from, error.to, { className: "syntax-error" });
 	} else if (loaded) {
 		// from and to might be -1, but it shouldnt cause any issues
-		highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, "current-expression")
+		if (machine.expr instanceof identifier || machine.expr instanceof literal) {
+			let val = machine.expr;
+			if (val instanceof identifier) {
+				val = machine.env.find_value(val);
+			}
+			highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, { className: "current-expression with-value", "data-value": val });
+		} else {
+			highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, { className: "current-expression" });
+		}
 	} else {
 		highlighted = highlight(programText);
 	}
@@ -67,14 +76,14 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 	}
 
-	function highlight(code: string, mark = false, markFrom = -1, markTo = -1, markClass = "") {
+	function highlight(code: string, mark = false, markFrom = -1, markTo = -1, props = {}) {
 		let children: any[] = [];
 		let tmpChildren: any[] = [];
 		let start = 0;
 		let inMark = false;
 		function putStyle(from: number, to: number, classes: string) {
 			if (mark && markTo >= start) {
-				if (!inMark && from >= markFrom) { // do we need to start the error span
+				if (!inMark && from >= markFrom) { // do we need to start the mark span
 					if (start < markFrom) {
 						children.push(code.substring(start, markFrom));
 						start = markFrom;
@@ -94,9 +103,10 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 							children.push(code.substring(start, markTo));
 							start = markTo;
 						}
-						let el = React.createElement("span", { className: markClass }, ...children);
+						let el = React.createElement("span", props, ...children);
 						children = tmpChildren;
 						children.push(el);
+						inMark = false;
 					}
 				}
 			}
@@ -113,6 +123,12 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 			classHighlighter,
 			putStyle
 		);
+		// Make sure mark is closed if it lasts until the end of file
+		if (inMark) {
+			let el = React.createElement("span", props, ...children);
+			children = tmpChildren;
+			children.push(el);
+		}
 		return React.createElement("code", undefined, ...children);
 	}
 

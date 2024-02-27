@@ -35,6 +35,10 @@ export class stg_machine {
 
 		for (let decl of prog.decls) {
 			if (decl instanceof binding) {
+				if (decl.name.name === "main") {
+					this.expr.from = decl.obj.from;
+					this.expr.to = decl.obj.to;
+				}
 				this.env.add_global(decl.name, this.h.alloc(decl.obj));
 			}
 		}
@@ -47,8 +51,12 @@ export class stg_machine {
 		try {
 			let new_expr = undefined;
 			for (let rule of this.ruleset) {
-				//console.log(`Trying rule ${rule.name}`);
-				new_expr = rule.apply(this.expr, this.env, this.s, this.h);
+				// Implicitly resolve name so there is no need for additional rule in operational semantics
+				let expr = this.expr;
+				if (expr instanceof identifier) {
+					expr = this.env.find_value(expr);
+				}
+				new_expr = rule.apply(expr, this.env, this.s, this.h);
 				if (new_expr) {
 					this.lastrule = rule.name;
 					this.expr = new_expr;

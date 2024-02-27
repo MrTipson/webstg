@@ -6,6 +6,7 @@
 	--syntax-number: rgb(172, 230, 139);
 	--syntax-error: 255, 0, 0;
 	--current-expression: rgba(255, 255, 0, 0.35);
+	--value: rgb(102, 102, 102);
 }
 
 .dark {
@@ -37,4 +38,9 @@
 }
 .current-expression {
 	background-color: var(--current-expression);
+	@apply px-1 py-0.5
+}
+.with-value::after {
+	content: attr(data-value);
+	@apply p-0.5 underline ml-1;
 }

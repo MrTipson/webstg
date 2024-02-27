@@ -11,6 +11,7 @@ export class enviroment {
 	removed_locals: [string, literal][][] = [];
 	add_local(name: identifier, val: literal | identifier): void {
 		let value = val instanceof literal ? val : this.find_value(val as identifier);
+		value = new literal(value.val, value.isAddr, name.from, name.to);
 		if (!this.added_locals[this.step]) {
 			this.added_locals[this.step] = [];
 		}
@@ -45,12 +46,17 @@ export class enviroment {
 		this.current_local.clear();
 	}
 	add_global(name: identifier, val: literal): void {
+		val.from = name.from;
+		val.to = name.to;
 		this.current_global.set(name.name, val);
 	}
 	find_value(name: identifier): literal {
 		let val = this.current_local.get(name.name) ||
 			this.current_global.get(name.name);
-		if (val) return val;
+		if (val) {
+			val = new literal(val.val, val.isAddr, name.from, name.to);
+			return val;
+		}
 		throw new Error(`Identifier ${name.name} not in enviroment`);
 	}
 	back() {

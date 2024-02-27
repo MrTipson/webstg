@@ -75,15 +75,6 @@ reg({
 	}
 });
 
-// This rule is not part of the 'fastcurry' operational semantics
-reg({
-	name: "LOCAL",
-	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
-		if (!(expr instanceof identifier)) return undefined;
-		return env.find_value(expr as identifier);
-	}
-});
-
 reg({
 	name: "CASECON",
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
@@ -191,12 +182,13 @@ reg({
 		// Assume its a binop
 		let [e1, e2] = expr.atoms.map(x => x instanceof literal ? x : env.find_value(x));
 		if (e1.isAddr || e2.isAddr) throw "Primop expression is an address";
+		let ret;
 		switch (expr.prim) {
-			case "+#": return new literal(e1.val + e2.val);
-			case "-#": return new literal(e1.val - e2.val);
-			case "*#": return new literal(e1.val * e2.val);
-			case "/#": return new literal(e1.val / e2.val);
-			case "%#": return new literal(e1.val % e2.val);
+			case "+#": ret = new literal(e1.val + e2.val); break;
+			case "-#": ret = new literal(e1.val - e2.val); break;
+			case "*#": ret = new literal(e1.val * e2.val); break;
+			case "/#": ret = new literal(e1.val / e2.val); break;
+			case "%#": ret = new literal(e1.val % e2.val); break;
 			default:
 				let res: boolean;
 				switch (expr.prim) {
@@ -208,7 +200,10 @@ reg({
 					case ">=#": res = e1.val >= e2.val; break;
 					default: throw new Error(`Invalid primop ${expr.prim}`);
 				}
-				return h.alloc(new CON(new identifier(res ? "True" : "False"), []));
+				ret = h.alloc(new CON(new identifier(res ? "True" : "False"), []));
 		}
+		ret.from = expr.from;
+		ret.to = expr.to;
+		return ret;
 	}
 });

@@ -185,7 +185,7 @@ export class THUNK {
 	}
 }
 export class BLACKHOLE {
-	constructor() { }
+	constructor(public from: number = -1, public to: number = -1) { }
 	public toString() {
 		return "BLACKHOLE";
 	}

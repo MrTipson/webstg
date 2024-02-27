@@ -5,7 +5,6 @@ import ProgramView from "@/components/ProgramView";
 import StackView from "@/components/StackView";
 import HeapView from "@/components/HeapView";
 import EnviromentView from "@/components/EnviromentView";
-import ExpressionView from "@/components/ExpressionView";
 import Controls from "@/components/Controls";
 import {
 	ResizableHandle,
@@ -21,7 +20,6 @@ export default function Machine() {
 
 	return (
 		<div className="h-full flex flex-col">
-			<ExpressionView machine={machine}></ExpressionView>
 			<ResizablePanelGroup direction="horizontal">
 				<ResizablePanel defaultSize={30}>
 					<ProgramView machine={machine} setMachine={setMachine}
