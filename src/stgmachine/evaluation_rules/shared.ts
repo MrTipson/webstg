@@ -168,8 +168,10 @@ reg({
 		let obj = h.get(addr);
 		if (!(obj instanceof FUN &&
 			obj.args.length == expr.atoms.length)) return undefined;
+		let call_args = expr.atoms.map(x => x instanceof literal ? x : env.find_value(x));
+		env.clear_locals();
 		for (let i = 0; i < obj.args.length; i++) {
-			env.add_local(obj.args[i], expr.atoms[i]);
+			env.add_local(obj.args[i], call_args[i]);
 		}
 		return obj.expr;
 	}

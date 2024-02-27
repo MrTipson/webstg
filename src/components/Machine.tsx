@@ -4,7 +4,6 @@ import { sum_prg } from "@/stglang/test";
 import ProgramView from "@/components/ProgramView";
 import StackView from "@/components/StackView";
 import HeapView from "@/components/HeapView";
-import EnviromentView from "@/components/EnviromentView";
 import Controls from "@/components/Controls";
 import {
 	ResizableHandle,
@@ -30,17 +29,9 @@ export default function Machine() {
 				<ResizableHandle withHandle />
 				{loaded &&
 					<>
-						<ResizablePanel defaultSize={30}>
-							<HeapView machine={machine} className="h-full" />
-						</ResizablePanel>
+						<ResizablePanel defaultSize={30}><HeapView machine={machine} className="h-full" /></ResizablePanel>
 						<ResizableHandle withHandle />
-						<ResizablePanel defaultSize={30}>
-							<ResizablePanelGroup direction="vertical">
-								<ResizablePanel defaultSize={30}><StackView machine={machine} className="h-full" /></ResizablePanel>
-								<ResizableHandle withHandle />
-								<ResizablePanel defaultSize={30}><EnviromentView machine={machine} className="h-full" /></ResizablePanel>
-							</ResizablePanelGroup>
-						</ResizablePanel>
+						<ResizablePanel defaultSize={30}><StackView machine={machine} className="h-full" /></ResizablePanel>
 						<Controls className="absolute bottom-6 left-0 right-0 m-auto w-fit" machine={machine} setMachine={setMachine} setStep={setStep} />
 					</>
 					|| // not loaded

@@ -15,7 +15,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import examples from "@/stglang/examples";
-import { identifier, literal } from "@/stglang/types";
+import { case_eval, identifier, literal } from "@/stglang/types";
 
 export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded }:
 	{
@@ -36,15 +36,26 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	if (error) {
 		highlighted = highlight(programText, true, error.from, error.to, { className: "syntax-error" });
 	} else if (loaded) {
+		let enviroment = [
+			...machine.env.local_entries(),
+			...machine.env.global_entries()
+		].map(([name, lit]) => {
+			return { from: lit.from, to: lit.to, value: String(lit) };
+		});
+		// With the current implementation, only identifier expressions get marked
+		if (machine.expr instanceof case_eval) {
+			let val = machine.expr.val;
+			enviroment.push({ from: val.from, to: val.to, value: String(val) });
+		}
 		// from and to might be -1, but it shouldnt cause any issues
 		if (machine.expr instanceof identifier || machine.expr instanceof literal) {
 			let val = machine.expr;
 			if (val instanceof identifier) {
 				val = machine.env.find_value(val);
 			}
-			highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, { className: "current-expression with-value", "data-value": val });
+			highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, { className: "current-expression with-value", "data-value": val }, enviroment);
 		} else {
-			highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, { className: "current-expression" });
+			highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, { className: "current-expression" }, enviroment);
 		}
 	} else {
 		highlighted = highlight(programText);
@@ -76,11 +87,17 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 	}
 
-	function highlight(code: string, mark = false, markFrom = -1, markTo = -1, props = {}) {
+	function highlight(code: string,
+		mark = false, markFrom = -1, markTo = -1, markProps = {},
+		valueAnnotations: { from: number, to: number, value: string }[] = []) {
 		let children: any[] = [];
 		let tmpChildren: any[] = [];
 		let start = 0;
 		let inMark = false;
+
+		valueAnnotations = valueAnnotations.sort((a, b) => b.from - a.from);
+		let annotation = valueAnnotations.pop();
+
 		function putStyle(from: number, to: number, classes: string) {
 			if (mark && markTo >= start) {
 				if (!inMark && from >= markFrom) { // do we need to start the mark span
@@ -103,7 +120,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 							children.push(code.substring(start, markTo));
 							start = markTo;
 						}
-						let el = React.createElement("span", props, ...children);
+						let el = React.createElement("span", markProps, ...children);
 						children = tmpChildren;
 						children.push(el);
 						inMark = false;
@@ -114,7 +131,15 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 				children.push(code.substring(start, from));
 			}
 			let text = code.substring(from, to);
-			children.push(React.createElement("span", { className: classes }, text));
+			// This will skip any annotations that might have been skipped
+			while (annotation && annotation.from < from) {
+				annotation = valueAnnotations.pop();
+			}
+			if (annotation && annotation.from == from && annotation.to == to) {
+				children.push(React.createElement("span", { className: classes + " with-value", "data-value": annotation.value }, text));
+			} else {
+				children.push(React.createElement("span", { className: classes }, text));
+			}
 			start = to;
 		}
 
@@ -125,7 +150,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		);
 		// Make sure mark is closed if it lasts until the end of file
 		if (inMark) {
-			let el = React.createElement("span", props, ...children);
+			let el = React.createElement("span", markProps, ...children);
 			children = tmpChildren;
 			children.push(el);
 		}

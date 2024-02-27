@@ -75,6 +75,12 @@ export class enviroment {
 			this.removed_locals[this.step] = [];
 		}
 	}
+	local_entries() {
+		return this.current_local.entries();
+	}
+	global_entries() {
+		return this.current_global.entries();
+	}
 	private _toString(env: Map<String, literal>): string {
 		return [...env.entries()].map(([name, lit]) => `\t${name}: ${lit}`).join("\n");
 	}

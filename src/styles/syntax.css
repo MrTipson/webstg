@@ -42,5 +42,5 @@
 }
 .with-value::after {
 	content: attr(data-value);
-	@apply p-0.5 underline ml-1;
+	@apply p-0.5 underline ml-1 text-muted-foreground;
 }
