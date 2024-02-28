@@ -1,7 +1,7 @@
 import { rules as rs_evalapply } from "@/stgmachine/evaluation_rules/eval-apply";
 import { rules as rs_pushenter } from "@/stgmachine/evaluation_rules/push-enter";
 import { rules as rs_shared } from "@/stgmachine/evaluation_rules/shared";
-import { binding, identifier, type heap_object, type expression, program, FUN, datatype, call, let_expr, THUNK, letrec_expr, case_expr } from "@/stglang/types";
+import { binding, identifier, literal, type heap_object, type expression, program, FUN, datatype, call, let_expr, THUNK, letrec_expr, case_expr, CON, PAP } from "@/stglang/types";
 import { heap } from "@/stgmachine/heap";
 import { stack } from "@/stgmachine/stack";
 import { enviroment } from "@/stgmachine/enviroment";
@@ -39,7 +39,16 @@ export class stg_machine {
 					this.expr.from = decl.obj.from;
 					this.expr.to = decl.obj.to;
 				}
-				this.env.add_global(decl.name, this.h.alloc(decl.obj));
+				let obj = decl.obj;
+				// global thunks and functions dont have any free variables saved in the closure
+				if (obj instanceof CON) {
+					let atoms = obj.atoms.map(x => x instanceof literal ? x : this.env.find_value(x));
+					obj = new CON(obj.constr, atoms, obj.from, obj.to);
+				} else if (obj instanceof PAP) {
+					let atoms = obj.atoms.map(x => x instanceof literal ? x : this.env.find_value(x));
+					obj = new PAP(obj.f, atoms, obj.from, obj.to);
+				}
+				this.env.add_global(decl.name, this.h.alloc(obj));
 			}
 		}
 		if (this.garbage_collection) rungc(this.expr, this.env, this.s, this.h);

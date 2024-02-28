@@ -158,12 +158,18 @@ export class FUN {
 
 		return `FUN(${args} -> ${expr})`;
 	}
+	public heapInfo(): [string, literal[]] {
+		return ["FUN", this.env ? [...this.env.values()] : []];
+	}
 }
 export class PAP {
 	constructor(public f: literal, public atoms: atom[], public from: number = -1, public to: number = -1) { }
 
 	public toString() {
 		return `PAP(${this.f} ${this.atoms.join(" ")})`;
+	}
+	public heapInfo(): [string, literal[]] {
+		return ["PAP", this.atoms as literal[]];
 	}
 }
 export class CON {
@@ -175,6 +181,9 @@ export class CON {
 		}
 		return `CON(${this.constr} ${this.atoms.join(" ")})`;
 	}
+	public heapInfo(): [string, literal[]] {
+		return ["CON", this.atoms as literal[]];
+	}
 }
 export class THUNK {
 	constructor(public expr: expression, public env: Map<string, literal> = new Map(), public from: number = -1, public to: number = -1) { }
@@ -183,10 +192,16 @@ export class THUNK {
 		//return `THUNK(${this.expr}): ${[...this.env.entries()].map(([k, v]) => `${k}..${v}`).join(" ")}`;
 		return `THUNK(${this.expr})`;
 	}
+	public heapInfo(): [string, literal[]] {
+		return ["THUNK", [...this.env.values()]];
+	}
 }
 export class BLACKHOLE {
 	constructor(public from: number = -1, public to: number = -1) { }
 	public toString() {
 		return "BLACKHOLE";
+	}
+	public heapInfo(): [string, literal[]] {
+		return ["BLACKHOLE", []];
 	}
 }
