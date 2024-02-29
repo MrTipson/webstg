@@ -182,7 +182,7 @@ export class CON {
 		return `CON(${this.constr} ${this.atoms.join(" ")})`;
 	}
 	public heapInfo(): [string, literal[]] {
-		return ["CON", this.atoms as literal[]];
+		return [this.constr.name, this.atoms as literal[]];
 	}
 }
 export class THUNK {
@@ -197,11 +197,12 @@ export class THUNK {
 	}
 }
 export class BLACKHOLE {
-	constructor(public from: number = -1, public to: number = -1) { }
+	constructor(public thunk: THUNK, public from: number = -1, public to: number = -1) { }
 	public toString() {
 		return "BLACKHOLE";
 	}
 	public heapInfo(): [string, literal[]] {
-		return ["BLACKHOLE", []];
+		let [_, refs] = this.thunk.heapInfo();
+		return ["BLACKHOLE", refs];
 	}
 }

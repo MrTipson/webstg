@@ -1,4 +1,4 @@
-import { CON, FUN, PAP, THUNK, literal, type heap_object } from '@/stglang/types';
+import { CON, FUN, PAP, THUNK, literal, type heap_object, BLACKHOLE } from '@/stglang/types';
 import type { stg_machine } from '@/stgmachine/machine';
 import Dagre from '@dagrejs/dagre';
 import ReactFlow, {
@@ -43,6 +43,9 @@ export default function HeapView({ className, machine, step }: { className?: str
 		if (obj instanceof THUNK) {
 			numVals = obj.env.size;
 			outnodes = [...obj.env.values()].map(x => x.val);
+		} else if (obj instanceof BLACKHOLE) {
+			numVals = obj.thunk.env.size;
+			outnodes = [...obj.thunk.env.values()].map(x => x.val);
 		} else if (obj instanceof FUN) {
 			if (obj.env) {
 				numVals = obj.env.size;

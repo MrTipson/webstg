@@ -129,7 +129,7 @@ reg({
 		let obj = h.get(expr);
 		if (!(obj instanceof THUNK)) return undefined;
 		env.replace_locals(obj.env);
-		h.set(expr, new BLACKHOLE());
+		h.set(expr, new BLACKHOLE(obj, obj.from, obj.to));
 		s.push(new thunk_update(expr));
 		return obj.expr;
 	}
