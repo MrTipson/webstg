@@ -18,7 +18,7 @@ export default function Machine() {
 	const [step, setStep] = useState(0);
 
 	return (
-		<div className="h-full flex flex-col">
+		<div className="h-full w-full flex flex-col">
 			<ResizablePanelGroup direction="horizontal">
 				<ResizablePanel defaultSize={30}>
 					<ProgramView machine={machine} setMachine={setMachine}

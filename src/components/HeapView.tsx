@@ -92,7 +92,7 @@ export default function HeapView({ className, machine, step }: { className?: str
 					edges={layouted.edges}
 					fitView
 				/>
-				<Controls />
+				<Controls position='top-left' />
 			</ReactFlowProvider>
 		</div>
 	);
