@@ -1,95 +1,101 @@
 import { CON, FUN, PAP, THUNK, literal, type heap_object, BLACKHOLE } from '@/stglang/types';
 import type { stg_machine } from '@/stgmachine/machine';
-import Dagre from '@dagrejs/dagre';
+import { useMemo, useState } from 'react';
 import ReactFlow, {
 	Handle,
 	Position,
 	ReactFlowProvider,
 	Controls
 } from 'reactflow';
+import type { Node, Edge, NodeChange } from 'reactflow';
 
 import 'reactflow/dist/style.css';
 
-const getLayoutedElements = (nodes: any, edges: any) => {
-	const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-	g.setGraph({ rankdir: 'BT' });
-
-	edges.forEach((edge) => g.setEdge(edge.source, edge.target));
-	nodes.forEach((node) => g.setNode(node.id, node));
-
-	Dagre.layout(g);
-
-	return {
-		nodes: nodes.map((node) => {
-			const { x, y } = g.node(node.id);
-
-			return { ...node, position: { x, y } };
-		}),
-		edges,
-	};
+const calculatePositions = (oldPositions: { x: number, y: number }[], nodes: Node[], edges: Edge[]) => {
+	return nodes.map(x => { return { x: 100, y: 100 } });
 };
 
 const nodeTypes = {
 	heapNode: HeapViewNode,
 };
 
-export default function HeapView({ className, machine, step }: { className?: string, machine: stg_machine, step: number }) {
-
-	let edges: any[] = [];
-	let nodes = machine.h.current.map((obj, i) => {
-		if (!obj) return undefined;
-		let outnodes: number[] = [];
-		let numVals: number = 0;
-		if (obj instanceof THUNK) {
+function getObjectConnections(obj: heap_object) {
+	let outnodes: number[] = [];
+	let numVals: number = 0;
+	if (obj instanceof THUNK) {
+		numVals = obj.env.size;
+		outnodes = [...obj.env.values()].map(x => x.val);
+	} else if (obj instanceof BLACKHOLE) {
+		numVals = obj.thunk.env.size;
+		outnodes = [...obj.thunk.env.values()].map(x => x.val);
+	} else if (obj instanceof FUN) {
+		if (obj.env) {
 			numVals = obj.env.size;
 			outnodes = [...obj.env.values()].map(x => x.val);
-		} else if (obj instanceof BLACKHOLE) {
-			numVals = obj.thunk.env.size;
-			outnodes = [...obj.thunk.env.values()].map(x => x.val);
-		} else if (obj instanceof FUN) {
-			if (obj.env) {
-				numVals = obj.env.size;
-				outnodes = [...obj.env.values()].map(x => x.val);
+		}
+	} else if (obj instanceof CON || obj instanceof PAP) {
+		// all atoms should be literals already, but we check anyways
+		numVals = obj.atoms.length;
+		outnodes = obj.atoms.filter(x => x instanceof literal && x.isAddr).map(x => (x as literal).val);
+	}
+	return { numVals, outnodes };
+}
+
+export default function HeapView({ className, machine, step }: { className?: string, machine: stg_machine, step: number }) {
+	let nodesChanged = false;
+	const { edges, nodes } = useMemo(
+		() => {
+			nodesChanged = true;
+			let edges: any[] = [];
+			let nodes = machine.h.current.map((obj, i) => {
+				if (!obj) return undefined;
+				const { numVals, outnodes } = getObjectConnections(obj);
+
+				outnodes.forEach((o, sourceHandle) =>
+					edges.push({ id: `e${i}-${o}`, source: String(i), target: String(o), sourceHandle: String(sourceHandle++) }));
+
+				return {
+					id: String(i),
+					type: 'heapNode',
+					data: {
+						label: String(obj),
+						addr: i,
+						obj: obj
+					},
+					width: 100 + 40 * numVals,
+					height: 100
+				}
+			}).filter(x => Boolean(x)) as Node[]; // When stepping back, some nodes become undefined. This filters them out
+			return { edges, nodes };
+		},
+		[step]
+	);
+	const [positions, setPositions] = useState<{ x: number, y: number }[]>([]);
+	if (nodesChanged) {
+		setPositions(calculatePositions(positions, nodes, edges));
+	}
+
+	function onNodesChanged(changes: NodeChange[]) {
+		let newPositions = [...positions];
+		for (let change of changes) {
+			if (change.type === 'position' && change.position) {
+				newPositions[Number(change.id)] = change.position;
 			}
-		} else if (obj instanceof CON || obj instanceof PAP) {
-			// all atoms should be literals already, but we check anyways
-			numVals = obj.atoms.length;
-			outnodes = obj.atoms.filter(x => x instanceof literal && x.isAddr).map(x => (x as literal).val);
 		}
-		let sourceHandle = 0;
-		for (let o of outnodes) {
-			edges.push({
-				id: `e${i}-${o}`,
-				source: String(i),
-				target: String(o),
-				sourceHandle: String(sourceHandle++)
-			});
-		}
+		setPositions(newPositions);
+	}
 
-		return {
-			id: String(i),
-			type: 'heapNode',
-			data: {
-				label: String(obj),
-				addr: i,
-				obj: obj
-			},
-			position: { x: 100, y: 100 },
-			width: 100 + 40 * numVals,
-			height: 100
-		}
-	}).filter(x => Boolean(x)); // When stepping back, some nodes become undefined. This filters them out
-	const layouted = getLayoutedElements(nodes, edges);
-
+	const positionedNodes: any[] = nodes.map((n, i) => { return { ...n, position: positions[i] } })
 	return (
 		<div className='h-full relative'>
 			<ReactFlowProvider>
 				<ReactFlow
 					nodesDraggable={true}
 					nodesConnectable={false}
+					onNodesChange={onNodesChanged}
 					nodeTypes={nodeTypes}
-					nodes={layouted.nodes}
-					edges={layouted.edges}
+					nodes={positionedNodes}
+					edges={edges}
 					fitView
 				/>
 				<Controls position='top-left' />
