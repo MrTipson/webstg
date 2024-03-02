@@ -1,24 +1,42 @@
 import { stg_machine } from "@/stgmachine/machine";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Controls({ className, machine, setMachine, setStep }: { className?: string, machine: stg_machine, setMachine: Function, setStep: Function }) {
 	const [intervalID, setIntervalID] = useState<number>();
+	const { toast } = useToast();
 
 	function next(steps: number) {
 		if (intervalID) { // if machine is stepped manually, stop interval
 			window.clearInterval(intervalID);
 			setIntervalID(undefined);
 		}
-		while (steps-- > 0 && machine.step());
-		console.log(machine);
-		setStep(machine.step_number);
+		try {
+			while (steps-- > 0 && machine.step());
+			console.log(machine);
+			setStep(machine.step_number);
+		} catch (e) {
+			toast({
+				title: "Runtime error",
+				description: String(e),
+				variant: "destructive"
+			});
+		}
 	}
 
 	function back(steps: number) {
-		while (steps-- > 0 && machine.step_back());
-		console.log(machine);
-		setStep(machine.step_number);
+		try {
+			while (steps-- > 0 && machine.step_back());
+			console.log(machine);
+			setStep(machine.step_number);
+		} catch (e) {
+			toast({
+				title: "Runtime error",
+				description: String(e),
+				variant: "destructive"
+			})
+		}
 	}
 
 	function toggleAutoStep() {

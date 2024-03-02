@@ -57,42 +57,33 @@ export class stg_machine {
 	}
 
 	step(): boolean {
-		try {
-			let new_expr = undefined;
-			for (let rule of this.ruleset) {
-				// Implicitly resolve name so there is no need for additional rule in operational semantics
-				let expr = this.expr;
-				if (expr instanceof identifier) {
-					expr = this.env.find_value(expr);
-				}
-				new_expr = rule.apply(expr, this.env, this.s, this.h);
-				if (new_expr) {
-					this.lastrule = rule.name;
-					this.expr = new_expr;
-					if (this.garbage_collection) rungc(this.expr, this.env, this.s, this.h);
-					this.step_number++; this.h.step++; this.s.step++; this.env.step++;
-					this.exprs[this.step_number] = this.expr;
-					return true;
-				}
+		let new_expr = undefined;
+		for (let rule of this.ruleset) {
+			// Implicitly resolve name so there is no need for additional rule in operational semantics
+			let expr = this.expr;
+			if (expr instanceof identifier) {
+				expr = this.env.find_value(expr);
 			}
-		} catch (e) {
-			console.log("ERROR:", e);
+			new_expr = rule.apply(expr, this.env, this.s, this.h);
+			if (new_expr) {
+				this.lastrule = rule.name;
+				this.expr = new_expr;
+				if (this.garbage_collection) rungc(this.expr, this.env, this.s, this.h);
+				this.step_number++; this.h.step++; this.s.step++; this.env.step++;
+				this.exprs[this.step_number] = this.expr;
+				return true;
+			}
 		}
 		return false;
 	}
 
 	step_back(): boolean {
-		try {
-			if (this.step_number <= 1) {
-				return false;
-			}
-			this.step_number--; this.h.back(); this.s.back(); this.env.back();
-			this.expr = this.exprs[this.step_number];
-			return true;
-		} catch (e) {
-			console.log("ERROR:", e);
+		if (this.step_number <= 1) {
+			return false;
 		}
-		return false;
+		this.step_number--; this.h.back(); this.s.back(); this.env.back();
+		this.expr = this.exprs[this.step_number];
+		return true;
 	}
 }
 
@@ -100,14 +91,18 @@ export function simulate(prog: program, n: number, eval_apply: boolean = false, 
 	let machine = new stg_machine(prog, eval_apply, garbage_collection);
 	let steps: { env: string, heap: string, stack: string, expr: string, rule: string | undefined }[] = [];
 
-	while (machine.step_number < n && machine.step()) {
-		steps.push({
-			env: String(machine.env),
-			heap: String(machine.h),
-			stack: String(machine.s),
-			expr: String(machine.expr),
-			rule: machine.lastrule
-		});
+	try {
+		while (machine.step_number < n && machine.step()) {
+			steps.push({
+				env: String(machine.env),
+				heap: String(machine.h),
+				stack: String(machine.s),
+				expr: String(machine.expr),
+				rule: machine.lastrule
+			});
+		}
+	} catch (e) {
+		console.log(e);
 	}
 
 	return steps;

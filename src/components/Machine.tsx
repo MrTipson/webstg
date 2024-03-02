@@ -10,6 +10,7 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function Machine() {
 	// set machine is called *only* when a new program is loaded, but will be mutated while stepping
@@ -29,9 +30,9 @@ export default function Machine() {
 				<ResizableHandle withHandle />
 				{loaded &&
 					<>
-						<ResizablePanel defaultSize={30}><HeapView machine={machine} className="h-full" step={step} /></ResizablePanel>
+						<ResizablePanel defaultSize={55}><HeapView machine={machine} className="h-full" step={step} /></ResizablePanel>
 						<ResizableHandle withHandle />
-						<ResizablePanel defaultSize={30}><StackView machine={machine} className="h-full" /></ResizablePanel>
+						<ResizablePanel defaultSize={15}><StackView machine={machine} className="h-full" /></ResizablePanel>
 						<Controls className="absolute bottom-6 left-0 right-0 m-auto w-fit" machine={machine} setMachine={setMachine} setStep={setStep} />
 					</>
 					|| // not loaded
@@ -42,6 +43,7 @@ export default function Machine() {
 					</>
 				}
 			</ResizablePanelGroup>
+			<Toaster />
 		</div>
 	);
 }

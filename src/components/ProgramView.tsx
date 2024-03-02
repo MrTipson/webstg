@@ -30,7 +30,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	const [parser, setParser] = useState(stg_parser);
 	const [programText, setProgramText] = useState(String(sum_prg));
 	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined);
-	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined)
+	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined);
 	const { toast } = useToast();
 
 	useEffect(() => currentExpressionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
@@ -202,7 +202,6 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 					<pre className={"relative z-10 bg-transparent text-wrap selection:bg-accent" + (loaded ? "" : " pointer-events-none")}>{highlighted}</pre>
 				</div>
 			</div>
-			<Toaster />
 		</div>
 	);
 }
