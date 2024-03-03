@@ -1,5 +1,6 @@
-import { CON, FUN, PAP, THUNK, literal, type heap_object, BLACKHOLE } from '@/stglang/types';
+import { CON, FUN, PAP, THUNK, literal, type heap_object, BLACKHOLE, identifier } from '@/stglang/types';
 import type { stg_machine } from '@/stgmachine/machine';
+import { thunk_update } from '@/stgmachine/stack';
 import Dagre from '@dagrejs/dagre';
 import ReactFlow, {
 	Handle,
@@ -36,6 +37,13 @@ const nodeTypes = {
 export default function HeapView({ className, machine, step }: { className?: string, machine: stg_machine, step: number }) {
 
 	let edges: any[] = [];
+
+	// Visualize nodes that are going to be/have been updated
+	let topFrame = machine.s.peek();
+	let updatingNode = (machine.expr instanceof literal || machine.expr instanceof identifier) && topFrame instanceof thunk_update && topFrame.addr.val || undefined;
+	let removedFrames = machine.s.removed[machine.s.step - 1];
+	let updatedNode = removedFrames && removedFrames[0] instanceof thunk_update && removedFrames[0].addr.val || undefined;
+
 	let nodes = machine.h.current.map((obj, i) => {
 		if (!obj) return undefined;
 		let outnodes: number[] = [];
@@ -65,11 +73,14 @@ export default function HeapView({ className, machine, step }: { className?: str
 				sourceHandle: String(sourceHandle++)
 			});
 		}
-
+		let variant = "default";
+		if (updatingNode === i) variant = "updating";
+		if (updatedNode === i) variant = "updated";
 		return {
 			id: String(i),
 			type: 'heapNode',
 			data: {
+				variant: variant,
 				label: String(obj),
 				addr: i,
 				obj: obj
@@ -98,12 +109,17 @@ export default function HeapView({ className, machine, step }: { className?: str
 	);
 }
 
-function HeapViewNode({ data }: { data: { addr: number, obj: heap_object } }) {
+const heapNodeVariants = {
+	default: "",
+	updating: " outline outline-yellow-500 outline-2",
+	updated: " outline outline-green-500 outline-2"
+};
+function HeapViewNode({ data }: { data: { addr: number, obj: heap_object, variant: keyof typeof heapNodeVariants } }) {
 	let [tag, values] = data.obj.heapInfo();
 
 	return (
-		<div className="p-1 rounded-sm bg-primary-foreground min-w-16">
-			<div className='flex justify-around items-center gap'>
+		<div className={"p-1 rounded-sm bg-primary-foreground min-w-16" + heapNodeVariants[data.variant]}>
+			<div className='flex justify-around items-center'>
 				<span className='m-1 font-semibold'>{tag}</span>
 				{values.map((val, i) => {
 					return (
