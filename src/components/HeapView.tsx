@@ -43,6 +43,9 @@ export default function HeapView({ className, machine, step }: { className?: str
 	let updatingNode = (machine.expr instanceof literal || machine.expr instanceof identifier) && topFrame instanceof thunk_update && topFrame.addr.val || undefined;
 	let removedFrames = machine.s.removed[machine.s.step - 1];
 	let updatedNode = removedFrames && removedFrames[0] instanceof thunk_update && removedFrames[0].addr.val || undefined;
+	let added = machine.h.added[machine.h.step - 1]?.map(([addr, obj]) => addr) || [];
+	let removed = machine.h.removed[machine.h.step - 1]?.map(([addr, obj]) => addr) || [];
+	let newlyAllocated = added.filter(x => !removed.includes(x));
 
 	let nodes = machine.h.current.map((obj, i) => {
 		if (!obj) return undefined;
@@ -76,6 +79,7 @@ export default function HeapView({ className, machine, step }: { className?: str
 		let variant = "default";
 		if (updatingNode === i) variant = "updating";
 		if (updatedNode === i) variant = "updated";
+		if (newlyAllocated.includes(i)) variant = "allocated";
 		return {
 			id: String(i),
 			type: 'heapNode',
@@ -112,7 +116,8 @@ export default function HeapView({ className, machine, step }: { className?: str
 const heapNodeVariants = {
 	default: "",
 	updating: " outline outline-yellow-500 outline-2",
-	updated: " outline outline-green-500 outline-2"
+	updated: " outline outline-green-500 outline-2",
+	allocated: " after:absolute after:content-['NEW'] after:-right-2 after:-bottom-3 after:text-yellow-400 after:font-semibold"
 };
 function HeapViewNode({ data }: { data: { addr: number, obj: heap_object, variant: keyof typeof heapNodeVariants } }) {
 	let [tag, values] = data.obj.heapInfo();
