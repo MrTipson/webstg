@@ -6,6 +6,8 @@ interface Props {
 
 const { title } = Astro.props;
 import { ModeToggle } from "@/components/ui/ModeToggle";
+import { Button } from "@/components/ui/button";
+import Icon from "@/components/Icons";
 ---
 
 <!doctype html>
@@ -20,11 +22,17 @@ import { ModeToggle } from "@/components/ui/ModeToggle";
 	</head>
 	<body class="grid grid-rows-[max-content_minmax(0,1fr)]">
 		<header class="bg-secondary flex justify-between px-6 py-2 row-span-1">
-			<div>
-				<span class="font-bold text-3xl">WebSTG</span>
+			<div class="text-3xl">
+				<span>Web</span><span class="font-bold">STG</span>
 			</div>
-			<div></div>
-			<ModeToggle client:load />
+			<div class="flex gap-1">
+				<Button variant="outline" size="icon">
+					<a href="https://github.com/MrTipson/webstg">
+						<Icon variant="github" />
+					</a>
+				</Button>
+				<ModeToggle client:load />
+			</div>
 		</header>
 		<main class="relative grow">
 			<slot />
