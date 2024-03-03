@@ -11,8 +11,64 @@ import type { Node, Edge, NodeChange } from 'reactflow';
 
 import 'reactflow/dist/style.css';
 
-const calculatePositions = (oldPositions: { x: number, y: number }[], nodes: Node[], edges: Edge[]) => {
-	return nodes.map(x => { return { x: 100, y: 100 } });
+const calculatePositions = (oldPositions: { x: number, y: number }[], nodes: (Node & { width: number, height: number })[], edges: Edge[], nodeGap: number = 15) => {
+	if (nodes.length == 0) return oldPositions;
+	const nodeHeight = nodes[0].height as number; // Should all be the same
+	const newPositions = [];
+
+	// Find roots
+	let isChild = [];
+	let isRoot = [];
+	for (let edge of edges) {
+		isChild[Number(edge.target)] = true;
+		isRoot[Number(edge.source)] = true;
+	}
+
+	let nodeWidths = []; // This will come in handy later
+	let nextFunPos;
+	let nextRootPos;
+	console.log(oldPositions);
+	for (let node of nodes) {
+		let { obj, addr } = node.data;
+		nodeWidths[addr] = node.width;
+		if (isChild[addr]) continue;
+		// Position independent objects
+		if (!(obj instanceof THUNK || obj instanceof BLACKHOLE) && !isRoot[addr]) {
+			// Technically, newPositions already includes oldPositions
+			newPositions[addr] = oldPositions[addr] || nextFunPos || { x: 0, y: -(nodeHeight + nodeGap) };
+			nextFunPos = { x: 0, y: newPositions[addr].y - (nodeHeight + nodeGap) };
+		} else { // Position roots
+			newPositions[addr] = oldPositions[addr] || nextRootPos || { x: 100, y: 0 };
+			nextRootPos = { x: newPositions[addr].x + node.width + nodeGap + 100, y: 0 };
+			console.log("root:", node.data.obj, newPositions[addr], nextRootPos);
+		}
+	}
+	let dependency = edges.map(({ source, target }) => [Number(source), Number(target)]);
+	// Position dependencies
+	let startX = [];
+	let dependencyUpdate = true;
+	while (dependencyUpdate) {
+		dependencyUpdate = false;
+		let todo = [];
+		for (let [from, to] of dependency) {
+			if (newPositions[from]) {
+				if (!startX[from]) {
+					startX[from] = newPositions[from].x;
+				}
+				newPositions[to] = oldPositions[to] || {
+					x: startX[from],
+					y: newPositions[from].y - (nodeHeight + nodeGap)
+				};
+				startX[from] += nodeWidths[to];
+				dependencyUpdate = true;
+			} else {
+				todo.push([from, to]);
+			}
+		}
+		dependency = todo;
+	}
+
+	return newPositions;
 };
 
 const nodeTypes = {
@@ -62,17 +118,18 @@ export default function HeapView({ className, machine, step }: { className?: str
 						addr: i,
 						obj: obj
 					},
-					width: 100 + 40 * numVals,
+					width: 100 + 20 * numVals,
 					height: 100
 				}
-			}).filter(x => Boolean(x)) as Node[]; // When stepping back, some nodes become undefined. This filters them out
+			}).filter(x => Boolean(x)) as (Node & { width: number, height: number })[]; // When stepping back, some nodes become undefined. This filters them out
 			return { edges, nodes };
 		},
 		[step]
 	);
-	const [positions, setPositions] = useState<{ x: number, y: number }[]>([]);
+	let [positions, setPositions] = useState<{ x: number, y: number }[]>([]);
 	if (nodesChanged) {
-		setPositions(calculatePositions(positions, nodes, edges));
+		positions = calculatePositions(positions, nodes, edges);
+		setPositions(positions);
 	}
 
 	function onNodesChanged(changes: NodeChange[]) {
@@ -85,7 +142,7 @@ export default function HeapView({ className, machine, step }: { className?: str
 		setPositions(newPositions);
 	}
 
-	const positionedNodes: any[] = nodes.map((n, i) => { return { ...n, position: positions[i] } })
+	const positionedNodes: any[] = nodes.map(n => { return { ...n, position: positions[n.data.addr] } })
 	return (
 		<div className='h-full relative'>
 			<ReactFlowProvider>
