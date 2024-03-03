@@ -30,7 +30,7 @@ reg({
 		let fun = h.get(f);
 		if (!(fun instanceof FUN &&
 			fun.args.length < expr.atoms.length)) return undefined;
-		for (let i = 0; i < expr.atoms.length; i++) {
+		for (let i = 0; i < fun.args.length; i++) {
 			env.add_local(fun.args[i], expr.atoms[i]);
 		}
 		let args = expr.atoms
@@ -49,7 +49,7 @@ reg({
 		let fun = h.get(f);
 		if (!(fun instanceof FUN &&
 			fun.args.length > expr.atoms.length)) return undefined;
-		return h.alloc(new PAP(f, expr.atoms));
+		return h.alloc(new PAP(f, expr.atoms, expr.from, expr.to));
 	}
 });
 
@@ -71,7 +71,7 @@ reg({
 		let f = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
 		let pap = h.get(f);
 		if (!(pap instanceof PAP)) return undefined;
-		return new call(pap.f, pap.atoms.concat(expr.atoms));
+		return new call(pap.f, pap.atoms.concat(expr.atoms), false, expr.from, expr.to);
 	}
 });
 
@@ -83,6 +83,6 @@ reg({
 		let f = expr instanceof literal ? expr : env.find_value(expr);
 		let pap = h.get(f);
 		if (!(pap instanceof PAP || pap instanceof FUN)) return undefined;
-		return new call(f, (s.pop() as apply_args).values);
+		return new call(f, (s.pop() as apply_args).values, false, expr.from, expr.to);
 	}
 });

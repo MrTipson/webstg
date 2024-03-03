@@ -128,5 +128,17 @@ list1 = CON(Cons one nil)
 list2 = CON(Cons two list1)
 list3 = CON(Cons three list2)
 main = THUNK(sum list3)`
+	},
+	{
+		name: "Too many args",
+		code: `data Number a = Num a
+plusN = FUN(n -> let f = FUN(a ->
+	case a of {
+		x -> case x +# n of {
+						y -> let result = CON(Num y)
+							in result;
+					};
+		}) in f)
+main = THUNK(plusN 1 2)`
 	}
 ];
