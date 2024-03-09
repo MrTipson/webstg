@@ -31,13 +31,12 @@ export class stg_machine {
 		this.ruleset = rs_shared.concat(eval_apply ? rs_evalapply : rs_pushenter);
 
 		this.garbage_collection = garbage_collection;
-		this.expr = new identifier("main");
+		let expr = undefined;
 
 		for (let decl of prog.decls) {
 			if (decl instanceof binding) {
 				if (decl.name.name === "main") {
-					this.expr.from = decl.obj.from;
-					this.expr.to = decl.obj.to;
+					expr = decl.name;
 				}
 				let obj = decl.obj;
 				// global thunks and functions dont have any free variables saved in the closure
@@ -51,6 +50,10 @@ export class stg_machine {
 				this.env.add_global(decl.name, this.h.alloc(obj));
 			}
 		}
+		if (!expr) {
+			throw new Error("No value bound to main");
+		}
+		this.expr = expr;
 		if (this.garbage_collection) rungc(this.expr, this.env, this.s, this.h);
 		this.step_number++; this.h.step++; this.s.step++; this.env.step++;
 		this.exprs[this.step_number] = this.expr;

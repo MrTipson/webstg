@@ -44,3 +44,7 @@
 	content: attr(data-value);
 	@apply p-0.5 underline ml-1 text-muted-foreground;
 }
+/* prevent main from displaying twice */
+.with-value .with-value::after {
+	display: none;
+}
