@@ -189,7 +189,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 
 	return (
 		<div className={className + " relative flex flex-col"}>
-			<div className="flex flex-wrap gap-2 m-2 items-center">
+			<div className="flex flex-wrap gap-2 m-1 items-center">
 				<h2 className="font-semibold text-xl m-3">Program view</h2>
 				<Select onValueChange={selectExample} defaultValue="Sum foldl">
 					<SelectTrigger className="w-[180px]">

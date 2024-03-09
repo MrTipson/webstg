@@ -10,6 +10,7 @@ import ReactFlow, {
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
+import { Separator } from '@/components/ui/separator';
 
 const getLayoutedElements = (nodes: any, edges: any) => {
 	const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -97,18 +98,24 @@ export default function HeapView({ className, machine, step }: { className?: str
 	const layouted = getLayoutedElements(nodes, edges);
 
 	return (
-		<div className='h-full relative'>
-			<ReactFlowProvider>
-				<ReactFlow
-					nodesDraggable={true}
-					nodesConnectable={false}
-					nodeTypes={nodeTypes}
-					nodes={layouted.nodes}
-					edges={layouted.edges}
-					fitView
-				/>
-				<Controls position='top-left' />
-			</ReactFlowProvider>
+		<div className="h-full flex flex-col">
+			<div className='m-1'>
+				<h2 className="font-semibold text-xl m-3">Heap view</h2>
+			</div>
+			<Separator />
+			<div className='flex-grow relative'>
+				<ReactFlowProvider>
+					<ReactFlow
+						nodesDraggable={true}
+						nodesConnectable={false}
+						nodeTypes={nodeTypes}
+						nodes={layouted.nodes}
+						edges={layouted.edges}
+						fitView
+					/>
+					<Controls position='top-left' />
+				</ReactFlowProvider>
+			</div>
 		</div>
 	);
 }
