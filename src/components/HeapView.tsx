@@ -41,7 +41,18 @@ export default function HeapView({ className, machine, step }: { className?: str
 
 	// Visualize nodes that are going to be/have been updated
 	let topFrame = machine.s.peek();
-	let updatingNode = (machine.expr instanceof literal || machine.expr instanceof identifier) && topFrame instanceof thunk_update && topFrame.addr.val || undefined;
+	let updatingNode: number | undefined = undefined;
+	if (topFrame instanceof thunk_update) {
+		let expr = machine.expr;
+		if (expr instanceof identifier) {
+			expr = machine.env.find_value(expr);
+		}
+		if (expr instanceof literal) {
+			if (expr.isAddr && !(machine.h.get(expr) instanceof THUNK)) {
+				updatingNode = topFrame.addr.val;
+			}
+		}
+	}
 	let removedFrames = machine.s.removed[machine.s.step - 1];
 	let updatedNode = removedFrames && removedFrames[0] instanceof thunk_update && removedFrames[0].addr.val || undefined;
 	let added = machine.h.added[machine.h.step - 1]?.map(([addr, obj]) => addr) || [];
