@@ -16,6 +16,16 @@ import {
 } from "@/components/ui/select";
 import examples from "@/stglang/examples";
 import { case_eval, identifier, literal } from "@/stglang/types";
+import { Settings2 } from "lucide-react";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded }:
 	{
@@ -28,9 +38,10 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		setLoaded: Function
 	}) {
 	const [parser, setParser] = useState(stg_parser);
-	const [programText, setProgramText] = useState(String(sum_prg));
+	const [programText, setProgramText] = useState(() => String(sum_prg));
 	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined);
 	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined);
+	const [settings, setSettings] = useState<{ garbage_collection: boolean, eval_apply: boolean }>({ garbage_collection: true, eval_apply: false });
 	const { toast } = useToast();
 
 	useEffect(() => currentExpressionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
@@ -71,7 +82,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 		try {
 			const ast = build_ast(programText);
-			setMachine(new stg_machine(ast, false, true));
+			setMachine(new stg_machine(ast, settings.eval_apply, settings.garbage_collection));
 			setStep(0);
 			toast({
 				title: "Success",
@@ -178,11 +189,11 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 
 	return (
 		<div className={className + " relative flex flex-col"}>
-			<div className="flex flex-wrap gap-2 mx-4 items-baseline">
-				<h3 className="font-semibold text-xl m-3">Program view</h3>
-				<Select onValueChange={selectExample}>
+			<div className="flex flex-wrap gap-2 m-2 items-center">
+				<h2 className="font-semibold text-xl m-3">Program view</h2>
+				<Select onValueChange={selectExample} defaultValue="Sum foldl">
 					<SelectTrigger className="w-[180px]">
-						<SelectValue placeholder="Select example" />
+						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
 						{examples.map(({ name, code }, i) => {
@@ -191,7 +202,18 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 					</SelectContent>
 				</Select>
 				<Button onClick={toggleEditable}>{loaded ? "Edit" : "Load"}</Button>
+				<Popover>
+					<PopoverTrigger asChild>
+						<Button variant={"outline"} size="icon">
+							<Settings2 />
+						</Button>
+					</PopoverTrigger>
+					<PopoverContent>
+						<SettingsMenu settings={settings} setSettings={setSettings} setLoaded={setLoaded} />
+					</PopoverContent>
+				</Popover>
 			</div>
+			<Separator />
 			<div className={"relative grow m-2 overflow-y-auto"}>
 				<div className="h-max relative m-2">
 					<code>
@@ -203,5 +225,35 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 				</div>
 			</div>
 		</div>
+	);
+}
+
+function SettingsMenu({ settings, setSettings, setLoaded }: { settings: { garbage_collection: boolean, eval_apply: boolean }, setSettings: Function, setLoaded: Function }) {
+	function onChange(change: { garbage_collection?: boolean, eval_apply?: boolean }) {
+		setSettings({ ...settings, ...change });
+		setLoaded(false);
+	}
+	const current_model = settings.eval_apply ? "eval-apply" : "push-enter";
+
+	return (
+		<>
+			<div className="flex items-center justify-between pb-2">
+				<Label htmlFor="garbage-collection" className="text-lg font-semibold">Garbage collection</Label>
+				<Switch id="garbage-collection" checked={settings.garbage_collection} onCheckedChange={(val) => onChange({ garbage_collection: val })} />
+			</div>
+			<div>
+				<h3 className="text-lg font-semibold">Evaluation model</h3>
+				<RadioGroup defaultValue={current_model} className="ml-3 my-2" onValueChange={(val) => onChange({ eval_apply: val === "eval-apply" })}>
+					<div className="flex items-center space-x-2">
+						<RadioGroupItem value="push-enter" id="r-push-enter" />
+						<Label htmlFor="r-push-enter">push-enter</Label>
+					</div>
+					<div className="flex items-center space-x-2">
+						<RadioGroupItem value="eval-apply" id="r-eval-apply" />
+						<Label htmlFor="r-eval-apply">eval-apply</Label>
+					</div>
+				</RadioGroup>
+			</div>
+		</>
 	);
 }
