@@ -1,4 +1,4 @@
-import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, type primop, case_eval, PAP, letrec_expr, type heap_object } from "@/stglang/types";
+import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, type primop, case_eval, PAP, letrec_expr, type heap_object, INDIRECTION } from "@/stglang/types";
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import { case_cont, thunk_update, type stack } from "@/stgmachine/stack";
@@ -136,6 +136,16 @@ reg({
 });
 
 reg({
+	name: "INDIRECTION",
+	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
+		if (!(expr instanceof literal && expr.isAddr)) return undefined;
+		let obj = h.get(expr);
+		if (!(obj instanceof INDIRECTION)) return undefined;
+		return new literal(obj.addr.val, obj.addr.isAddr, expr.from, expr.to);
+	}
+});
+
+reg({
 	name: "RET",
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
 		if (!(expr instanceof literal &&
@@ -152,10 +162,8 @@ reg({
 	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined {
 		if (!(expr instanceof literal &&
 			s.peek() instanceof thunk_update)) return undefined;
-		let obj = h.get(expr);
-		if (!obj) return undefined;
 		let cont = s.pop() as thunk_update;
-		h.set(cont.addr, obj);
+		h.set(cont.addr, new INDIRECTION(expr));
 		return cont.addr;
 	}
 });

@@ -1,4 +1,4 @@
-import { CON, FUN, PAP, THUNK, literal, type expression, call, case_eval } from "@/stglang/types";
+import { CON, FUN, PAP, THUNK, literal, type expression, call, case_eval, INDIRECTION } from "@/stglang/types";
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import { case_cont, pending_arg, thunk_update, type stack, apply_args } from "@/stgmachine/stack";
@@ -66,6 +66,10 @@ export function rungc(expr: expression, env: enviroment, s: stack, h: heap) {
 				[...obj.env.values()]
 					.filter(x => !flags[x.val])
 					.forEach(x => roots.push(x));
+			}
+		} else if (obj instanceof INDIRECTION) {
+			if (!flags[obj.addr.val]) {
+				roots.push(obj.addr);
 			}
 		}
 	}

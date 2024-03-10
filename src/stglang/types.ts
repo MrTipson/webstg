@@ -141,7 +141,7 @@ export class default_alt {
 	}
 }
 
-export type heap_object = FUN | PAP | CON | THUNK | BLACKHOLE
+export type heap_object = FUN | PAP | CON | THUNK | BLACKHOLE | INDIRECTION
 export class FUN {
 	constructor(public args: identifier[], public expr: expression, public env?: Map<string, literal>, public from: number = -1, public to: number = -1) { }
 
@@ -204,5 +204,15 @@ export class BLACKHOLE {
 	public heapInfo(): [string, literal[]] {
 		let [_, refs] = this.thunk.heapInfo();
 		return ["BLACKHOLE", refs];
+	}
+}
+
+export class INDIRECTION {
+	constructor(public addr: literal, public from: number = -1, public to: number = -1) { }
+	public toString() {
+		return `INDIRECTION ${this.addr}`;
+	}
+	public heapInfo(): [string, literal[]] {
+		return ["INDIRECTION", [this.addr]];
 	}
 }

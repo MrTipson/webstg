@@ -1,4 +1,4 @@
-import { CON, FUN, PAP, THUNK, literal, type heap_object, BLACKHOLE, identifier } from '@/stglang/types';
+import { CON, FUN, PAP, THUNK, literal, type heap_object, BLACKHOLE, identifier, INDIRECTION } from '@/stglang/types';
 import type { stg_machine } from '@/stgmachine/machine';
 import { thunk_update } from '@/stgmachine/stack';
 import Dagre from '@dagrejs/dagre';
@@ -78,6 +78,9 @@ export default function HeapView({ className, machine, step }: { className?: str
 			// all atoms should be literals already, but we check anyways
 			numVals = obj.atoms.length;
 			outnodes = obj.atoms.filter(x => x instanceof literal && x.isAddr).map(x => (x as literal).val);
+		} else if (obj instanceof INDIRECTION) {
+			numVals = 1;
+			outnodes = [obj.addr.val];
 		}
 		let sourceHandle = 0;
 		for (let o of outnodes) {
