@@ -17,7 +17,7 @@ export class stg_machine {
 	public readonly s = new stack();
 	public readonly env = new enviroment();
 
-	private ruleset;
+	public ruleset;
 	public expr: expression;
 	public exprs: expression[] = [];
 	public lastrule: string | undefined;
@@ -60,17 +60,16 @@ export class stg_machine {
 	}
 
 	step(): boolean {
-		let new_expr = undefined;
 		for (let rule of this.ruleset) {
 			// Implicitly resolve name so there is no need for additional rule in operational semantics
 			let expr = this.expr;
 			if (expr instanceof identifier) {
 				expr = this.env.find_value(expr);
 			}
-			new_expr = rule.apply(expr, this.env, this.s, this.h);
-			if (new_expr) {
+			const result = rule.match(expr, this.env, this.s, this.h);
+			if (result) {
 				this.lastrule = rule.name;
-				this.expr = new_expr;
+				this.expr = result();
 				if (this.garbage_collection) rungc(this.expr, this.env, this.s, this.h);
 				this.step_number++; this.h.step++; this.s.step++; this.env.step++;
 				this.exprs[this.step_number] = this.expr;

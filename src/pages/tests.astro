@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import { build_ast } from "@/stglang/ASTBuilder";
 import { sum_prg } from "@/stglang/test";
 import { status, reason } from "@/tests/backtest";
+import LatexRuleTests from "@/tests/rule-definitions";
 let ast: any = "";
 ast = build_ast(String(sum_prg));
 ---
@@ -15,5 +16,6 @@ ast = build_ast(String(sum_prg));
 		</div>
 		<pre>{sum_prg}</pre>
 		<pre>{ast}</pre>
+		<LatexRuleTests />
 	</main>
 </Layout>

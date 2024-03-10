@@ -10,7 +10,7 @@ export function register_rule(ruleset: Array<Rule>, rule: Rule) {
 export function used_vars(expr: expression | heap_object | alternatives): string[] {
 	return [...new Set(_used_vars(expr))];
 }
-function _used_vars(expr: expression | heap_object): string[] {
+function _used_vars(expr: expression | heap_object | alternatives): string[] {
 	if (expr instanceof let_expr) {
 		let vars: string[] = [];
 		let defines: string[] = [];
@@ -67,5 +67,7 @@ function _used_vars(expr: expression | heap_object): string[] {
 
 export interface Rule {
 	name: string,
-	apply(expr: expression, env: enviroment, s: stack, h: heap): expression | undefined;
+	definition: string,
+	explanation: string,
+	match(expr: expression, env: enviroment, s: stack, h: heap): (() => expression) | undefined
 }
