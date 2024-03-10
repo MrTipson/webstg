@@ -50,10 +50,15 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	if (error) {
 		highlighted = highlight(programText, true, error.from, error.to, { className: "syntax-error" });
 	} else if (loaded) {
+		let mainfrom, mainto;
 		let enviroment = [
 			...machine.env.local_entries(),
 			...machine.env.global_entries()
 		].map(([name, lit]) => {
+			if (name === "main") {
+				mainfrom = lit.from;
+				mainto = lit.to;
+			}
 			return { from: lit.from, to: lit.to, value: String(lit) };
 		});
 		// With the current implementation, only identifier expressions get marked
@@ -63,7 +68,8 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 		// from and to might be -1, but it shouldnt cause any issues
 		let props: Object = { className: "current-expression" };
-		if (machine.expr instanceof identifier || machine.expr instanceof literal) {
+		if (mainfrom !== machine.expr.from && mainto !== machine.expr.to && // don't mark main's value again
+			(machine.expr instanceof identifier || machine.expr instanceof literal)) {
 			let val = machine.expr;
 			if (val instanceof identifier) {
 				val = machine.env.find_value(val);
