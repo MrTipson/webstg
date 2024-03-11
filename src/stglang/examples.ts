@@ -140,5 +140,50 @@ plusN = FUN(n -> let f = FUN(a ->
 					};
 		}) in f)
 main = THUNK(plusN 1 2)`
+	},
+	{
+		name: "Primitive operator",
+		code: `data Number a = Num a
+main = THUNK(case 2 +# 3 of {
+	x -> let result = CON(Num x)
+			in result;
+})`
+	},
+	{
+		name: "Not so simple map",
+		code: `data Number a = Num a
+data List a = Nil | Cons a (List a)
+nil = CON Nil
+one = CON(Num 1)
+two = CON(Num 2)
+three = CON(Num 3)
+plusOne = FUN(x ->
+	case x of {
+	Num i -> case  i +# 1 of {
+					y -> let result = CON(Num y)
+							in result;
+					};
+	}
+)
+list1 = CON(Cons one nil)
+list2 = CON(Cons two list1)
+list3 = CON(Cons three list2)
+map = FUN(f xs ->
+	case xs of {
+			Nil -> nil;
+			Cons h t -> let fh = THUNK(f h)
+							ft = THUNK(map f t)
+							result = CON(Cons fh ft)
+						in result;
+		})
+last = FUN(xs ->
+	case xs of {
+		Cons h t -> case t of {
+				Nil -> h;
+				Cons h2 t2 -> last t;
+		};
+	})
+mapped = THUNK(map plusOne list3)
+main = THUNK(last mapped)`
 	}
 ];
