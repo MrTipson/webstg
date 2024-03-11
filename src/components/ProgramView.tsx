@@ -103,6 +103,18 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 					variant: "destructive"
 				});
 				setError({ from: e.from, to: e.to });
+			} else if (e instanceof Error) {
+				toast({
+					title: "Error",
+					description: e.message,
+					variant: "destructive"
+				});
+			} else {
+				toast({
+					title: "Unexpected error",
+					description: String(e),
+					variant: "destructive"
+				});
 			}
 		}
 	}
