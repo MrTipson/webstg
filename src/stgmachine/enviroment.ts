@@ -1,5 +1,4 @@
 import { identifier, literal } from "@/stglang/types";
-import type { stack } from "@/stgmachine/stack";
 
 export class enviroment {
 	step: number = 0;
@@ -63,7 +62,7 @@ export class enviroment {
 		if (this.step <= 0) return;
 		this.step--;
 		if (this.added_locals[this.step]) {
-			for (let [k, v] of this.added_locals[this.step]) {
+			for (let [k, _v] of this.added_locals[this.step]) {
 				this.current_local.delete(k);
 			}
 			this.added_locals[this.step] = [];

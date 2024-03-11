@@ -1,5 +1,5 @@
 import { stg_machine } from "@/stgmachine/machine";
-import { fib_prg, sum_prg } from "@/stglang/test";
+import { fib_prg } from "@/stglang/test";
 
 export let status: boolean = true;
 export let reason: String = "OK";

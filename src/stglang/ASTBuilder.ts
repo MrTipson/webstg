@@ -1,5 +1,5 @@
 import { parser } from "./parser.js"
-import { identifier, literal, program, datatype, constructor, binding, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, FUN, PAP, CON, THUNK, BLACKHOLE } from "@/stglang/types";
+import { identifier, literal, program, datatype, constructor, binding, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, FUN, CON, THUNK } from "@/stglang/types";
 
 export class STGSyntaxError extends Error {
 	constructor(m: string, public from: number, public to: number) {
@@ -17,7 +17,7 @@ export function build_ast(code: string): program {
 
 	let ast: program | undefined;
 	let constructors: string[] = [];
-	let datatypes = [];
+	// let datatypes = [];
 	tree.iterate({
 		enter(n) {
 			switch (n.name) {

@@ -33,7 +33,7 @@ export default function Machine() {
 						<ResizablePanel defaultSize={55}><HeapView machine={machine} className="h-full" step={step} /></ResizablePanel>
 						<ResizableHandle withHandle />
 						<ResizablePanel defaultSize={15}><StackView machine={machine} className="h-full" /></ResizablePanel>
-						<Controls className="absolute bottom-6 left-0 right-0 m-auto w-fit" machine={machine} setMachine={setMachine} setStep={setStep} />
+						<Controls className="absolute bottom-6 left-0 right-0 m-auto w-fit" machine={machine} setStep={setStep} />
 					</>
 					|| // not loaded
 					<>

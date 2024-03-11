@@ -6,18 +6,23 @@ import ReactFlow, {
 	Handle,
 	Position,
 	ReactFlowProvider,
-	Controls
+	Controls,
+	type Node,
+	type Edge
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
 import { Separator } from '@/components/ui/separator';
 
-const getLayoutedElements = (nodes: any, edges: any) => {
+const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
 	const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 	g.setGraph({ rankdir: 'BT' });
 
 	edges.forEach((edge) => g.setEdge(edge.source, edge.target));
-	nodes.forEach((node) => g.setNode(node.id, node));
+	nodes.forEach((node) => g.setNode(node.id, {
+		width: node.width || undefined,
+		height: node.height || undefined
+	}));
 
 	Dagre.layout(g);
 
@@ -35,9 +40,9 @@ const nodeTypes = {
 	heapNode: HeapViewNode,
 };
 
-export default function HeapView({ className, machine, step }: { className?: string, machine: stg_machine, step: number }) {
+export default function HeapView({ className, machine }: { className?: string, machine: stg_machine, step: number }) {
 
-	let edges: any[] = [];
+	let edges: Edge[] = [];
 
 	// Visualize nodes that are going to be/have been updated
 	let topFrame = machine.s.peek();
@@ -55,11 +60,11 @@ export default function HeapView({ className, machine, step }: { className?: str
 	}
 	let removedFrames = machine.s.removed[machine.s.step - 1];
 	let updatedNode = removedFrames && removedFrames[0] instanceof thunk_update && removedFrames[0].addr.val || undefined;
-	let added = machine.h.added[machine.h.step - 1]?.map(([addr, obj]) => addr) || [];
-	let removed = machine.h.removed[machine.h.step - 1]?.map(([addr, obj]) => addr) || [];
+	let added = machine.h.added[machine.h.step - 1]?.map(([addr, _obj]) => addr) || [];
+	let removed = machine.h.removed[machine.h.step - 1]?.map(([addr, _obj]) => addr) || [];
 	let newlyAllocated = added.filter(x => !removed.includes(x));
 
-	let nodes = machine.h.current.map((obj, i) => {
+	let nodes = machine.h.current.map<Node | undefined>((obj, i) => {
 		if (!obj) return undefined;
 		let outnodes: number[] = [];
 		let numVals: number = 0;
@@ -108,27 +113,29 @@ export default function HeapView({ className, machine, step }: { className?: str
 			width: 100 + 40 * numVals,
 			height: 100
 		}
-	}).filter(x => Boolean(x)); // When stepping back, some nodes become undefined. This filters them out
+	}).filter<Node>((x):x is Node => Boolean(x)); // When stepping back, some nodes become undefined. This filters them out
 	const layouted = getLayoutedElements(nodes, edges);
 
 	return (
-		<div className="h-full flex flex-col">
-			<div className='m-1'>
-				<h2 className="font-semibold text-xl m-3">Heap view</h2>
-			</div>
-			<Separator />
-			<div className='flex-grow relative'>
-				<ReactFlowProvider>
-					<ReactFlow
-						nodesDraggable={true}
-						nodesConnectable={false}
-						nodeTypes={nodeTypes}
-						nodes={layouted.nodes}
-						edges={layouted.edges}
-						fitView
-					/>
-					<Controls position='top-left' />
-				</ReactFlowProvider>
+		<div className={className}>
+			<div className="h-full flex flex-col">
+				<div className='m-1'>
+					<h2 className="font-semibold text-xl m-3">Heap view</h2>
+				</div>
+				<Separator />
+				<div className='flex-grow relative'>
+					<ReactFlowProvider>
+						<ReactFlow
+							nodesDraggable={true}
+							nodesConnectable={false}
+							nodeTypes={nodeTypes}
+							nodes={layouted.nodes}
+							edges={layouted.edges}
+							fitView
+						/>
+						<Controls position='top-left' />
+					</ReactFlowProvider>
+				</div>
 			</div>
 		</div>
 	);

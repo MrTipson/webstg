@@ -1,12 +1,11 @@
-import { map_pap_prg, sum_prg, fib_prg } from "@/stglang/test";
+import { sum_prg } from "@/stglang/test";
 import { stg_machine } from "@/stgmachine/machine";
-import React, { useState, type ChangeEvent, useContext, useRef, useEffect } from "react";
+import React, { useState, type ChangeEvent, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { parser as stg_parser } from "@/stglang/parser";
+import { parser } from "@/stglang/parser";
 import { highlightTree, classHighlighter } from "@lezer/highlight";
 import { STGSyntaxError, build_ast } from "@/stglang/ASTBuilder";
 import { useToast } from "@/components/ui/use-toast";
-import { Toaster } from "@/components/ui/toaster";
 import {
 	Select,
 	SelectContent,
@@ -27,7 +26,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded }:
+export default function ProgramView({ className, machine, setMachine, setStep, loaded, setLoaded }:
 	{
 		className?: string,
 		machine: stg_machine,
@@ -37,7 +36,6 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		loaded: boolean,
 		setLoaded: Function
 	}) {
-	const [parser, setParser] = useState(stg_parser);
 	const [programText, setProgramText] = useState(() => String(sum_prg));
 	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined);
 	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined);
@@ -190,9 +188,9 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	}
 
 	function selectExample(s: string) {
-		const selected = examples.filter(({ name, code }) => name === s)[0];
+		const selected = examples.filter(({ name }) => name === s)[0];
 		if (selected) {
-			let { name, code } = selected;
+			let { code } = selected;
 			setProgramText(code);
 			setLoaded(false);
 			setError(undefined);
@@ -214,7 +212,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
-						{examples.map(({ name, code }, i) => {
+						{examples.map(({ name }, i) => {
 							return <SelectItem key={i} value={name}>{name}</SelectItem>;
 						})}
 					</SelectContent>

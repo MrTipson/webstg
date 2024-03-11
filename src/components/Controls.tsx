@@ -6,7 +6,7 @@ import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import { identifier } from "@/stglang/types";
 
-export default function Controls({ className, machine, setMachine, setStep }: { className?: string, machine: stg_machine, setMachine: Function, setStep: Function }) {
+export default function Controls({ className, machine, setStep }: { className?: string, machine: stg_machine, setStep: Function }) {
 	const [intervalID, setIntervalID] = useState<number>();
 	const { toast } = useToast();
 

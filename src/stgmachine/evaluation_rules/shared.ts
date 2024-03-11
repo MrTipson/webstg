@@ -1,4 +1,4 @@
-import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, type primop, case_eval, PAP, letrec_expr, type heap_object, INDIRECTION } from "@/stglang/types";
+import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, BLACKHOLE, call, FUN, builtin_op, case_eval, PAP, letrec_expr, type heap_object, INDIRECTION } from "@/stglang/types";
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import { case_cont, thunk_update, type stack } from "@/stgmachine/stack";
@@ -11,7 +11,7 @@ reg({
 	name: "LET",
 	definition: "let $x = obj$ in $e$; $s$; $H \\: \\Rightarrow \\: e[x'/x]$; $s$; $H[x'\\mapsto obj]$",
 	explanation: "Allocate objects on the heap and bind their addresses to names in the local enviroment",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof let_expr)) return undefined;
 		let e = (expr as let_expr);
 		return function () {
@@ -26,11 +26,11 @@ reg({
 					obj = new CON(obj.constr, values);
 				} else if (obj instanceof THUNK) {
 					let used = used_vars(obj);
-					let closure_env = [...env.current_local.entries()].filter(([k, v]) => used.includes(k));
+					let closure_env = [...env.current_local.entries()].filter(([k, _v]) => used.includes(k));
 					obj = new THUNK(obj.expr, new Map(closure_env));
 				} else if (obj instanceof FUN) {
 					let used = used_vars(obj);
-					let closure_env = [...env.current_local.entries()].filter(([k, v]) => used.includes(k));
+					let closure_env = [...env.current_local.entries()].filter(([k, _v]) => used.includes(k));
 					obj = new FUN(obj.args, obj.expr, new Map(closure_env));
 				}
 				let addr = h.alloc(obj);
@@ -45,7 +45,7 @@ reg({
 	name: "LETREC",
 	definition: "letrec $x = obj$ in $e$; $s$; $H \\: \\Rightarrow \\: e[x'/x]$; $s$; $H[x'\\mapsto obj]$",
 	explanation: "Allocate objects on the heap and bind their addresses to names in the local enviroment",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof letrec_expr)) return undefined;
 		let e = (expr as letrec_expr);
 		return function () {
@@ -72,7 +72,7 @@ reg({
 					obj.atoms = obj.atoms.map<literal>(x => x instanceof literal ? x : env.find_value(x));
 				} else if (obj instanceof THUNK || obj instanceof FUN) {
 					let used = used_vars(obj);
-					let closure_env = [...env.current_local.entries()].filter(([k, v]) => used.includes(k));
+					let closure_env = [...env.current_local.entries()].filter(([k, _v]) => used.includes(k));
 					obj.env = new Map(closure_env);
 				}
 			}
@@ -86,7 +86,7 @@ reg({
 	definition: "case $v$ of $\\{\\ldots ; C\\, x_1 \\ldots x_n \\rightarrow e;\\ldots\\}$; $s$; $H[v \\mapsto \\mathtt{CON}(C\\ a_1\\ldots a_n)] \\:" +
 		"\\Rightarrow \\: e[a_1/x_1 \\ldots a_n/x_n]$; $s$; $H$",
 	explanation: "Match object to constructor alternative",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof case_eval)) return undefined;
 		let e = (expr as case_eval);
 		if (!(e.val.isAddr)) return undefined;
@@ -111,7 +111,7 @@ reg({
 	name: "CASEANY",
 	definition: "case $v$ of $\\{\\ldots ; x \\rightarrow e\\}$; $s$; $H \\: \\Rightarrow \\: e[v/x]$; $s$; $H$",
 	explanation: "Match object to default alternative",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof case_eval)) return undefined;
 		let e = (expr as case_eval);
 		if (!e.alts.default_alt) return undefined;
@@ -130,12 +130,12 @@ reg({
 	name: "CASE",
 	definition: "case $e$ of $\\{ \\ldots \\}$; $s$; $H \\: \\Rightarrow \\: e$; case $\\bullet$ of $\\{ \\ldots \\}:s$; $H$",
 	explanation: "Evaluate case scrutinee and push continuation onto stack",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, s: stack, _h: heap) {
 		if (!(expr instanceof case_expr)) return undefined;
 		let e = (expr as case_expr);
 		return function () {
 			let used = used_vars(expr.alts);
-			let saved_env = [...env.current_local.entries()].filter(([k, v]) => used.includes(k));
+			let saved_env = [...env.current_local.entries()].filter(([k, _v]) => used.includes(k));
 			s.push(new case_cont(e.alts, new Map(saved_env)));
 			return e.expr;
 		};
@@ -164,7 +164,7 @@ reg({
 	name: "INDIRECTION",
 	definition: "$x$; $s$; $H[x \\mapsto \\mathtt{INDIRECTION} \\, y] \\: \\Rightarrow \\: y$; $s$; $H$",
 	explanation: "Follow an indirection",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, _env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof literal && expr.isAddr)) return undefined;
 		let obj = h.get(expr);
 		if (!(obj instanceof INDIRECTION)) return undefined;
@@ -193,7 +193,7 @@ reg({
 	name: "UPDATE",
 	definition: "$y$; Upd $x \\, \\bullet :s$; $H \\: \\Rightarrow \\: y$; $s$; $H[x \\mapsto \\mathtt{INDIRECTION} \\, y]$",
 	explanation: "Pop update frame and update thunk with an indirection",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, _env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal &&
 			s.peek() instanceof thunk_update)) return undefined;
 		return function () {
@@ -209,7 +209,7 @@ reg({
 	definition: "$f^n \\, a_1 \\ldots a_n$; $s$; $H[f \\mapsto \\mathtt{FUN}(x_1 \\ldots x_n \\rightarrow e)]$$\\:" +
 		"\\Rightarrow \\: e[a_1/x_1 \\ldots a_n/x_n]$; $s$; $H$",
 	explanation: "Call to a known function",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof call && expr.known)) return undefined;
 		let addr = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
 		let obj = h.get(addr);
@@ -231,7 +231,7 @@ reg({
 	name: "PRIMOP",
 	definition: "$\\oplus a_1 \\ldots a_n$; $s$; $H \\: \\Rightarrow \\: a$; $s$; $H$",
 	explanation: "Apply primitive operation to arguments",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof builtin_op)) return undefined;
 		// Assume its a binop
 		let [e1, e2] = expr.atoms.map(x => x instanceof literal ? x : env.find_value(x));

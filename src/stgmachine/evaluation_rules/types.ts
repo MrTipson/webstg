@@ -1,4 +1,4 @@
-import { let_expr, type expression, literal, case_expr, letrec_expr, call, builtin_op, identifier, case_eval, type heap_object, THUNK, FUN, CON, PAP, alternatives } from "@/stglang/types";
+import { let_expr, type expression, literal, case_expr, letrec_expr, call, builtin_op, identifier, type heap_object, THUNK, FUN, CON, PAP, alternatives } from "@/stglang/types";
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import type { stack } from "@/stgmachine/stack";

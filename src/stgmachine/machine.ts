@@ -1,7 +1,7 @@
 import { rules as rs_evalapply } from "@/stgmachine/evaluation_rules/eval-apply";
 import { rules as rs_pushenter } from "@/stgmachine/evaluation_rules/push-enter";
 import { rules as rs_shared } from "@/stgmachine/evaluation_rules/shared";
-import { binding, identifier, literal, type heap_object, type expression, program, FUN, datatype, call, let_expr, THUNK, letrec_expr, case_expr, CON, PAP } from "@/stglang/types";
+import { binding, identifier, literal, type expression, program, FUN, datatype, call, let_expr, THUNK, letrec_expr, case_expr, CON, PAP } from "@/stglang/types";
 import { heap } from "@/stgmachine/heap";
 import { stack } from "@/stgmachine/stack";
 import { enviroment } from "@/stgmachine/enviroment";

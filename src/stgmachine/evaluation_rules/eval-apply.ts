@@ -12,7 +12,7 @@ reg({
 	definition: "$f^\\bullet \\, a_1 \\ldots a_n$; $s$; $H[f \\mapsto \\mathtt{FUN}(x_1 \\ldots x_n \\rightarrow e)] \\:" +
 		"\\Rightarrow \\: e[a_1/x_1 \\ldots a_n/x_n]$; $s$; $H$",
 	explanation: "Call of an unknown function with a matching number of arguments",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof call)) return undefined;
 		let f = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
 		let obj = h.get(f);
@@ -58,7 +58,7 @@ reg({
 	definition: "$f^k \\, a_1 \\ldots a_m$; $s$; $H[f \\mapsto \\mathtt{FUN}(x_1 \\ldots x_n \\rightarrow e)] \\:" +
 		"\\Rightarrow \\: p$; $s$; $H[p \\mapsto \\mathtt{PAP}(f \\, a_1 \\ldots a_m)] \\quad \\mathit{m \\lt n}$",
 	explanation: "Function call with too few arguments, a partial application is constructed",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof call)) return undefined;
 		let f = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
 		let fun = h.get(f);
@@ -89,7 +89,7 @@ reg({
 	definition: "$f^k \\, a_{n+1} \\ldots a_m$; $s$; $H[f \\mapsto \\mathtt{PAP}(g \\, a_1 \\ldots a_n)] \\:" +
 		"\\Rightarrow \\: g^\\bullet \\, a_1 \\ldots a_n a_{n+1} \\ldots a_m$; $s$; $H$",
 	explanation: "Providing additional arguments to a partial application",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof call)) return undefined;
 		let f = expr.f instanceof literal ? expr.f : env.find_value(expr.f);
 		let obj = h.get(f);

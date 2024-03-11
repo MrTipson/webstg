@@ -1,4 +1,4 @@
-import type { alternatives, atom, heap_object, identifier, literal } from "@/stglang/types";
+import type { alternatives, literal } from "@/stglang/types";
 
 export type stack_object = case_cont | thunk_update | apply_args | pending_arg;
 export class case_cont {

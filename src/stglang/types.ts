@@ -25,7 +25,7 @@ export class program {
 export class datatype {
 	constructor(
 		public name: identifier, public types: identifier[], public constructors: constructor[],
-		from: number = -1, to: number = -1
+		public from: number = -1, public to: number = -1
 	) { }
 
 	public toString() {

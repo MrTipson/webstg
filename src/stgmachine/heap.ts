@@ -56,12 +56,12 @@ export class heap {
 		//console.log("Before", this.current);
 		if (this.added[this.step]) {
 			for (let i = this.added[this.step].length - 1; i >= 0; i--) {
-				let [addr, obj] = this.added[this.step][i];
+				let [addr, _obj] = this.added[this.step][i];
 				this.current[addr] = undefined;
 
 				// either undefined or false is falsey
 				let was_replaced = this.removed[this.step]
-					?.map(([a, o]) => a)
+					?.map(([a, _o]) => a)
 					.includes(addr);
 				if (!was_replaced && (addr === this.i - 1)) {
 					this.i--;

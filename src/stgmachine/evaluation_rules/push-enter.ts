@@ -1,4 +1,4 @@
-import { call, literal, type expression, FUN, identifier, PAP, type atom } from "@/stglang/types";
+import { call, literal, type expression, FUN, PAP } from "@/stglang/types";
 import { register_rule, type Rule } from "@/stgmachine/evaluation_rules/types";
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
@@ -11,7 +11,7 @@ reg({
 	name: "PUSH",
 	definition: "$f^k \\, a_1 \\ldots a_m$; $s$; $H \\: \\Rightarrow \\: f$; Arg $a_1 \\ldots \\, $Arg $a_m:s$; $H$",
 	explanation: "Push function arguments onto the stack",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, env: enviroment, s: stack, _h: heap) {
 		if (!(expr instanceof call)) return undefined;
 		let call_expr = expr as call;
 		return function () {
@@ -51,7 +51,7 @@ reg({
 	definition: "$f$; Arg $a_1 \\ldots $ Arg $a_m:s$; $H[f \\mapsto \\mathtt{FUN}(x_1 \\ldots x_n \\rightarrow e)] \\:" +
 		"\\Rightarrow \\: p$; $s$; $H[p \\mapsto \\mathtt{PAP}(f \\, a_1 \\ldots a_m)] \\quad \\mathit{1 \\le m \\lt n}$",
 	explanation: "Construct partial application",
-	match(expr: expression, env: enviroment, s: stack, h: heap) {
+	match(expr: expression, _env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal)) return undefined;
 		let fun = h.get(expr);
 		if (!(fun instanceof FUN)) return undefined;
