@@ -70,7 +70,8 @@ export class heap {
 			this.added[this.step] = [];
 		}
 		if (this.removed[this.step]) {
-			for (let [addr, obj] of this.removed[this.step]) {
+			for (let i = this.removed[this.step].length - 1; i >= 0; i--) {
+				let [addr, obj] = this.removed[this.step][i];
 				this.current[addr] = obj;
 			}
 			this.removed[this.step] = [];
