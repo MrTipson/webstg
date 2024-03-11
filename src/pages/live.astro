@@ -7,3 +7,10 @@ import "@/styles/syntax.css";
 <Layout title="Test page.">
 	<Machine client:load />
 </Layout>
+
+<style is:global>
+	/* We make sure that attribution is clearly visible and doesn't clash with the site styling */
+	.react-flow__attribution {
+		background: unset;
+	}
+</style>
