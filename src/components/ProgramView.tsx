@@ -230,14 +230,14 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 				</Popover>
 			</div>
 			<Separator />
-			<div className={"relative grow m-2 overflow-y-auto"}>
-				<div className="h-max relative m-2">
+			<div className="relative grow m-2 overflow-y-auto p-2 flex flex-col">
+				<div className="relative w-full min-w-max grow">
+					<pre className={"relative z-10 bg-transparent selection:bg-accent" + (loaded ? "" : " pointer-events-none")}>{highlighted}</pre>
 					<code>
 						<textarea className={"absolute inset-0 bg-transparent text-transparent caret-primary p-4 font-semibold \
-							resize-none selection:bg-accent selection:text-transparent w-full h-full overflow-visible" + (!loaded ? "" : " pointer-events-none")}
+							resize-none selection:bg-accent selection:text-transparent w-full h-full overflow-hidden text-nowrap whitespace-pre" + (!loaded ? "" : " pointer-events-none")}
 							onChange={inputHandler} value={programText} spellCheck={false} disabled={loaded} />
 					</code>
-					<pre className={"relative z-10 bg-transparent text-wrap selection:bg-accent" + (loaded ? "" : " pointer-events-none")}>{highlighted}</pre>
 				</div>
 			</div>
 		</div>

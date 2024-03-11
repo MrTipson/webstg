@@ -113,7 +113,7 @@ export default function HeapView({ className, machine }: { className?: string, m
 			width: 100 + 40 * numVals,
 			height: 100
 		}
-	}).filter<Node>((x):x is Node => Boolean(x)); // When stepping back, some nodes become undefined. This filters them out
+	}).filter<Node>((x): x is Node => Boolean(x)); // When stepping back, some nodes become undefined. This filters them out
 	const layouted = getLayoutedElements(nodes, edges);
 
 	return (
