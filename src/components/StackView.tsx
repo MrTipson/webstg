@@ -1,13 +1,39 @@
 import { stg_machine } from "@/stgmachine/machine";
 import { thunk_update, type stack_object, case_cont, pending_arg, apply_args } from "@/stgmachine/stack";
 import { Separator } from "@/components/ui/separator";
+import HelpPopover from "@/components/HelpPopover";
 
 export default function StackView({ className, machine }: { className?: string, machine: stg_machine }) {
 	return (
 		<div className={className}>
 			<div className="h-full w-full flex flex-col">
-				<div className="m-1">
+				<div className="flex flex-wrap gap-2 m-1 items-center">
 					<h2 className="font-semibold text-xl m-3">Stack view</h2>
+					<HelpPopover>
+						<p>Stack view displays the current state of the stack.</p><br />
+						<p>
+							Most of the time it's populated with update frames (
+							<span className="text-green-500">Update</span>
+							<span className="px-1 m-1 rounded-sm bg-muted font-mono">0x5</span>
+							) and case continuations
+							<span className="text-sm flex gap-2 items-center">
+								(<span className="text-orange-500">Case continuation</span>
+								<span className='flex flex-wrap items-center'>
+									<span className="text-xs">Saved locals:</span>
+									<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono">x 5</span>
+								</span>),
+							</span>
+							while arguments for the push-enter (
+							<span className="text-blue-500">Argument</span>
+							<span className="px-1 m-1 rounded-sm bg-muted font-mono">0x10</span>
+							) and eval-apply (
+							<span className="text-blue-500">Arguments</span>
+							<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono">3</span>
+							<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono">2</span>
+							<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono">0x10</span>
+							) also appear for short periods of time.
+						</p>
+					</HelpPopover>
 				</div>
 				<Separator />
 				<div className="flex-grow overflow-auto text-wrap">

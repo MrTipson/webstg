@@ -25,6 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import HelpPopover from "@/components/HelpPopover";
 
 export default function ProgramView({ className, machine, setMachine, setStep, loaded, setLoaded }:
 	{
@@ -218,16 +219,20 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 					</SelectContent>
 				</Select>
 				<Button onClick={toggleEditable}>{loaded ? "Edit" : "Load"}</Button>
-				<Popover>
-					<PopoverTrigger asChild>
-						<Button variant={"outline"} size="icon">
-							<Settings2 />
-						</Button>
-					</PopoverTrigger>
-					<PopoverContent>
-						<SettingsMenu settings={settings} setSettings={setSettings} setLoaded={setLoaded} />
-					</PopoverContent>
-				</Popover>
+				<SettingsMenu settings={settings} setSettings={setSettings} setLoaded={setLoaded} />
+				<HelpPopover>
+					<p>Program view allows you to import examples, edit programs and change settings.</p><br />
+					<p>Basic syntax highlighting and error handling is also available.</p><br />
+					<p>During runtime, additional info is displayed in the program code:</p>
+					<ul className="list-disc list-inside">
+						<li className='my-1'>
+							values of bindings in the enviroment:
+							<span className="tok-variableName with-value px-1 py-0.5 mx-1 rounded font-semibold" data-value="0xb">TEST</span>
+						</li>
+						<li className='my-1'>current expression: <span className="current-expression px-1 py-0.5 rounded">1 +# 2</span></li>
+						<li className='my-1'>expression result: <span className="current-expression with-value px-1 py-0.5 rounded" data-value="3">1 +# 2</span></li>
+					</ul>
+				</HelpPopover>
 			</div>
 			<Separator />
 			<div className="relative grow m-2 overflow-y-auto p-2 flex flex-col">
@@ -252,24 +257,31 @@ function SettingsMenu({ settings, setSettings, setLoaded }: { settings: { garbag
 	const current_model = settings.eval_apply ? "eval-apply" : "push-enter";
 
 	return (
-		<>
-			<div className="flex items-center justify-between pb-2">
-				<Label htmlFor="garbage-collection" className="text-lg font-semibold">Garbage collection</Label>
-				<Switch id="garbage-collection" checked={settings.garbage_collection} onCheckedChange={(val) => onChange({ garbage_collection: val })} />
-			</div>
-			<div>
-				<h3 className="text-lg font-semibold">Evaluation model</h3>
-				<RadioGroup defaultValue={current_model} className="ml-3 my-2" onValueChange={(val) => onChange({ eval_apply: val === "eval-apply" })}>
-					<div className="flex items-center space-x-2">
-						<RadioGroupItem value="push-enter" id="r-push-enter" />
-						<Label htmlFor="r-push-enter">push-enter</Label>
-					</div>
-					<div className="flex items-center space-x-2">
-						<RadioGroupItem value="eval-apply" id="r-eval-apply" />
-						<Label htmlFor="r-eval-apply">eval-apply</Label>
-					</div>
-				</RadioGroup>
-			</div>
-		</>
+		<Popover>
+			<PopoverTrigger asChild>
+				<Button variant={"outline"} size="icon">
+					<Settings2 />
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent>
+				<div className="flex items-center justify-between pb-2">
+					<Label htmlFor="garbage-collection" className="text-lg font-semibold">Garbage collection</Label>
+					<Switch id="garbage-collection" checked={settings.garbage_collection} onCheckedChange={(val) => onChange({ garbage_collection: val })} />
+				</div>
+				<div>
+					<h3 className="text-lg font-semibold">Evaluation model</h3>
+					<RadioGroup defaultValue={current_model} className="ml-3 my-2" onValueChange={(val) => onChange({ eval_apply: val === "eval-apply" })}>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="push-enter" id="r-push-enter" />
+							<Label htmlFor="r-push-enter">push-enter</Label>
+						</div>
+						<div className="flex items-center space-x-2">
+							<RadioGroupItem value="eval-apply" id="r-eval-apply" />
+							<Label htmlFor="r-eval-apply">eval-apply</Label>
+						</div>
+					</RadioGroup>
+				</div>
+			</PopoverContent>
+		</Popover>
 	);
 }

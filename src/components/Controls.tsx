@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import { identifier } from "@/stglang/types";
+import HelpPopover from "@/components/HelpPopover";
 
 export default function Controls({ className, machine, setStep }: { className?: string, machine: stg_machine, setStep: Function }) {
 	const [intervalID, setIntervalID] = useState<number>();
@@ -88,6 +89,11 @@ export default function Controls({ className, machine, setStep }: { className?: 
 				<Button onClick={() => next(1)}>+1</Button>
 				<Button onClick={() => next(10)}>+10</Button>
 				<Button onClick={() => next(100)}>+100</Button>
+				<HelpPopover>
+					<p>The control panel contains controls for stepping the simulation.</p><br />
+					<p>It also displays the next rule which will be applied, both as a short
+						description, but also as a more formal operational semantics rule.</p>
+				</HelpPopover>
 			</div>
 		</div>
 	);

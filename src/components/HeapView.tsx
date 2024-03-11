@@ -13,6 +13,7 @@ import ReactFlow, {
 
 import 'reactflow/dist/style.css';
 import { Separator } from '@/components/ui/separator';
+import HelpPopover from '@/components/HelpPopover';
 
 const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
 	const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -119,8 +120,27 @@ export default function HeapView({ className, machine }: { className?: string, m
 	return (
 		<div className={className}>
 			<div className="h-full flex flex-col">
-				<div className='m-1'>
+				<div className='flex flex-wrap gap-2 m-1 items-center'>
 					<h2 className="font-semibold text-xl m-3">Heap view</h2>
+					<HelpPopover>
+						<p>Heap view displays all allocated objects on the heap.</p><br />
+						<p>If garbage collection is enabled, objects with no references are deleted.</p><br />
+						<p>Some objects may be additionally marked, such as:</p>
+						<ul className='list-disc list-inside'>
+							<li className='my-1'>
+								newly allocated object:
+								<span className={"relative inline-block px-3 rounded" + heapNodeVariants["allocated"] + " after:text-xs after:-bottom-1"}>TEST</span>
+							</li>
+							<li className='my-1'>
+								to-be updated object:
+								<span className={"relative inline-block mx-2 px-1 rounded" + heapNodeVariants["updating"]}>TEST</span>
+							</li>
+							<li className='my-1'>
+								updated object:
+								<span className={"relative inline-block mx-2 px-1 rounded" + heapNodeVariants["updated"]}>TEST</span>
+							</li>
+						</ul>
+					</HelpPopover>
 				</div>
 				<Separator />
 				<div className='flex-grow relative'>
