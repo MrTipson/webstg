@@ -8,7 +8,7 @@
 		"build": "astro check && astro build",
 		"preview": "astro preview",
 		"astro": "astro",
-		"grammar": "lezer-generator src/stglang/stglang.grammar -o src/stglang/parser"
+		"prebuild": "lezer-generator src/stglang/stglang.grammar -o src/stglang/parser"
 	},
 	"dependencies": {
 		"@astrojs/check": "^0.5.0",

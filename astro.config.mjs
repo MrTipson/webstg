@@ -10,5 +10,7 @@ export default defineConfig({
 		tailwind({
 			applyBaseStyles: false,
 		})
-	]
+	],
+	site: 'https://mrtipson.github.io',
+	base: '/webstg',
 });
