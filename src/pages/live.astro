@@ -13,4 +13,10 @@ import "@/styles/syntax.css";
 	.react-flow__attribution {
 		background: unset;
 	}
+	/* Make nodes and edges dont prevent panning, since we dont need node/edge interactivity */
+	.react-flow__edge,
+	.react-flow__node,
+	.react-flow__node * {
+		pointer-events: none !important;
+	}
 </style>

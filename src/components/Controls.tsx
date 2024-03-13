@@ -8,14 +8,9 @@ import { identifier } from "@/stglang/types";
 import HelpPopover from "@/components/HelpPopover";
 
 export default function Controls({ className, machine, setStep }: { className?: string, machine: stg_machine, setStep: Function }) {
-	const [intervalID, setIntervalID] = useState<number>();
 	const { toast } = useToast();
 
 	function next(steps: number) {
-		if (intervalID) { // if machine is stepped manually, stop interval
-			window.clearInterval(intervalID);
-			setIntervalID(undefined);
-		}
 		try {
 			while (steps-- > 0 && machine.step());
 			console.log(machine);
@@ -43,21 +38,6 @@ export default function Controls({ className, machine, setStep }: { className?: 
 		}
 	}
 
-	function toggleAutoStep() {
-		if (intervalID) {
-			window.clearInterval(intervalID);
-			setIntervalID(undefined);
-		} else {
-			setIntervalID(window.setInterval(() => {
-				if (!machine.step()) { // clear interval if execution stops
-					window.clearInterval(intervalID);
-					setIntervalID(undefined);
-				}
-				setStep(machine.step_number);
-			}, 1000));
-		}
-	}
-
 	let definition, explanation;
 	let expr = machine.expr;
 	if (expr instanceof identifier) expr = machine.env.find_value(expr);
@@ -82,13 +62,12 @@ export default function Controls({ className, machine, setStep }: { className?: 
 				<span className="font-semibold text-lg">No matching rule</span>
 			}
 			<div className={"flex gap-x-1 justify-center"}>
-				<Button onClick={() => back(100)}>-100</Button>
-				<Button onClick={() => back(10)}>-10</Button>
-				<Button onClick={() => back(1)}>-1</Button>
-				<Button onClick={toggleAutoStep}>{intervalID ? "Cancel autostep" : "Start autostep"}</Button>
-				<Button onClick={() => next(1)}>+1</Button>
-				<Button onClick={() => next(10)}>+10</Button>
-				<Button onClick={() => next(100)}>+100</Button>
+				<Button className="min-w-0" onClick={() => back(100)}>-100</Button>
+				<Button className="min-w-0" onClick={() => back(10)}>-10</Button>
+				<Button className="min-w-0" onClick={() => back(1)}>-1</Button>
+				<Button className="min-w-0" onClick={() => next(1)}>+1</Button>
+				<Button className="min-w-0" onClick={() => next(10)}>+10</Button>
+				<Button className="min-w-0" onClick={() => next(100)}>+100</Button>
 				<HelpPopover>
 					<p>The control panel contains controls for stepping the simulation.</p><br />
 					<p>It also displays the next rule which will be applied, both as a short

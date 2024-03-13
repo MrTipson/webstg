@@ -11,13 +11,50 @@ import {
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Toaster } from "@/components/ui/toaster";
-import { Separator } from "./ui/separator";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export default function Machine() {
 	// set machine is called *only* when a new program is loaded, but will be mutated while stepping
 	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(sum_prg, false, true));
 	const [loaded, setLoaded] = useState(false);
 	const [step, setStep] = useState(0);
+	const isDesktop = useMediaQuery("(min-width: 768px)");
+
+	if (!isDesktop) {
+		return (
+			<div className="h-full w-full flex flex-col">
+				<ResizablePanelGroup direction="vertical">
+					<ResizablePanel defaultSize={30}>
+						<ResizablePanelGroup direction="horizontal">
+							<ResizablePanel defaultSize={70}>
+								<ProgramView machine={machine} setMachine={setMachine}
+									step={step} setStep={setStep}
+									loaded={loaded} setLoaded={setLoaded}
+									className="h-full" />
+							</ResizablePanel>
+							{loaded &&
+								<>
+									<ResizableHandle withHandle />
+									<ResizablePanel defaultSize={30}><StackView machine={machine} className="h-full" /></ResizablePanel>
+								</>}
+						</ResizablePanelGroup>
+					</ResizablePanel>
+					<ResizableHandle withHandle />
+					<ResizablePanel defaultSize={60} className="flex flex-col justify-center">
+						{loaded &&
+							<HeapView machine={machine} className="h-full" step={step} />
+							||
+							<span className="text-center text-primary text-2xl font-bold">Load a program to begin simulation</span>
+						}
+					</ResizablePanel>
+				</ResizablePanelGroup>
+				{loaded &&
+					<Controls className="bg-background p-2 border" machine={machine} setStep={setStep} />
+				}
+				<Toaster />
+			</div>
+		);
+	}
 
 	return (
 		<div className="h-full w-full flex flex-col">

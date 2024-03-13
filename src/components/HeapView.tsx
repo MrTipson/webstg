@@ -129,7 +129,7 @@ export default function HeapView({ className, machine }: { className?: string, m
 						<ul className='list-disc list-inside'>
 							<li className='my-1'>
 								newly allocated object:
-								<span className={"relative inline-block px-3 rounded" + heapNodeVariants["allocated"] + " after:text-xs after:-bottom-1"}>TEST</span>
+								<span className={"relative inline-block px-3 rounded" + heapNodeVariants["allocated"] + " after:text-xs after:-bottom-0.5"}>TEST</span>
 							</li>
 							<li className='my-1'>
 								to-be updated object:
