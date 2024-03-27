@@ -14,6 +14,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { Separator } from '@/components/ui/separator';
 import HelpPopover from '@/components/HelpPopover';
+import type { STGSettings } from '@/components/Machine';
 
 const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
 	const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -41,8 +42,12 @@ const nodeTypes = {
 	heapNode: HeapViewNode,
 };
 
-export default function HeapView({ className, machine }: { className?: string, machine: stg_machine, step: number }) {
-
+export default function HeapView({ className, machine, settings }: {
+	className?: string,
+	machine: stg_machine,
+	step: number,
+	settings: STGSettings
+}) {
 	let edges: Edge[] = [];
 
 	// Visualize nodes that are going to be/have been updated
@@ -90,12 +95,27 @@ export default function HeapView({ className, machine }: { className?: string, m
 		}
 		let sourceHandle = 0;
 		for (let o of outnodes) {
-			edges.push({
-				id: `e${i}-${o}`,
-				source: String(i),
-				target: String(o),
-				sourceHandle: String(sourceHandle++)
-			});
+			let outObj = machine.h.current[o];
+			if (settings.collapse_indirections && outObj instanceof INDIRECTION) {
+				edges.push({
+					id: `e${i}-${outObj.addr.val}`,
+					source: String(i),
+					target: String(outObj.addr.val),
+					sourceHandle: String(sourceHandle++),
+					label: "Indirection",
+					labelBgBorderRadius: 4,
+					labelStyle: { fill: "hsl(var(--primary))"},
+					labelBgPadding: [4, 2],
+					labelBgStyle: { fill: "hsl(var(--muted))"}
+				});
+			} else {
+				edges.push({
+					id: `e${i}-${o}`,
+					source: String(i),
+					target: String(o),
+					sourceHandle: String(sourceHandle++)
+				});
+			}
 		}
 		let variant = "default";
 		if (updatingNode === i) variant = "updating";
@@ -115,6 +135,10 @@ export default function HeapView({ className, machine }: { className?: string, m
 			height: 100
 		}
 	}).filter<Node>((x): x is Node => Boolean(x)); // When stepping back, some nodes become undefined. This filters them out
+	if (settings.collapse_indirections) {
+		let globalEnv = [...machine.env.current_global.values()].map(x => x.val);
+		nodes = nodes.filter(x => !(x.data.obj instanceof INDIRECTION) || globalEnv.includes(x.data.addr))
+	}
 	const layouted = getLayoutedElements(nodes, edges);
 
 	return (

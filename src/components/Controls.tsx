@@ -54,6 +54,7 @@ export default function Controls({ className, machine, setStep }: { className?: 
 		<div className={className}>
 			{definition &&
 				<div className="text-center p-2">
+					<div>Step <span className="font-semibold">{machine.step_number}</span></div>
 					<span className="font-semibold text-lg">Next rule: </span>
 					<span className="text-muted-foreground">{explanation}</span>
 					<div className="bg-muted p-1 rounded"><Latex children={definition} /></div>
