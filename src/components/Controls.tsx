@@ -60,7 +60,7 @@ export default function Controls({ className, machine, setStep }: { className?: 
 					<div className="bg-muted p-1 rounded"><Latex children={definition} /></div>
 				</div>
 				||
-				<span className="font-semibold text-lg">No matching rule</span>
+				<div className="font-semibold text-lg text-center">No matching rule</div>
 			}
 			<div className={"flex gap-x-1 justify-center"}>
 				<Button className="min-w-0" onClick={() => back(100)}>-100</Button>
