@@ -1,4 +1,3 @@
-import { sum_prg } from "@/stglang/test";
 import { stg_machine } from "@/stgmachine/machine";
 import React, { useState, type ChangeEvent, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import HelpPopover from "@/components/HelpPopover";
 import type { STGSettings } from "@/components/Machine";
 import SettingsMenu from "@/components/SettingsMenu";
+import { default_program } from "@/components/Machine";
 
 export default function ProgramView({ className, machine, setMachine, setStep, loaded, setLoaded, settings, setSettings }:
 	{
@@ -32,7 +32,7 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 		settings: STGSettings,
 		setSettings: Function
 	}) {
-	const [programText, setProgramText] = useState(() => String(sum_prg));
+	const [programText, setProgramText] = useState(() => String(default_program));
 	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined);
 	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined);
 	const { toast } = useToast();

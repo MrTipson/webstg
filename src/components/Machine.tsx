@@ -19,9 +19,11 @@ export type STGSettings = {
 	collapse_indirections: boolean
 }
 
+export const default_program = sum_prg;
+
 export default function Machine() {
 	// set machine is called *only* when a new program is loaded, but will be mutated while stepping
-	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(sum_prg, false, true));
+	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(default_program, false, true));
 	const [loaded, setLoaded] = useState(false);
 	const [step, setStep] = useState(0);
 	const [settings, setSettings] = useState<STGSettings>({
