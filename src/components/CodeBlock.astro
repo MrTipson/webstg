@@ -1,0 +1,29 @@
+---
+import Prism from "@astrojs/prism/Prism.astro";
+import { Highlight } from "./MdMachine";
+
+const { code, lang, filename } = Astro.props;
+
+const hasLang = !!lang;
+const isStgLang = lang === "stg";
+const hasFileName = !!filename;
+
+const showHeader = hasLang || hasFileName;
+---
+
+<!-- Example from https://github.com/johnzanussi/astro-mdx-code-blocks -->
+<figure class="code-block">
+	{
+		showHeader && (
+			<figcaption class="header">
+				{hasFileName && <span class="filename">{filename}</span>}
+				{hasLang && <span class="lang">{lang}</span>}
+			</figcaption>
+		)
+	}
+	{
+		(isStgLang && <Highlight program={code} />) || (
+			<Prism code={code} lang={lang} />
+		)
+	}
+</figure>

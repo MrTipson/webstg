@@ -20,9 +20,7 @@ export function MdMachine({ children, program, step, garbage_collection, eval_ap
 		eval_apply: eval_apply,
 		collapse_indirections: collapse_indirections
 	}
-	while (step > machine.step_number) {
-		machine.step();
-	}
+	while (step > machine.step_number && machine.step());
 	const str = (children as React.ReactElement).props.value;
 	// Replace placeholder tags with the actual HeapView/StackView components
 	let index1 = str.indexOf(heap_slot);

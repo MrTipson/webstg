@@ -2,7 +2,6 @@
 layout: ../layouts/MarkdownLayout.astro
 title: "Example mdx configuration"
 ---
-import { MdMachine, Highlight } from "@/components/MdMachine";
 import examples from "@/stglang/examples";
 
 export const code = examples.find(x => x.name === "Partial application").code;
@@ -12,7 +11,19 @@ This is the first test of markdown based examples!
 
 <MdMachine client:load step={176} program={code} garbage_collection collapse_indirections>
 	**Test**
-	<Highlight program={code} />
+	You can use normal code blocks.
+	```stg
+	foldl = FUN(f acc list -> 
+		case list of {
+		Nil  -> acc;
+		Cons h t -> let newAcc = THUNK(f acc h)
+					in foldl f newAcc t;
+		}
+	)
+	```
+	But if your code is in a variable, you have to use the CodeBlock component explicitly.
+	CodeBlock and MdMachine are imported by default, other components/functions need to be imported explicitly.
+	<CodeBlock code={code} lang="stg" file={undefined}/>
 	<slot id="StackView"/>
 	<slot id="HeapView"/>
 </MdMachine>
