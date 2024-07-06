@@ -1,6 +1,5 @@
 import { stg_machine } from "@/stgmachine/machine";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';

@@ -104,9 +104,9 @@ export default function HeapView({ className, machine, settings }: {
 					sourceHandle: String(sourceHandle++),
 					label: "Indirection",
 					labelBgBorderRadius: 4,
-					labelStyle: { fill: "hsl(var(--primary))"},
+					labelStyle: { fill: "hsl(var(--primary))" },
 					labelBgPadding: [4, 2],
-					labelBgStyle: { fill: "hsl(var(--muted))"}
+					labelBgStyle: { fill: "hsl(var(--muted))" }
 				});
 			} else {
 				edges.push({
