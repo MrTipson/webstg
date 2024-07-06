@@ -1,0 +1,18 @@
+---
+layout: ../layouts/MarkdownLayout.astro
+title: "Example mdx configuration"
+---
+import { MdMachine, Highlight } from "@/components/MdMachine";
+import examples from "@/stglang/examples";
+
+export const code = examples.find(x => x.name === "Partial application").code;
+
+# Hello world
+This is the first test of markdown based examples!
+
+<MdMachine client:load step={176} program={code} garbage_collection collapse_indirections>
+	**Test**
+	<Highlight program={code} />
+	<slot id="StackView"/>
+	<slot id="HeapView"/>
+</MdMachine>

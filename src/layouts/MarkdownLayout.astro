@@ -1,0 +1,11 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import "@/styles/syntax.css";
+import "@/styles/react_flow_overrides.css";
+
+const { frontmatter } = Astro.props;
+---
+
+<Layout title={frontmatter.title}>
+	<slot />
+</Layout>
