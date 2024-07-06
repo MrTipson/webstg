@@ -2,21 +2,9 @@
 import Layout from "@/layouts/Layout.astro";
 import Machine from "@/components/Machine.tsx";
 import "@/styles/syntax.css";
+import "@/styles/react_flow_overrides.css";
 ---
 
 <Layout title="Test page.">
 	<Machine client:load />
 </Layout>
-
-<style is:global>
-	/* We make sure that attribution is clearly visible and doesn't clash with the site styling */
-	.react-flow__attribution {
-		background: unset;
-	}
-	/* Make nodes and edges dont prevent panning, since we dont need node/edge interactivity */
-	.react-flow__edge,
-	.react-flow__node,
-	.react-flow__node * {
-		pointer-events: none !important;
-	}
-</style>

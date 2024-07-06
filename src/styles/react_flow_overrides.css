@@ -1,0 +1,10 @@
+/* Make sure that attribution is clearly visible and doesn't clash with the site styling */
+.react-flow__attribution {
+	background: unset !important;
+}
+/* We don't need interactable nodes/edges, so disabling events makes panning more consistent */
+.react-flow__edge,
+.react-flow__node,
+.react-flow__node * {
+	pointer-events: none !important;
+}
