@@ -5,13 +5,15 @@ import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 import { identifier } from "@/stglang/types";
 import HelpPopover from "@/components/HelpPopover";
+import Timeline from "@/components/Timeline";
 
-export default function Controls({ className, machine, setStep }: { className?: string, machine: stg_machine, setStep: Function }) {
+export default function Controls({ className, machine, step, setStep }: { className?: string, machine: stg_machine, step: number, setStep: Function }) {
 	const { toast } = useToast();
 
-	function next(steps: number) {
+	function moveTo(newStep: number) {
 		try {
-			while (steps-- > 0 && machine.step());
+			while (newStep > machine.step_number && machine.step());
+			while (newStep < machine.step_number && machine.step_back());
 			console.log(machine);
 			setStep(machine.step_number);
 		} catch (e) {
@@ -20,20 +22,6 @@ export default function Controls({ className, machine, setStep }: { className?: 
 				description: String(e),
 				variant: "destructive"
 			});
-		}
-	}
-
-	function back(steps: number) {
-		try {
-			while (steps-- > 0 && machine.step_back());
-			console.log(machine);
-			setStep(machine.step_number);
-		} catch (e) {
-			toast({
-				title: "Runtime error",
-				description: String(e),
-				variant: "destructive"
-			})
 		}
 	}
 
@@ -62,18 +50,19 @@ export default function Controls({ className, machine, setStep }: { className?: 
 				<div className="font-semibold text-lg text-center">No matching rule</div>
 			}
 			<div className={"flex gap-x-1 justify-center"}>
-				<Button className="min-w-0" onClick={() => back(100)}>-100</Button>
-				<Button className="min-w-0" onClick={() => back(10)}>-10</Button>
-				<Button className="min-w-0" onClick={() => back(1)}>-1</Button>
-				<Button className="min-w-0" onClick={() => next(1)}>+1</Button>
-				<Button className="min-w-0" onClick={() => next(10)}>+10</Button>
-				<Button className="min-w-0" onClick={() => next(100)}>+100</Button>
+				<Button className="min-w-0" onClick={() => moveTo(step - 100)}>-100</Button>
+				<Button className="min-w-0" onClick={() => moveTo(step - 10)}>-10</Button>
+				<Button className="min-w-0" onClick={() => moveTo(step - 1)}>-1</Button>
+				<Button className="min-w-0" onClick={() => moveTo(step + 1)}>+1</Button>
+				<Button className="min-w-0" onClick={() => moveTo(step + 10)}>+10</Button>
+				<Button className="min-w-0" onClick={() => moveTo(step + 100)}>+100</Button>
 				<HelpPopover>
 					<p>The control panel contains controls for stepping the simulation.</p><br />
 					<p>It also displays the next rule which will be applied, both as a short
 						description, but also as a more formal operational semantics rule.</p>
 				</HelpPopover>
 			</div>
+			<Timeline className="m-auto w-[500px]" width={500} step={step} moveTo={moveTo} markers={[]}></Timeline>
 		</div>
 	);
 }
