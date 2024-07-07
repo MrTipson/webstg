@@ -2,7 +2,6 @@ import { Slider } from "@/components/ui/slider"
 import { useMemo, useState } from "react";
 
 function calculateTicks(limit: number) {
-	console.log("Calculating ticks...");
 	const gap = Math.max(1, Math.ceil((limit - 1) / 10));
 	let spacing = 1;
 	let flag = false;
@@ -14,11 +13,12 @@ function calculateTicks(limit: number) {
 	if (spacing > 1) {
 		ticks.push(1);
 	}
-	for (let i = spacing; i < limit; i += spacing) {
+	for (let i = spacing; i <= limit - gap / 2; i += spacing) {
 		ticks.push(i);
 	}
-	ticks.push(limit);
-	console.log("Ticks:", ticks);
+	if (limit > 1) {
+		ticks.push(limit);
+	}
 	return ticks;
 }
 
