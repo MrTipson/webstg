@@ -82,7 +82,7 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 		try {
 			const ast = build_ast(programText);
 			setMachine(new stg_machine(ast, settings.eval_apply, settings.garbage_collection));
-			setStep(0);
+			setStep(1);
 			toast({
 				title: "Success",
 				description: "You can now step through the execution"
