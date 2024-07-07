@@ -152,16 +152,16 @@ export default function HeapView({ className, machine, settings }: {
 						<p>Some objects may be additionally marked, such as:</p>
 						<ul className='list-disc list-inside'>
 							<li className='my-1'>
-								newly allocated object:
-								<span className={"relative inline-block px-3 rounded" + heapNodeVariants["allocated"] + " after:text-xs after:-bottom-0.5"}>TEST</span>
-							</li>
-							<li className='my-1'>
 								to-be updated object:
 								<span className={"relative inline-block mx-2 px-1 rounded" + heapNodeVariants["updating"]}>TEST</span>
 							</li>
 							<li className='my-1'>
 								updated object:
 								<span className={"relative inline-block mx-2 px-1 rounded" + heapNodeVariants["updated"]}>TEST</span>
+							</li>
+							<li className='my-1'>
+								newly allocated object:
+								<span className={"relative inline-block px-3 rounded" + heapNodeVariants["allocated"] + " after:text-xs after:-bottom-0.5"}>TEST</span>
 							</li>
 						</ul>
 					</HelpPopover>
