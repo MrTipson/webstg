@@ -2,10 +2,32 @@
 import Layout from "@/layouts/Layout.astro";
 import "@/styles/syntax.css";
 import "@/styles/react_flow_overrides.css";
+import "@/styles/markdown.css";
 
-const { frontmatter } = Astro.props;
+const { title, headings } = Astro.props;
+const paddings = [undefined, "pl-0", "pl-4", "pl-8", "pl-8", "pl-8", "pl-8"];
 ---
 
-<Layout title={frontmatter.title}>
-	<slot />
+<Layout title={title + " | WebSTG"}>
+	<div class="grid grid-cols-6 col-si">
+		<nav class="col-span-1 p-4"></nav>
+		<main class="col-span-4 p-8">
+			<slot />
+		</main>
+		<aside class="col-span-1 p-4 mt-8 h-fit">
+			<div class="fixed">
+				<h3 class="mx-0">Contents</h3>
+				{
+					headings.map((x) => (
+						<a
+							class={`block ${paddings[x.depth]} text-muted-foreground hover:text-foreground`}
+							href={"#" + x.slug}
+						>
+							{x.text}
+						</a>
+					))
+				}
+			</div>
+		</aside>
+	</div>
 </Layout>
