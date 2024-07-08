@@ -19,8 +19,17 @@ import HelpPopover from "@/components/HelpPopover";
 import type { STGSettings } from "@/components/Machine";
 import SettingsMenu from "@/components/SettingsMenu";
 import { default_program } from "@/components/Machine";
+import { inflate, deflate } from 'pako';
 
-export default function ProgramView({ className, machine, setMachine, setStep, loaded, setLoaded, settings, setSettings }:
+function compress(txt: string) {
+	return btoa(Array.from(deflate(txt), (byte) => String.fromCodePoint(byte)).join(""));
+}
+
+function decompress(txt: string) {
+	return inflate(Uint8Array.from(atob(txt), char => char.codePointAt(0) as number), { to: 'string' });
+}
+
+export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded, settings, setSettings }:
 	{
 		className?: string,
 		machine: stg_machine,
@@ -32,12 +41,35 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 		settings: STGSettings,
 		setSettings: Function
 	}) {
-	const [programText, setProgramText] = useState(() => String(default_program));
+	const [programText, setProgramText] = useState(() => {
+		const searchParams = new URLSearchParams(location.search);
+		const programParam = searchParams.get('program');
+		if (programParam) {
+			return decompress(programParam);
+		} else {
+			return String(default_program);
+		}
+	});
 	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined);
 	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined);
 	const { toast } = useToast();
 
 	useEffect(() => currentExpressionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
+
+	useEffect(() => {
+		const searchParams = new URLSearchParams(location.search);
+		step = Number(searchParams.get('step')) || 1;
+		if (!loaded && searchParams.has('program')) {
+			if (!loadMachine(programText, step)) {
+				toast({
+					title: 'Import failed',
+					description: 'Could not restore configuration from the URL',
+					variant: 'destructive'
+				});
+				history.replaceState(null, '', location.pathname);
+			}
+		}
+	}, []);
 
 	let highlighted;
 	if (error) {
@@ -74,20 +106,19 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 		highlighted = highlight(programText);
 	}
 
-	function toggleEditable() {
-		if (loaded) {
-			setLoaded(false);
-			return;
-		}
+	function loadMachine(code: string, step: number) {
 		try {
-			const ast = build_ast(programText);
-			setMachine(new stg_machine(ast, settings.eval_apply, settings.garbage_collection));
-			setStep(1);
+			const ast = build_ast(code);
+			const machine = new stg_machine(ast, settings.eval_apply, settings.garbage_collection);
+			while (step > machine.step_number && machine.step());
+			setMachine(machine);
+			setStep(step);
 			toast({
 				title: "Success",
 				description: "You can now step through the execution"
 			});
 			setLoaded(true);
+			return true;
 		} catch (e) { // build ast can throw an error
 			if (e instanceof STGSyntaxError) {
 				toast({
@@ -109,6 +140,22 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 					variant: "destructive"
 				});
 			}
+			return false;
+		}
+	}
+
+	function toggleEditable() {
+		if (loaded) {
+			history.replaceState(null, '', location.pathname);
+			setLoaded(false);
+		} else if (loadMachine(programText, 1)) {
+			setLoaded(true);
+			const searchParams = new URLSearchParams(location.search);
+			if (!searchParams.has('program')) {
+				searchParams.set('program', compress(programText));
+			}
+			const newUrl = `${location.pathname}?${searchParams.toString()}`;
+			history.replaceState(null, '', newUrl);
 		}
 	}
 
@@ -185,8 +232,7 @@ export default function ProgramView({ className, machine, setMachine, setStep, l
 	function selectExample(s: string) {
 		const selected = examples.filter(({ name }) => name === s)[0];
 		if (selected) {
-			let { code } = selected;
-			setProgramText(code);
+			setProgramText(selected.code);
 			setLoaded(false);
 			setError(undefined);
 		}
