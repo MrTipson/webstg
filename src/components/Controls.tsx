@@ -100,7 +100,7 @@ export default function Controls({ className, machine, step, setStep }: { classN
 						<Label htmlFor="name">Name</Label>
 						<Input
 							id="name"
-							defaultValue=""
+							defaultValue={markers.get(step) || ''}
 							className="col-span-2 h-8"
 							onInput={onChangeMarker}
 						/>
