@@ -6,9 +6,15 @@ import Latex from 'react-latex-next';
 import { identifier } from "@/stglang/types";
 import HelpPopover from "@/components/HelpPopover";
 import Timeline from "@/components/Timeline";
+import React, { useRef, useState } from 'react';
+import { Flag } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function Controls({ className, machine, step, setStep }: { className?: string, machine: stg_machine, step: number, setStep: Function }) {
 	const { toast } = useToast();
+	const [markers, setMarkers] = useState<Map<number, string>>(new Map());
 
 	function moveTo(newStep: number) {
 		try {
@@ -37,6 +43,17 @@ export default function Controls({ className, machine, step, setStep }: { classN
 		}
 	}
 
+	function onChangeMarker(event: React.ChangeEvent<HTMLInputElement>) {
+		const value = event.target.value;
+		const newMarkers = new Map(markers);
+		if (value === '') {
+			newMarkers.delete(step);
+		} else {
+			newMarkers.set(step, value);
+		}
+		setMarkers(newMarkers);
+	}
+
 	return (
 		<div className={className}>
 			{definition &&
@@ -61,8 +78,35 @@ export default function Controls({ className, machine, step, setStep }: { classN
 					<p>It also displays the next rule which will be applied, both as a short
 						description, but also as a more formal operational semantics rule.</p>
 				</HelpPopover>
+				<MarkerPopover>
+					<p>Set marker name or leave empty to remove marker.</p>
+					<div className="grid grid-cols-3 items-center mt-2">
+						<Label htmlFor="name">Name</Label>
+						<Input
+							id="name"
+							defaultValue=""
+							className="col-span-2 h-8"
+							onInput={onChangeMarker}
+						/>
+					</div>
+				</MarkerPopover>
 			</div>
-			<Timeline className="m-auto w-[500px]" width={500} step={step} moveTo={moveTo} markers={[]}></Timeline>
+			<Timeline className="m-auto w-[500px]" width={500} step={step} moveTo={moveTo} markers={[...markers.entries()]}></Timeline>
 		</div>
+	);
+}
+
+function MarkerPopover({ children }: React.PropsWithChildren) {
+	return (
+		<Popover>
+			<PopoverTrigger asChild>
+				<Button variant={"outline"} size="icon">
+					<Flag />
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent>
+				{children}
+			</PopoverContent>
+		</Popover>
 	);
 }
