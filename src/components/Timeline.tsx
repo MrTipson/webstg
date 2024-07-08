@@ -29,12 +29,22 @@ function calculateOffset(step: number, limit: number, width: number) {
 
 export default function Timeline({ className, width, markers, step, moveTo }:
 	{ className?: string, width: number, markers: [number, string][], step: number, moveTo: Function }) {
-	let [limit, setLimit] = useState(step);
+	const [limit, setLimitOriginal] = useState(() => {
+		const searchParams = new URLSearchParams(location.search);
+		return Number(searchParams.get('limit')) || step;
+	});
+	const setLimit = (newLimit: number) => {
+		setLimitOriginal(newLimit);
+		const searchParams = new URLSearchParams(location.search);
+		searchParams.set('limit', String(newLimit));
+		const newUrl = `${location.pathname}?${searchParams.toString()}`;
+		history.replaceState(null, '', newUrl);
+	};
+
 	const ticks = useMemo(() => calculateTicks(limit), [limit]);
 
 	if (step > limit) {
 		setLimit(step);
-		limit = step;
 	}
 
 	function changeHandler(value: number[]) {

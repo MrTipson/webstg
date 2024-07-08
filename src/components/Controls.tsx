@@ -14,7 +14,18 @@ import { Input } from "@/components/ui/input";
 
 export default function Controls({ className, machine, step, setStep }: { className?: string, machine: stg_machine, step: number, setStep: Function }) {
 	const { toast } = useToast();
-	const [markers, setMarkers] = useState<Map<number, string>>(new Map());
+	const [markers, setMarkers] = useState<Map<number, string>>(() => {
+		const searchParams = new URLSearchParams(location.search);
+		const markers = new Map();
+		for (let key of searchParams.keys()) {
+			if (/^m\d+$/.test(key)) {
+				const step = Number(key.substring(1));
+				const name = decodeURIComponent(searchParams.get(key) as string);
+				markers.set(step, name);
+			}
+		}
+		return markers;
+	});
 
 	function moveTo(newStep: number) {
 		try {
@@ -46,12 +57,17 @@ export default function Controls({ className, machine, step, setStep }: { classN
 	function onChangeMarker(event: React.ChangeEvent<HTMLInputElement>) {
 		const value = event.target.value;
 		const newMarkers = new Map(markers);
+		const searchParams = new URLSearchParams(location.search);
 		if (value === '') {
 			newMarkers.delete(step);
+			searchParams.delete(`m${step}`)
 		} else {
 			newMarkers.set(step, value);
+			searchParams.set(`m${step}`, encodeURIComponent(value))
 		}
 		setMarkers(newMarkers);
+		const newUrl = `${location.pathname}?${searchParams.toString()}`;
+		history.replaceState(null, '', newUrl);
 	}
 
 	return (
