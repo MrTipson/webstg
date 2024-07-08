@@ -18,11 +18,13 @@ function calculateTicks(limit: number) {
 	for (let i = spacing; i <= limit - gap / 2; i += spacing) {
 		ticks.push(i);
 	}
-	if (limit > 1) {
-		ticks.push(limit);
-	}
+	ticks.push(limit);
 
 	return ticks;
+}
+
+function calculateOffset(step: number, limit: number, width: number) {
+	return limit === 1 ? 0 : Math.round((step - 1) / (limit - 1) * (width - 16));
 }
 
 export default function Timeline({ className, width, markers, step, moveTo }:
@@ -44,7 +46,7 @@ export default function Timeline({ className, width, markers, step, moveTo }:
 
 			<div className="relative mx-2 h-8">
 				{markers.filter(([i, _]) => i <= step).map(([i, name]) =>
-					<span key={i} onClick={() => moveTo(i)} className='absolute bottom-0 -translate-x-1/2 bg-secondary px-1.5 py-0.25 rounded' style={{ left: Math.round((i - 1) / (limit - 1) * (width - 16)) }}>
+					<span key={i} onClick={() => moveTo(i)} className='absolute bottom-0 -translate-x-1/2 bg-secondary px-1.5 py-0.25 rounded' style={{ left: calculateOffset(i, limit, width) }}>
 						<span className='w-0 h-0 border-transparent border-[5px] border-t-secondary absolute top-full left-0 right-0 m-auto' />
 						{name}
 					</span>
@@ -55,7 +57,7 @@ export default function Timeline({ className, width, markers, step, moveTo }:
 
 			<div className="relative mx-2 h-6 -z-10">
 				{ticks.map(x =>
-					<span key={x} className='absolute top-0 -translate-x-1/2' style={{ left: Math.round((x - 1) / (limit - 1) * (width - 16)) }}>
+					<span key={x} className='absolute top-0 -translate-x-1/2' style={{ left: calculateOffset(x, limit, width) }}>
 						<span className='border border-secondary-foreground m-auto inset-0 absolute w-0 h-2 -translate-y-4' />
 						{x}
 					</span>
