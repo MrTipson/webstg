@@ -41,10 +41,12 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		settings: STGSettings,
 		setSettings: Function
 	}) {
+	const [selected, setSelected] = useState<string>('Sum foldl');
 	const [programText, setProgramText] = useState(() => {
 		const searchParams = new URLSearchParams(location.search);
 		const programParam = searchParams.get('program');
 		if (programParam) {
+			setSelected('');
 			return decompress(programParam);
 		} else {
 			return String(default_program);
@@ -232,6 +234,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	function selectExample(s: string) {
 		const selected = examples.filter(({ name }) => name === s)[0];
 		if (selected) {
+			setSelected(s);
 			setProgramText(selected.code);
 			setLoaded(false);
 			setError(undefined);
@@ -240,6 +243,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 
 	function inputHandler(e: ChangeEvent<HTMLTextAreaElement>) {
 		let code = e.target.value;
+		setSelected('');
 		setProgramText(code);
 		setError(undefined);
 	}
@@ -248,9 +252,9 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		<div className={className + " relative flex flex-col"}>
 			<div className="flex flex-wrap gap-2 m-1 items-center">
 				<h2 className="font-semibold text-xl m-3">Program view</h2>
-				<Select onValueChange={selectExample} defaultValue="Sum foldl">
+				<Select onValueChange={selectExample} value={selected}>
 					<SelectTrigger className="w-[180px]">
-						<SelectValue />
+						<SelectValue placeholder="Custom program" />
 					</SelectTrigger>
 					<SelectContent>
 						{examples.map(({ name }, i) => {
