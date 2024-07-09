@@ -26,3 +26,9 @@ tbody > tr { @apply border-b border-t-muted }
 figure { @apply flex flex-col items-center my-8}
 figure p { @apply m-0 }
 figcaption { @apply mt-2}
+
+details { @apply text-muted-foreground border-l pl-2 }
+summary { @apply cursor-pointer relative }
+summary::before { @apply content-[''] absolute top-0 bottom-0 -left-8 w-2 h-2 my-auto border-b border-r -rotate-45 transition-transform duration-200 }
+details[open] summary::before { @apply rotate-45 }
+summary::marker { @apply content-none }

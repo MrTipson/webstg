@@ -4,35 +4,83 @@ import "@/styles/syntax.css";
 import "@/styles/react_flow_overrides.css";
 import "@/styles/markdown.css";
 import type { MarkdownHeading } from "astro";
+import type { SidebarEntry } from "@/content/directory";
 
 interface Props {
 	title: string;
 	headings: MarkdownHeading[];
+	sidebar: SidebarEntry[];
 }
-const { title, headings } = Astro.props;
-const paddings = [undefined, "pl-0", "pl-4", "pl-8", "pl-8", "pl-8", "pl-8"];
+const { title, headings, sidebar } = Astro.props;
+const tocPaddings = [undefined, "pl-0", "pl-4", "pl-8", "pl-8", "pl-8", "pl-8"];
+const linkStyle = "no-underline block text-muted-foreground ml-8 hover:text-foreground";
+const detailsStyle = "pl-2 ml-6";
+
+function constructSidebar(sidebar: SidebarEntry[]): string {
+	return sidebar
+		.map((entry) => {
+			if ("slug" in entry) {
+				return `<a class="${linkStyle}" href=${entry.slug}>${entry.label}</a>`;
+			} else if ("link" in entry) {
+				return `<a class="${linkStyle}" href=${entry.link}>${entry.label}</a>`;
+			} else if ("items" in entry) {
+				return `
+				<details class="${detailsStyle}" open=${!entry.collapsed}>
+					<summary class="hover:text-foreground">${entry.label}</summary>
+					<div>${constructSidebar(entry.items)}</div>
+				</details>`;
+			}
+		})
+		.join("");
+}
 ---
 
 <Layout title={title + " | WebSTG"}>
-	<div class="grid grid-cols-6 col-si">
-		<nav class="col-span-1 p-4"></nav>
-		<main class="col-span-4 p-8">
+	<div class="columns">
+		<nav class="sidebar scrollbar" set:html={constructSidebar(sidebar)} />
+		<main class="content scrollbar">
 			<slot />
 		</main>
-		<aside class="col-span-1 p-4 mt-8 h-fit">
-			<div class="fixed">
-				<h3 class="mx-0">Contents</h3>
-				{
-					headings.map((x) => (
-						<a
-							class={`block ${paddings[x.depth]} text-muted-foreground hover:text-foreground`}
-							href={"#" + x.slug}
-						>
-							{x.text}
-						</a>
-					))
-				}
-			</div>
+		<aside class="toc scrollbar">
+			{headings.length > 0 && <h3 class="mx-0">Contents</h3>}
+			{
+				headings.map((x) => (
+					<a
+						class={`block ${tocPaddings[x.depth]} text-muted-foreground hover:text-foreground`}
+						href={"#" + x.slug}
+					>
+						{x.text}
+					</a>
+				))
+			}
 		</aside>
 	</div>
 </Layout>
+
+<style>
+	.sidebar {
+		@apply col-span-1 p-4 pt-12 text-muted-foreground no-underline overflow-auto;
+	}
+	.columns {
+		@apply grid grid-cols-6 h-full;
+	}
+	.content {
+		@apply relative col-span-4 p-8 overflow-auto;
+	}
+	.toc {
+		@apply col-span-1 p-4 pt-12 overflow-auto;
+	}
+	.scrollbar {
+		scrollbar-width: 4px;
+		scrollbar-color: var(--muted) var(--muted-foreground);
+	}
+	.scrollbar::-webkit-scrollbar {
+		@apply w-3 m-1;
+	}
+	.scrollbar::-webkit-scrollbar-thumb {
+		@apply bg-muted-foreground;
+	}
+	.scrollbar::-webkit-scrollbar-track {
+		@apply bg-muted;
+	}
+</style>

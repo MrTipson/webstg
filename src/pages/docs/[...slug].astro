@@ -1,6 +1,7 @@
 ---
 import MarkdownLayout from "@/layouts/MarkdownLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
+import { sidebar } from "@/content/directory";
 
 export async function getStaticPaths() {
 	const blogEntries = await getCollection("docs");
@@ -17,6 +18,6 @@ const { entry } = Astro.props;
 const { Content, headings } = await entry.render();
 ---
 
-<MarkdownLayout {...entry.data} {headings}>
+<MarkdownLayout {sidebar} {...entry.data} {headings}>
 	<Content />
 </MarkdownLayout>
