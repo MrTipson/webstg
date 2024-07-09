@@ -3,8 +3,6 @@ import { type STGSettings } from "./Machine";
 import { build_ast } from "@/stglang/ASTBuilder";
 import { stg_machine } from "@/stgmachine/machine";
 import React from "react";
-import { classHighlighter, highlightCode } from "@lezer/highlight";
-import { parser } from "@/stglang/parser";
 import HeapView from "./HeapView";
 import StackView from "./StackView";
 
@@ -47,22 +45,5 @@ export function MdMachine({ children, program, step, garbage_collection, eval_ap
 		<>
 			{...[before, element1, between, element2, after]}
 		</>
-	);
-}
-
-export function Highlight({ className, program }: { className: string, program: string }) {
-	let children: any[] = [];
-
-	function emit(text: string, classes: string) {
-		children.push(React.createElement("span", { className: classes }, text));
-	}
-	function emitBreak() {
-		children.push(React.createElement("span", undefined, "\n"));
-	}
-	highlightCode(program, parser.parse(program), classHighlighter, emit, emitBreak);
-	return (
-		<pre className={className}>
-			<code>{...children}</code>
-		</pre>
 	);
 }

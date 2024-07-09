@@ -9,7 +9,10 @@ blockquote { @apply border-l-foreground border-l-2 px-2 py-1 bg-secondary my-4 }
 blockquote > p { @apply mx-0 mt-0 }
 blockquote > footer { @apply inline-block }
 
-pre { @apply p-2 bg-muted }
+pre { @apply p-2 w-full}
+code { @apply bg-muted/50 px-1 py-0.5 }
+pre > code { @apply bg-transparent p-0 }
+pre.astro-code { @apply !bg-muted/50 }
 
 ul { @apply list-disc }
 ol { @apply list-decimal }

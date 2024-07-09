@@ -1,8 +1,10 @@
 ---
+// Adjusted example from https://github.com/johnzanussi/astro-mdx-code-blocks
 import { Code } from "astro:components";
-import { Highlight } from "./MdMachine";
 import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { classHighlighter, highlightCode } from "@lezer/highlight";
+import { parser } from "@/stglang/parser";
 
 const { code, lang, filename } = Astro.props;
 
@@ -11,9 +13,28 @@ const isStgLang = lang === "stg";
 const hasFileName = !!filename;
 
 const showHeader = hasLang || hasFileName;
+
+function highlightSTG(program: string) {
+	const children: any[] = [];
+
+	function emit(text: string, classes: string) {
+		children.push(`<span class=${classes}>${text}</span>`);
+	}
+	function emitBreak() {
+		children.push(`<span>\n</span>`);
+	}
+
+	highlightCode(
+		program,
+		parser.parse(program),
+		classHighlighter,
+		emit,
+		emitBreak,
+	);
+	return children.join("");
+}
 ---
 
-<!-- Example from https://github.com/johnzanussi/astro-mdx-code-blocks -->
 <div>
 	{
 		showHeader && (
@@ -26,9 +47,11 @@ const showHeader = hasLang || hasFileName;
 	<div class="relative flex bg-muted/50">
 		{
 			isStgLang ? (
-				<Highlight program={code} className="codeBlock" />
+				<pre>
+					<code set:html={highlightSTG(code)} />
+				</pre>
 			) : (
-				<Code code={code} lang={lang} class="codeBlock" />
+				<Code code={code} lang={lang || 'plaintext'} class="codeBlock" />
 			)
 		}
 		<Button size={"icon"} variant={"outline"} className="copyCode">
