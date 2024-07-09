@@ -19,9 +19,7 @@ const detailsStyle = "pl-2 ml-6";
 function constructSidebar(sidebar: SidebarEntry[]): string {
 	return sidebar
 		.map((entry) => {
-			if ("slug" in entry) {
-				return `<a class="${linkStyle}" href=${entry.slug}>${entry.label}</a>`;
-			} else if ("link" in entry) {
+			if ("link" in entry) {
 				return `<a class="${linkStyle}" href=${entry.link}>${entry.label}</a>`;
 			} else if ("items" in entry) {
 				return `
