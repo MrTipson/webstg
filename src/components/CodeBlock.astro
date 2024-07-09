@@ -1,6 +1,8 @@
 ---
-import Prism from "@astrojs/prism/Prism.astro";
+import { Code } from "astro:components";
 import { Highlight } from "./MdMachine";
+import { Check, Copy } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const { code, lang, filename } = Astro.props;
 
@@ -12,18 +14,73 @@ const showHeader = hasLang || hasFileName;
 ---
 
 <!-- Example from https://github.com/johnzanussi/astro-mdx-code-blocks -->
-<figure class="code-block">
+<div>
 	{
 		showHeader && (
-			<figcaption class="header">
-				{hasFileName && <span class="filename">{filename}</span>}
+			<div class="header">
 				{hasLang && <span class="lang">{lang}</span>}
-			</figcaption>
+				{hasFileName && <span class="filename">{filename}</span>}
+			</div>
 		)
 	}
-	{
-		(isStgLang && <Highlight program={code} />) || (
-			<Prism code={code} lang={lang} />
-		)
+	<div class="relative flex bg-muted/50">
+		{
+			isStgLang ? (
+				<Highlight program={code} className="codeBlock" />
+			) : (
+				<Code code={code} lang={lang} class="codeBlock" />
+			)
+		}
+		<Button size={"icon"} variant={"outline"} className="copyCode">
+			<Copy size={20} className="copyIcon" />
+			<Check className="checkIcon" />
+		</Button>
+	</div>
+</div>
+
+<style>
+	.header {
+		@apply bg-muted relative p-1;
 	}
-</figure>
+	.lang {
+		@apply px-1 py-0.5 m-0.5 text-xs text-muted-foreground;
+	}
+	.filename {
+		@apply italic font-mono;
+	}
+	.codeBlock {
+		@apply !bg-transparent w-full;
+	}
+	.copyCode {
+		@apply m-2 shrink-0;
+	}
+	.copyIcon {
+		@apply absolute pointer-events-none;
+	}
+	.checkIcon {
+		@apply text-green-500 absolute opacity-0 pointer-events-none;
+	}
+	button.copied > .copyIcon {
+		@apply animate-ping repeat-1 fill-mode-forwards duration-500;
+	}
+	button.copied > .checkIcon {
+		@apply transition-opacity duration-500 opacity-100;
+	}
+</style>
+
+<script>
+	const buttons = document.querySelectorAll("button.copyCode");
+
+	buttons.forEach((button) => {
+		button.addEventListener("click", async (e) => {
+			const target = e.target as HTMLButtonElement;
+			const codeBlock = target.parentElement?.querySelector(".codeBlock");
+			if (codeBlock) {
+				const code = (codeBlock as HTMLDivElement).innerText;
+				await navigator.clipboard.writeText(code);
+				target.classList.add("copied");
+				setTimeout(() => target.classList.remove("copied"), 2000);
+			}
+		});
+	});
+</script>

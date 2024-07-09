@@ -5,7 +5,7 @@ h3, h4, h5, h6 { @apply mx-4 mt-3 text-lg font-semibold }
 p {	@apply mx-4 my-2 text-muted-foreground }
 a {	@apply text-accent-foreground underline underline-offset-4 }
 
-blockquote { @apply border-l border-l-foreground border-l-2 px-2 py-1 bg-secondary my-4 }
+blockquote { @apply border-l-foreground border-l-2 px-2 py-1 bg-secondary my-4 }
 blockquote > p { @apply mx-0 mt-0 }
 blockquote > footer { @apply inline-block }
 
@@ -18,8 +18,11 @@ ul.contains-task-list { @apply list-none }
 .footnotes > ol { @apply list-outside }
 .footnotes { @apply border-t mt-8}
 
-table {	@apply m-auto }
 thead { @apply border-b border-b-foreground text-left}
 td,th { @apply px-3 py-1}
 td { @apply text-muted-foreground }
 tbody > tr { @apply border-b border-t-muted }
+
+figure { @apply flex flex-col items-center my-8}
+figure p { @apply m-0 }
+figcaption { @apply mt-2}

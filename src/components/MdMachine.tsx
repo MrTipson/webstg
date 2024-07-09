@@ -50,7 +50,7 @@ export function MdMachine({ children, program, step, garbage_collection, eval_ap
 	);
 }
 
-export function Highlight({ program }: { program: string }) {
+export function Highlight({ className, program }: { className: string, program: string }) {
 	let children: any[] = [];
 
 	function emit(text: string, classes: string) {
@@ -61,7 +61,7 @@ export function Highlight({ program }: { program: string }) {
 	}
 	highlightCode(program, parser.parse(program), classHighlighter, emit, emitBreak);
 	return (
-		<pre>
+		<pre className={className}>
 			<code>{...children}</code>
 		</pre>
 	);

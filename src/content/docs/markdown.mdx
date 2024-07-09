@@ -10,18 +10,36 @@ This is the first test of markdown based examples!
 
 ![This is an image](https://cdn.7tv.app/emote/638767f24cc489ef45239272/4x.webp)
 
+<figure>
+	![This is an image](https://cdn.7tv.app/emote/638767f24cc489ef45239272/4x.webp)
+	<figcaption>This is a figure image</figcaption>
+</figure>
 ### Third heading
 
 > True happines does not come from money
 > it comes from money, sex and drugs.
 > <footer>Sun Tzu</footer>, <cite>Lost part of lore</cite>
 
+```diff
+// patch.diff
++	def test():
+-		pass
 ```
-def test():
-	pass
 
-Languages should work, but dont currently because I tried to shim in a custom STG lang highlighter.
+```py
+// test.py
+	def test():
+		pass
 ```
+
+<figure>
+```py
+// test.py
+	def test():
+		pass
+```
+<figcaption>Can code blocks be in figures?</figcaption>
+</figure>
 
 *Italic text* and **bold text** test. What about ~~crossed out~~?
 
@@ -39,6 +57,15 @@ Languages should work, but dont currently because I tried to shim in a custom ST
 | ----------- | ----------- |
 | Header | Title |
 | Paragraph | Text |
+
+<figure>
+| Syntax | Description |
+| ----------- | ----------- |
+| Header | Title |
+| Paragraph | Text |
+
+<figcaption>Test</figcaption>
+</figure>
 
 Here's a sentence with a footnote. [^1]
 
