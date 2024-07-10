@@ -11,13 +11,15 @@ import { ArrowLeft, ArrowRight, Flag, Play } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import type { STGSettings } from "@/components/Machine";
 
-export default function Controls({ className, machine, step, setStep, breakpoints }: {
+export default function Controls({ className, machine, step, setStep, breakpoints, settings }: {
 	className?: string,
 	machine: stg_machine,
 	step: number,
 	setStep: Function,
-	breakpoints: Map<number, number>
+	breakpoints: Map<number, number>,
+	settings: STGSettings
 }) {
 	const { toast } = useToast();
 	const [markers, setMarkers] = useState<Map<number, string>>(() => {
@@ -50,7 +52,8 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 
 	function run() {
 		try {
-			while (machine.step()) {
+			let stepLimit = settings.run_limit;
+			while (machine.step() && --stepLimit > 0) {
 				const { from, to } = machine.expr;
 				if (breakpoints.get(from) === to) {
 					break;
@@ -112,14 +115,6 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 				<div className="font-semibold text-lg text-center p-2">No matching rule</div>
 			}
 			<div className={"flex gap-x-1 justify-center"}>
-				<Button onClick={() => moveTo(step - 1)}><ArrowLeft /></Button>
-				<Button onClick={() => run()} size={'icon'}><Play /></Button>
-				<Button onClick={() => moveTo(step + 1)} ><ArrowRight /></Button>
-				<HelpPopover>
-					<p>The control panel contains controls for stepping the simulation.</p><br />
-					<p>It also displays the next rule which will be applied, both as a short
-						description, but also as a more formal operational semantics rule.</p>
-				</HelpPopover>
 				<MarkerPopover>
 					<p>Set marker name or leave empty to remove marker.</p>
 					<div className="grid grid-cols-3 items-center mt-2">
@@ -132,6 +127,14 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 						/>
 					</div>
 				</MarkerPopover>
+				<Button onClick={() => moveTo(step - 1)}><ArrowLeft /></Button>
+				<Button onClick={() => run()} size={'icon'}><Play /></Button>
+				<Button onClick={() => moveTo(step + 1)} ><ArrowRight /></Button>
+				<HelpPopover>
+					<p>The control panel contains controls for stepping the simulation.</p><br />
+					<p>It also displays the next rule which will be applied, both as a short
+						description, but also as a more formal operational semantics rule.</p>
+				</HelpPopover>
 			</div>
 		</div>
 	);
