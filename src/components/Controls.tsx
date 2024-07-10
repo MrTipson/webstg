@@ -132,11 +132,24 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 				<Button onClick={() => moveTo(step + 1)} ><ArrowRight /></Button>
 				<HelpPopover>
 					<p>The control panel contains controls for stepping the simulation.</p><br />
-					<p>It also displays the next rule which will be applied, both as a short
-						description, but also as a more formal operational semantics rule.</p>
+					<span className="font-semibold">Timeline:</span>
+					<p className="text-muted-foreground">As the execution progresses, the timeline grows. Use it to
+						jump back to previous steps. Markers can be added using the flag
+						icon, and allow you to jump to the marked step.
+					</p><br />
+					<span className="font-semibold">Next rule:</span>
+					<p className="text-muted-foreground">
+						Displays the next rule which will be applied, both as a short
+						description, but also as a more formal operational semantics rule.
+					</p><br />
+					<span className="font-semibold">Controls:</span>
+					<p className="text-muted-foreground">
+						Arrows step the simulation by one, while the continue goes forward for
+						<span className="italic"> step_limit</span> steps and stops at breakpoints.
+					</p><br />
 				</HelpPopover>
 			</div>
-		</div>
+		</div >
 	);
 }
 

@@ -147,23 +147,32 @@ export default function HeapView({ className, machine, settings }: {
 				<div className='flex flex-wrap gap-2 m-1 items-center'>
 					<h2 className="font-semibold text-xl m-3">Heap view</h2>
 					<HelpPopover>
-						<p>Heap view displays all allocated objects on the heap.</p><br />
-						<p>If garbage collection is enabled, objects with no references are deleted.</p><br />
-						<p>Some objects may be additionally marked, such as:</p>
-						<ul className='list-disc list-inside'>
+						<p className='text-muted-foreground'>Heap view displays all allocated objects on the heap.</p><br />
+						<span className='font-semibold'>Garbage collection:</span>
+						<p className='text-muted-foreground'>If garbage collection is enabled, objects with no references are deleted.</p><br />
+
+						<span className='font-semibold'>Marked objects:</span>
+						<p className='text-muted-foreground'>Some objects may be additionally marked, such as:</p>
+						<ul className='list-disc list-inside text-muted-foreground'>
 							<li className='my-1'>
 								to-be updated object:
-								<span className={"relative inline-block mx-2 px-1 rounded" + heapNodeVariants["updating"]}>TEST</span>
+								<span className={"relative inline-block mx-2 px-1 rounded text-foreground" + heapNodeVariants["updating"]}>TEST</span>
 							</li>
 							<li className='my-1'>
 								updated object:
-								<span className={"relative inline-block mx-2 px-1 rounded" + heapNodeVariants["updated"]}>TEST</span>
+								<span className={"relative inline-block mx-2 px-1 rounded text-foreground" + heapNodeVariants["updated"]}>TEST</span>
 							</li>
 							<li className='my-1'>
 								newly allocated object:
-								<span className={"relative inline-block px-3 rounded" + heapNodeVariants["allocated"] + " after:text-xs after:-bottom-0.5"}>TEST</span>
+								<span className={"relative inline-block px-3 rounded text-foreground" + heapNodeVariants["allocated"] + " after:text-xs after:-bottom-0.5"}>TEST</span>
 							</li>
-						</ul>
+						</ul><br />
+
+						<span className='font-semibold'>Indrections:</span>
+						<p className='text-muted-foreground'>When thunks are updated, they are replaced by an indirection,
+							which points to the new value (i.e. <span className='italic'>big value</span> model). For
+							better clarity, indirections are collapsed by default and replaced with a tag above the connection.
+						</p>
 					</HelpPopover>
 				</div>
 				<Separator />

@@ -336,6 +336,25 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		<div className={className + " relative flex flex-col"}>
 			<div className="flex flex-wrap gap-2 m-1 items-center">
 				<h2 className="font-semibold text-xl m-3">Program view</h2>
+				<HelpPopover>
+					<p className="text-muted-foreground">Program view allows you to import examples, edit programs and change settings.
+						Basic syntax highlighting and error handling is also available.</p><br />
+
+					<span className="font-semibold">Runtime:</span>
+					<p className="text-muted-foreground">During runtime, additional info is displayed in the program code:</p>
+					<ul className="list-disc list-inside text-muted-foreground">
+						<li className='my-1'>
+							values of bindings in the enviroment:
+							<span className="tok-variableName with-value px-1 py-0.5 mx-1 rounded font-semibold" data-value="0xb">TEST</span>
+						</li>
+						<li className='my-1'>current expression: <span className="current-expression px-1 py-0.5 rounded text-foreground">1 +# 2</span></li>
+						<li className='my-1'>expression result: <span className="current-expression with-value px-1 py-0.5 rounded text-foreground" data-value="3">1 +# 2</span></li>
+					</ul><br />
+
+					<span className="font-semibold">Breakpoints:</span>
+					<p className="text-muted-foreground">When a program is loaded,
+						you can set breakpoints on the left side of the program code.</p>
+				</HelpPopover>
 				<Select onValueChange={selectExample} value={selected}>
 					<SelectTrigger className="w-[180px]">
 						<SelectValue placeholder="Custom program" />
@@ -348,19 +367,6 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 				</Select>
 				<Button onClick={toggleEditable}>{loaded ? "Edit" : "Load"}</Button>
 				<SettingsMenu settings={settings} setSettings={setSettings} setLoaded={setLoaded} />
-				<HelpPopover>
-					<p>Program view allows you to import examples, edit programs and change settings.</p><br />
-					<p>Basic syntax highlighting and error handling is also available.</p><br />
-					<p>During runtime, additional info is displayed in the program code:</p>
-					<ul className="list-disc list-inside">
-						<li className='my-1'>
-							values of bindings in the enviroment:
-							<span className="tok-variableName with-value px-1 py-0.5 mx-1 rounded font-semibold" data-value="0xb">TEST</span>
-						</li>
-						<li className='my-1'>current expression: <span className="current-expression px-1 py-0.5 rounded">1 +# 2</span></li>
-						<li className='my-1'>expression result: <span className="current-expression with-value px-1 py-0.5 rounded" data-value="3">1 +# 2</span></li>
-					</ul>
-				</HelpPopover>
 			</div>
 			<Separator />
 			<div className="relative grow m-2 overflow-y-auto p-2 flex flex-col">
