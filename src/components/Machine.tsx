@@ -26,6 +26,7 @@ export default function Machine() {
 	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(default_program, false, true));
 	const [loaded, setLoaded] = useState(false);
 	const [step, setStepOriginal] = useState(0);
+	const [breakpoints, setBreakpoints] = useState<Map<number, number>>(new Map());
 	const setStep = (newStep: number) => {
 		setStepOriginal(newStep);
 		const searchParams = new URLSearchParams(location.search);
@@ -51,7 +52,8 @@ export default function Machine() {
 									step={step} setStep={setStep}
 									loaded={loaded} setLoaded={setLoaded}
 									settings={settings} setSettings={setSettings}
-									className="h-full" />
+									breakpoints={breakpoints} setBreakpoints={setBreakpoints}
+									isDesktop={isDesktop} className="h-full" />
 							</Panel>
 							{loaded &&
 								<>
@@ -70,7 +72,7 @@ export default function Machine() {
 					</Panel>
 				</PanelGroup>
 				{loaded &&
-					<Controls className="bg-background p-2 border" machine={machine} step={step} setStep={setStep} />
+					<Controls className="bg-background p-2 border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} />
 				}
 				<Toaster />
 			</div>
@@ -85,7 +87,8 @@ export default function Machine() {
 						step={step} setStep={setStep}
 						loaded={loaded} setLoaded={setLoaded}
 						settings={settings} setSettings={setSettings}
-						className="h-full" />
+						breakpoints={breakpoints} setBreakpoints={setBreakpoints}
+						isDesktop={isDesktop} className="h-full" />
 				</Panel>
 				<Handle withHandle />
 				{loaded &&
@@ -93,7 +96,7 @@ export default function Machine() {
 						<Panel defaultSize={55}><HeapView machine={machine} className="h-full" step={step} settings={settings} /></Panel>
 						<Handle withHandle />
 						<Panel defaultSize={15}><StackView machine={machine} className="h-full" /></Panel>
-						<Controls className="absolute left-0 right-0 m-auto bottom-0 bg-background z-10 p-2 w-fit rounded-t border" machine={machine} step={step} setStep={setStep} />
+						<Controls className="absolute left-0 right-0 m-auto bottom-0 bg-background z-10 p-2 w-fit rounded-t border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} />
 					</>
 					|| // not loaded
 					<>

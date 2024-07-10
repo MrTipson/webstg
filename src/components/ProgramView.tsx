@@ -1,5 +1,5 @@
 import { stg_machine } from "@/stgmachine/machine";
-import React, { useState, type ChangeEvent, useRef, useEffect } from "react";
+import React, { useState, type ChangeEvent, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { parser } from "@/stglang/parser";
 import { highlightTree, classHighlighter } from "@lezer/highlight";
@@ -13,7 +13,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import examples from "@/stglang/examples";
-import { case_eval, identifier, literal } from "@/stglang/types";
+import { binding, case_eval, case_expr, FUN, identifier, let_expr, letrec_expr, literal, THUNK, type expression } from "@/stglang/types";
 import { Separator } from "@/components/ui/separator";
 import HelpPopover from "@/components/HelpPopover";
 import type { STGSettings } from "@/components/Machine";
@@ -29,7 +29,33 @@ function decompress(txt: string) {
 	return inflate(Uint8Array.from(atob(txt), char => char.codePointAt(0) as number), { to: 'string' });
 }
 
-export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded, settings, setSettings }:
+function findExpression(lineStart: number, nextLineStart: number, expr: expression): expression | undefined {
+	if (expr instanceof let_expr || expr instanceof letrec_expr) {
+		let e = findExpression(lineStart, nextLineStart, expr.expr);
+		if (e) return e;
+	} else if (expr instanceof case_expr) {
+		let e = findExpression(lineStart, nextLineStart, expr.expr);
+		if (e) return e;
+
+		const exprs = [...expr.alts.named_alts.map(x => x.expr)];
+		if (expr.alts.default_alt) {
+			exprs.push(expr.alts.default_alt.expr);
+		}
+		for (let x of exprs) {
+			e = findExpression(lineStart, nextLineStart, x);
+			if (e) return e;
+		}
+	}
+	if (lineStart <= expr.from && nextLineStart > expr.from ||
+		lineStart < expr.to && nextLineStart >= expr.to ||
+		lineStart >= expr.from && nextLineStart <= expr.to
+	) {
+		return expr;
+	}
+	return undefined;
+}
+
+export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded, settings, setSettings, breakpoints, setBreakpoints, isDesktop }:
 	{
 		className?: string,
 		machine: stg_machine,
@@ -40,6 +66,9 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		setLoaded: Function,
 		settings: STGSettings,
 		setSettings: Function
+		breakpoints: Map<number, number>,
+		setBreakpoints: Function,
+		isDesktop: boolean
 	}) {
 	const [selected, setSelected] = useState<string>('Sum foldl');
 	const [programText, setProgramText] = useState(() => {
@@ -55,6 +84,34 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined);
 	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined);
 	const { toast } = useToast();
+
+	const lineStarts = useMemo(() => {
+		if (!loaded) {
+			return [];
+		}
+		const lineLengths = programText.split("\n").map(x => x.length + 1);
+		let total = 0;
+		const starts = [];
+		for (const len of lineLengths) {
+			starts.push(total);
+			total += len;
+		}
+		starts.push(total);
+		return starts;
+	}, [loaded]);
+
+	const breakPointIsActive = useMemo<boolean[]>(() => {
+		const spans = [...breakpoints.keys()].sort();
+		const result = new Array(lineStarts.length).fill(false);
+		let spanIndex = 0;
+		for (let lineIndex = 0; lineIndex < lineStarts.length; lineIndex++) {
+			if (lineStarts[lineIndex] > spans[spanIndex]) {
+				result[lineIndex - 1] = true;
+				spanIndex++;
+			}
+		}
+		return result;
+	}, [breakpoints]);
 
 	useEffect(() => currentExpressionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
 
@@ -248,6 +305,33 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		setError(undefined);
 	}
 
+	function setBreakpoint(lineNumber: number) {
+		const lineStart = lineStarts[lineNumber];
+		// Check if there is a breakpoint on this line already
+		for (const [start, end] of breakpoints.entries()) {
+			if (lineStart <= start && lineStarts[lineNumber + 1] > start) {
+				const newBreakpoints = new Map(breakpoints);
+				newBreakpoints.delete(start);
+				setBreakpoints(newBreakpoints);
+				return;
+			}
+		}
+		for (const decl of machine.prog.decls) {
+			if (lineStart >= decl.from && lineStart < decl.to && decl instanceof binding) {
+				if (decl.obj instanceof FUN || decl.obj instanceof THUNK) {
+					const expr = findExpression(lineStart, lineStarts[lineNumber + 1], decl.obj.expr) ||
+						findExpression(decl.from, decl.to, decl.obj.expr);
+					if (expr) {
+						const newBreakpoints = new Map(breakpoints);
+						newBreakpoints.set(expr.from, expr.to);
+						setBreakpoints(newBreakpoints);
+					}
+					return;
+				}
+			}
+		}
+	}
+
 	return (
 		<div className={className + " relative flex flex-col"}>
 			<div className="flex flex-wrap gap-2 m-1 items-center">
@@ -281,7 +365,13 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 			<Separator />
 			<div className="relative grow m-2 overflow-y-auto p-2 flex flex-col">
 				<div className="relative w-full min-w-max grow">
-					<pre className={"relative z-10 bg-transparent selection:bg-accent" + (loaded ? "" : " pointer-events-none")}>{highlighted}</pre>
+					<pre className={"relative z-10 bg-transparent selection:bg-accent p-4" + (loaded ? "" : " pointer-events-none")}>{highlighted}</pre>
+					<ul className="absolute left-0 top-0 list-disc list-inside pt-4 z-10 select-all marker:text-red-700">
+						{loaded && breakPointIsActive.map((active, i) => {
+							const opacity = active ? "opacity-100" : isDesktop ? "opacity-0 hover:opacity-50" : "opacity-25";
+							return <li className={"px-2 -ml-2 w-6 " + opacity} key={i} onClick={() => setBreakpoint(i)} ></li>
+						})}
+					</ul>
 					<code>
 						<textarea className={"absolute inset-0 bg-transparent text-transparent caret-primary p-4 font-semibold \
 							resize-none selection:bg-accent selection:text-transparent w-full h-full overflow-hidden text-nowrap whitespace-pre" + (!loaded ? "" : " pointer-events-none")}
