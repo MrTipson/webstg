@@ -16,7 +16,8 @@ export function MdMachine({ children, program, step, garbage_collection, eval_ap
 	const settings: STGSettings = {
 		garbage_collection: garbage_collection,
 		eval_apply: eval_apply,
-		collapse_indirections: collapse_indirections
+		collapse_indirections: collapse_indirections,
+		run_limit: 1 // should not matter since machine isn't run
 	}
 	while (step > machine.step_number && machine.step());
 	const str = (children as React.ReactElement).props.value;

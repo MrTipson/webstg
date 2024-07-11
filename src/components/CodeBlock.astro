@@ -47,11 +47,13 @@ function highlightSTG(program: string) {
 	<div class="relative flex bg-muted/50">
 		{
 			isStgLang ? (
-				<pre>
-					<code set:html={highlightSTG(code)} />
-				</pre>
+				<pre class="codeBlock"><code set:html={highlightSTG(code)} /></pre>
 			) : (
-				<Code code={code} lang={lang || 'plaintext'} class="codeBlock" />
+				<Code
+					code={code}
+					lang={lang || "plaintext"}
+					class="codeBlock"
+				/>
 			)
 		}
 		<Button size={"icon"} variant={"outline"} className="copyCode">
