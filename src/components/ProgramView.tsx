@@ -81,7 +81,11 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 			return String(default_program);
 		}
 	});
-	const [error, setError] = useState<{ from: number, to: number } | undefined>(undefined);
+	const [error, setError] = useState<{ from: number, to: number, step: number } | undefined>(undefined);
+	if (error && step < error.step) {
+		setError(undefined);
+	}
+
 	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined);
 	const { toast } = useToast();
 
@@ -155,10 +159,19 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		if (mainfrom !== machine.expr.from && mainto !== machine.expr.to && // don't mark main's value again
 			(machine.expr instanceof identifier || machine.expr instanceof literal)) {
 			let val = machine.expr;
-			if (val instanceof identifier) {
-				val = machine.env.find_value(val);
+			try {
+				if (val instanceof identifier) {
+					val = machine.env.find_value(val);
+				}
+				props = { className: "current-expression with-value", "data-value": val, ref: currentExpressionRef };
+			} catch (e) {
+				toast({
+					title: "Runtime error",
+					description: String(e),
+					variant: "destructive"
+				});
+				setError({ from: val.from, to: val.to, step: step });
 			}
-			props = { className: "current-expression with-value", "data-value": val, ref: currentExpressionRef };
 		}
 		highlighted = highlight(programText, true, machine.expr.from, machine.expr.to, props, enviroment);
 	} else {
@@ -185,7 +198,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 					description: e.message,
 					variant: "destructive"
 				});
-				setError({ from: e.from, to: e.to });
+				setError({ from: e.from, to: e.to, step: 0 });
 			} else if (e instanceof Error) {
 				toast({
 					title: "Error",

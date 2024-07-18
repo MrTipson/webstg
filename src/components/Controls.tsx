@@ -59,8 +59,6 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 					break;
 				}
 			}
-			console.log(machine);
-			setStep(machine.step_number);
 		} catch (e) {
 			toast({
 				title: "Runtime error",
@@ -68,11 +66,15 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 				variant: "destructive"
 			});
 		}
+		console.log(machine);
+		setStep(machine.step_number);
 	}
 
 	let definition, explanation;
 	let expr = machine.expr;
-	if (expr instanceof identifier) expr = machine.env.find_value(expr);
+	try {
+		if (expr instanceof identifier) expr = machine.env.find_value(expr);
+	} catch (e) { } // error should get reported by ProgramView
 	for (let rule of machine.ruleset) {
 		let result = rule.match(expr, machine.env, machine.s, machine.h);
 		if (result) {

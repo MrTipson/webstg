@@ -55,9 +55,11 @@ export default function HeapView({ className, machine, settings }: {
 	let updatingNode: number | undefined = undefined;
 	if (topFrame instanceof thunk_update) {
 		let expr = machine.expr;
-		if (expr instanceof identifier) {
-			expr = machine.env.find_value(expr);
-		}
+		try {
+			if (expr instanceof identifier) {
+				expr = machine.env.find_value(expr);
+			}
+		} catch { }
 		if (expr instanceof literal) {
 			if (expr.isAddr && !(machine.h.get(expr) instanceof THUNK)) {
 				updatingNode = topFrame.addr.val;
