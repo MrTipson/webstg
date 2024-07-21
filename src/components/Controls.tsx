@@ -103,16 +103,22 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 
 	return (
 		<div className={className}>
-			<div className="text-center">
-				Step <span className="font-semibold">{machine.step_number}</span>
-			</div>
-			<Timeline className={"m-auto " + (isDesktop ? "w-[500px]" : "w-[300px]")} width={isDesktop ? 500 : 300} step={step} moveTo={moveTo} markers={[...markers.entries()]}></Timeline>
+			<details open>
+				<summary className="text-center">
+					Step <span className="font-semibold">{machine.step_number}</span>
+				</summary>
+				<Timeline className={"m-auto " + (isDesktop ? "w-[500px]" : "w-[300px]")} width={isDesktop ? 500 : 300} step={step} moveTo={moveTo} markers={[...markers.entries()]}></Timeline>
+			</details>
 			{
 				definition &&
 				<div className="text-center p-2">
-					<span className="font-semibold text-lg">Next rule: </span>
-					<span className="text-muted-foreground">{explanation}</span>
-					<div className="bg-muted p-1 rounded"><Latex children={definition} /></div>
+					<details open>
+						<summary>
+							<span className="font-semibold text-lg">Next rule: </span>
+							<span className="text-muted-foreground">{explanation}</span>
+						</summary>
+						<div className="bg-muted p-1 rounded"><Latex children={definition} /></div>
+					</details>
 				</div>
 				||
 				<div className="font-semibold text-lg text-center p-2">No matching rule</div>
