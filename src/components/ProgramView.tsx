@@ -361,7 +361,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	return (
 		<div className={className + " relative flex flex-col"}>
 			<div className="flex flex-wrap gap-2 m-1 items-center">
-				<h2 className="font-semibold text-xl m-3">Program view</h2>
+				<h2 className="font-semibold text-xl m-3">Program</h2>
 				<HelpPopover>
 					<p className="text-muted-foreground">Program view allows you to import examples, edit programs and change settings.
 						Basic syntax highlighting and error handling is also available.</p><br />

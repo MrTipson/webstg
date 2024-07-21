@@ -8,7 +8,7 @@ export default function StackView({ className, machine }: { className?: string, 
 		<div className={className}>
 			<div className="h-full w-full flex flex-col">
 				<div className="flex flex-wrap gap-2 m-1 items-center">
-					<h2 className="font-semibold text-xl m-3">Stack view</h2>
+					<h2 className="font-semibold text-xl m-3">Stack</h2>
 					<HelpPopover>
 						<p className="text-muted-foreground">Stack view displays the current state of the stack.</p><br />
 						<p className="text-muted-foreground">

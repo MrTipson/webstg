@@ -147,7 +147,7 @@ export default function HeapView({ className, machine, settings }: {
 		<div className={className}>
 			<div className="h-full flex flex-col">
 				<div className='flex flex-wrap gap-2 m-1 items-center'>
-					<h2 className="font-semibold text-xl m-3">Heap view</h2>
+					<h2 className="font-semibold text-xl m-3">Heap</h2>
 					<HelpPopover>
 						<p className='text-muted-foreground'>Heap view displays all allocated objects on the heap.</p><br />
 						<span className='font-semibold'>Garbage collection:</span>
