@@ -381,16 +381,18 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 					<p className="text-muted-foreground">When a program is loaded,
 						you can set breakpoints on the left side of the program code.</p>
 				</HelpPopover>
-				<Select onValueChange={selectExample} value={selected}>
-					<SelectTrigger className="w-[180px]">
-						<SelectValue placeholder="Custom program" />
-					</SelectTrigger>
-					<SelectContent>
-						{examples.map(({ name }, i) => {
-							return <SelectItem key={i} value={name}>{name}</SelectItem>;
-						})}
-					</SelectContent>
-				</Select>
+				{!loaded &&
+					<Select onValueChange={selectExample} value={selected}>
+						<SelectTrigger className="w-[180px]">
+							<SelectValue placeholder="Custom program" />
+						</SelectTrigger>
+						<SelectContent>
+							{examples.map(({ name }, i) => {
+								return <SelectItem key={i} value={name}>{name}</SelectItem>;
+							})}
+						</SelectContent>
+					</Select>
+				}
 				<Button onClick={toggleEditable}>{loaded ? "Edit" : "Load"}</Button>
 				<SettingsMenu settings={settings} setSettings={setSettings} setLoaded={setLoaded} />
 			</div>
