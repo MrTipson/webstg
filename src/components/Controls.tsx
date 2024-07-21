@@ -13,13 +13,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { STGSettings } from "@/components/Machine";
 
-export default function Controls({ className, machine, step, setStep, breakpoints, settings }: {
+export default function Controls({ className, machine, step, setStep, breakpoints, settings, isDesktop }: {
 	className?: string,
 	machine: stg_machine,
 	step: number,
 	setStep: Function,
 	breakpoints: Map<number, number>,
-	settings: STGSettings
+	settings: STGSettings,
+	isDesktop: boolean,
 }) {
 	const { toast } = useToast();
 	const [markers, setMarkers] = useState<Map<number, string>>(() => {
@@ -105,7 +106,7 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 			<div className="text-center">
 				Step <span className="font-semibold">{machine.step_number}</span>
 			</div>
-			<Timeline className="m-auto w-[500px]" width={500} step={step} moveTo={moveTo} markers={[...markers.entries()]}></Timeline>
+			<Timeline className={"m-auto " + (isDesktop ? "w-[500px]" : "w-[300px]")} width={isDesktop ? 500 : 300} step={step} moveTo={moveTo} markers={[...markers.entries()]}></Timeline>
 			{
 				definition &&
 				<div className="text-center p-2">

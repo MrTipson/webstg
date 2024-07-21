@@ -74,7 +74,7 @@ export default function Machine() {
 					</Panel>
 				</PanelGroup>
 				{loaded &&
-					<Controls className="bg-background p-2 border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} />
+					<Controls className="bg-background p-2 border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} isDesktop={isDesktop} />
 				}
 				<Toaster />
 			</div>
@@ -98,7 +98,7 @@ export default function Machine() {
 						<Panel defaultSize={55}><HeapView machine={machine} className="h-full" step={step} settings={settings} /></Panel>
 						<Handle withHandle />
 						<Panel defaultSize={15}><StackView machine={machine} className="h-full" /></Panel>
-						<Controls className="absolute left-0 right-0 m-auto bottom-0 bg-background z-10 p-2 w-fit rounded-t border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} />
+						<Controls className="absolute left-0 right-0 m-auto bottom-0 bg-background z-10 p-2 w-fit rounded-t border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} isDesktop={isDesktop} />
 					</>
 					|| // not loaded
 					<>

@@ -52,7 +52,7 @@ export default function Timeline({ className, width, markers, step, moveTo }:
 	}
 
 	return (
-		<div className={className + ` w-[${width}px]`}>
+		<div className={className + ` w-[${width}px] relative z-0`}>
 
 			<div className="relative mx-2 h-8">
 				{markers.filter(([i, _]) => i <= limit).map(([i, name]) =>
