@@ -1,5 +1,5 @@
 import { stg_machine } from "@/stgmachine/machine";
-import React, { useState, type ChangeEvent, useRef, useEffect, useMemo } from "react";
+import React, { useState, type ChangeEvent, useRef, useEffect, useMemo, type BaseSyntheticEvent, type KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { parser } from "@/stglang/parser";
 import { highlightTree, classHighlighter } from "@lezer/highlight";
@@ -345,6 +345,19 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 	}
 
+	function keyDownHandler(e: BaseSyntheticEvent & KeyboardEvent) {
+		switch (e.key) {
+			case 'Tab': // Change behaviour so tab doesn't move to next element
+				e.preventDefault();
+				document.execCommand('insertText', false, '\t');
+				e.target.dispatchEvent(new Event('input'));
+				break;
+			case 'Escape': // Escape unfocuses text area, so tab can move on to next element again
+				e.target.blur();
+				break;
+		}
+	}
+
 	return (
 		<div className={className + " relative flex flex-col"}>
 			<div className="flex flex-wrap gap-2 m-1 items-center">
@@ -394,7 +407,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 					<code>
 						<textarea className={"absolute inset-0 bg-transparent text-transparent caret-primary p-4 font-semibold \
 							resize-none selection:bg-accent selection:text-transparent w-full h-full overflow-hidden text-nowrap whitespace-pre" + (!loaded ? "" : " pointer-events-none")}
-							onChange={inputHandler} value={programText} spellCheck={false} disabled={loaded} />
+							onChange={inputHandler} value={programText} spellCheck={false} disabled={loaded} onKeyDownCapture={keyDownHandler} aria-label="Editor for the STG program." aria-description="Tab behaviour has been altered. If you wish to switch focus, press the escape key before using tab." />
 					</code>
 				</div>
 			</div>
