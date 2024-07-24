@@ -3,17 +3,19 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
-import { identifier } from "@/stglang/types";
+import { identifier, THUNK, type heap_object } from "@/stglang/types";
 import HelpPopover from "@/components/HelpPopover";
 import Timeline from "@/components/Timeline";
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Flag, Play } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { STGSettings } from "@/components/Machine";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
-export default function Controls({ className, machine, step, setStep, breakpoints, settings, isDesktop }: {
+export default function Controls({ className, machine, step, setStep, breakpoints, settings, isDesktop, enteredThunks, setEnteredThunks }: {
 	className?: string,
 	machine: stg_machine,
 	step: number,
@@ -21,6 +23,8 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 	breakpoints: Map<number, number>,
 	settings: STGSettings,
 	isDesktop: boolean,
+	enteredThunks: [number, number][],
+	setEnteredThunks: Function,
 }) {
 	const { toast } = useToast();
 	const [markers, setMarkers] = useState<Map<number, string>>(() => {
@@ -36,6 +40,11 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 		return markers;
 	});
 
+	function enterThunk(thunk: number) {
+		machine.enter_thunk(thunk);
+		setEnteredThunks([...enteredThunks, [machine.step_number, thunk]]);
+		setStep(machine.step_number);
+	}
 	function moveTo(newStep: number) {
 		try {
 			while (newStep > machine.step_number && machine.step());
@@ -137,7 +146,10 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 					</div>
 				</MarkerPopover>
 				<Button onClick={() => moveTo(step - 1)}><ArrowLeft /></Button>
-				<Button onClick={() => run()} size={'icon'}><Play /></Button>
+				{definition
+					&& <Button onClick={run} size={'icon'}><Play /></Button>
+					|| <ThunkPopover machine={machine} enterThunk={enterThunk}>Enter another thunk?</ThunkPopover>
+				}
 				<Button onClick={() => moveTo(step + 1)} ><ArrowRight /></Button>
 				<HelpPopover>
 					<p>The control panel contains controls for stepping the simulation.</p><br />
@@ -172,6 +184,32 @@ function MarkerPopover({ children }: React.PropsWithChildren) {
 			</PopoverTrigger>
 			<PopoverContent>
 				{children}
+			</PopoverContent>
+		</Popover>
+	);
+}
+
+function ThunkPopover({ children, machine, enterThunk }: React.PropsWithChildren & { machine: stg_machine, enterThunk: Function }) {
+	const thunks = machine.h.current.map((x, i) => [x, i]).filter(([x, i]) => x instanceof THUNK) as [heap_object, number][];
+	return (
+		<Popover>
+			<PopoverTrigger asChild>
+				<Button>
+					{children}
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent className="w-52 h-72">
+				<ScrollArea className="h-full">
+					<h3>Thunks on the heap:</h3>
+					{thunks.map(([x, address], i) =>
+						<div key={i} className="contents">
+							<Button variant={'ghost'} className="w-full rounded-none justify-start" onClick={() => enterThunk(address)}>
+								{`0x${address.toString(16)}`}
+							</Button>
+							{i < thunks.length - 1 && <Separator />}
+						</div>
+					)}
+				</ScrollArea>
 			</PopoverContent>
 		</Popover>
 	);

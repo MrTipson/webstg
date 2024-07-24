@@ -55,7 +55,7 @@ function findExpression(lineStart: number, nextLineStart: number, expr: expressi
 	return undefined;
 }
 
-export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded, settings, setSettings, breakpoints, setBreakpoints, isDesktop }:
+export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded, settings, setSettings, breakpoints, setBreakpoints, isDesktop, enteredThunks, setEnteredThunks }:
 	{
 		className?: string,
 		machine: stg_machine,
@@ -68,7 +68,9 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		setSettings: Function
 		breakpoints: Map<number, number>,
 		setBreakpoints: Function,
-		isDesktop: boolean
+		isDesktop: boolean,
+		enteredThunks: [number, number][],
+		setEnteredThunks: Function,
 	}) {
 	const [selected, setSelected] = useState<string>('Sum foldl');
 	const [programText, setProgramText] = useState(() => {
@@ -181,7 +183,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	function loadMachine(code: string, step: number) {
 		try {
 			const ast = build_ast(code);
-			const machine = new stg_machine(ast, settings.eval_apply, settings.garbage_collection);
+			const machine = new stg_machine(ast, settings.eval_apply, settings.garbage_collection, enteredThunks);
 			while (step > machine.step_number && machine.step());
 			setMachine(machine);
 			setStep(step);
@@ -219,6 +221,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	function toggleEditable() {
 		if (loaded) {
 			history.replaceState(null, '', location.pathname);
+			setEnteredThunks([]);
 			setLoaded(false);
 		} else if (loadMachine(programText, 1)) {
 			setLoaded(true);

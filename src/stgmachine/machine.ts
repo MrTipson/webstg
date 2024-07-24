@@ -22,7 +22,9 @@ export class stg_machine {
 	public exprs: expression[] = [];
 	public lastrule: string | undefined;
 
-	constructor(prog: program, eval_apply: boolean = false, garbage_collection: boolean = false) {
+	public readonly entered_thunks: Map<number, number>;
+
+	constructor(prog: program, eval_apply: boolean = false, garbage_collection: boolean = false, entered_thunks: [number, number][] = []) {
 		this.step_number = 0;
 		this.prog = prog;
 		annotate_known_function_calls(prog);
@@ -31,6 +33,7 @@ export class stg_machine {
 		this.ruleset = rs_shared.concat(eval_apply ? rs_evalapply : rs_pushenter);
 
 		this.garbage_collection = garbage_collection;
+		this.entered_thunks = new Map(entered_thunks);
 		let expr = undefined;
 
 		for (let decl of prog.decls) {
@@ -76,6 +79,13 @@ export class stg_machine {
 				return true;
 			}
 		}
+		const address = this.entered_thunks.get(this.step_number + 1)
+		if (address) {
+			this.step_number++; this.h.step++; this.s.step++; this.env.step++;
+			this.expr = new literal(address, true);
+			this.exprs[this.step_number] = this.expr;
+			return true;
+		}
 		return false;
 	}
 
@@ -86,6 +96,25 @@ export class stg_machine {
 		this.step_number--; this.h.back(); this.s.back(); this.env.back();
 		this.expr = this.exprs[this.step_number];
 		return true;
+	}
+
+	enter_thunk(thunk: number) {
+		if (!(this.h.current[thunk] instanceof THUNK)) {
+			throw Error("Heap object to enter is not a thunk.");
+		}
+		for (let rule of this.ruleset) {
+			// Implicitly resolve name so there is no need for additional rule in operational semantics
+			let expr = this.expr;
+			if (expr instanceof identifier) {
+				expr = this.env.find_value(expr);
+			}
+			const result = rule.match(expr, this.env, this.s, this.h);
+			if (result) {
+				throw Error("Cannot enter a thunk during execution of another.");
+			}
+		}
+		this.entered_thunks.set(this.step_number + 1, thunk);
+		this.step();
 	}
 }
 

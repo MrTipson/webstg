@@ -28,6 +28,25 @@ export default function Machine() {
 	const [loaded, setLoaded] = useState(false);
 	const [step, setStepOriginal] = useState(0);
 	const [breakpoints, setBreakpoints] = useState<Map<number, number>>(new Map());
+	const [enteredThunks, setEnteredThunksOriginal] = useState<[number, number][]>(() => {
+		const searchParams = new URLSearchParams(location.search);
+		const thunks: [number, number][] = [];
+		for (let key of searchParams.keys()) {
+			if (/^e\d+$/.test(key)) {
+				const step = Number(key.substring(1));
+				const address = Number(searchParams.get(key));
+				thunks.push([step, address]);
+			}
+		}
+		return thunks;
+	});
+	const setEnteredThunks = (thunks: [number, number][]) => {
+		setEnteredThunksOriginal(thunks);
+		const searchParams = new URLSearchParams(location.search);
+		thunks.forEach(([step, address]) => searchParams.set(`e${step}`, String(address)))
+		const newUrl = `${location.pathname}?${searchParams.toString()}`;
+		history.replaceState(null, '', newUrl);
+	}
 	const setStep = (newStep: number) => {
 		setStepOriginal(newStep);
 		const searchParams = new URLSearchParams(location.search);
@@ -55,6 +74,7 @@ export default function Machine() {
 									loaded={loaded} setLoaded={setLoaded}
 									settings={settings} setSettings={setSettings}
 									breakpoints={breakpoints} setBreakpoints={setBreakpoints}
+									enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks}
 									isDesktop={isDesktop} className="h-full" />
 							</Panel>
 							{loaded &&
@@ -74,7 +94,7 @@ export default function Machine() {
 					</Panel>
 				</PanelGroup>
 				{loaded &&
-					<Controls className="bg-background p-2 border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} isDesktop={isDesktop} />
+					<Controls className="bg-background p-2 border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} isDesktop={isDesktop} enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks} />
 				}
 				<Toaster />
 			</div>
@@ -90,6 +110,7 @@ export default function Machine() {
 						loaded={loaded} setLoaded={setLoaded}
 						settings={settings} setSettings={setSettings}
 						breakpoints={breakpoints} setBreakpoints={setBreakpoints}
+						enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks}
 						isDesktop={isDesktop} className="h-full" />
 				</Panel>
 				<Handle withHandle />
@@ -98,7 +119,7 @@ export default function Machine() {
 						<Panel defaultSize={55}><HeapView machine={machine} className="h-full" step={step} settings={settings} /></Panel>
 						<Handle withHandle />
 						<Panel defaultSize={15}><StackView machine={machine} className="h-full" /></Panel>
-						<Controls className="absolute left-0 right-0 m-auto bottom-0 bg-background z-10 p-2 w-fit rounded-t border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} isDesktop={isDesktop} />
+						<Controls className="absolute left-0 right-0 m-auto bottom-0 bg-background z-10 p-2 w-fit rounded-t border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} isDesktop={isDesktop} enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks} />
 					</>
 					|| // not loaded
 					<>
