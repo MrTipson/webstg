@@ -198,8 +198,8 @@ function ThunkPopover({ children, machine, enterThunk }: React.PropsWithChildren
 					{children}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-52 h-72">
-				<ScrollArea className="h-full">
+			<PopoverContent className="w-52 max-h-72 grid grid-rows-1">
+				<ScrollArea>
 					<h3>Thunks on the heap:</h3>
 					{thunks.map(([x, address], i) =>
 						<div key={i} className="contents">
