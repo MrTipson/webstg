@@ -6,7 +6,7 @@ import Latex from 'react-latex-next';
 import { identifier, THUNK, type heap_object } from "@/stglang/types";
 import HelpPopover from "@/components/HelpPopover";
 import Timeline from "@/components/Timeline";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, Flag, Play } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,17 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 		}
 		return markers;
 	});
+	useEffect(() => {
+		function keyboardHandler(event: KeyboardEvent) {
+			if (event.key == "ArrowLeft") {
+				moveTo(step - 1);
+			} else if (event.key == "ArrowRight") {
+				moveTo(step + 1);
+			}
+		}
+		document.addEventListener("keydown", keyboardHandler);
+		return () => document.removeEventListener("keydown", keyboardHandler);
+	})
 
 	function enterThunk(thunk: number) {
 		machine.enter_thunk(thunk);
