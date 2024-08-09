@@ -1,5 +1,5 @@
 import { parser } from "./parser.js"
-import { identifier, literal, program, datatype, constructor, binding, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, FUN, CON, THUNK } from "@/stglang/types";
+import { identifier, literal, program, datatype, constructor, binding, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, FUN, CON, THUNK, PAP } from "@/stglang/types";
 
 export class STGSyntaxError extends Error {
 	constructor(m: string, public from: number, public to: number) {
@@ -32,6 +32,7 @@ export function build_ast(code: string): program {
 				case "CON_fields":
 				case "FUN_obj":
 				case "FUN_args":
+				case "PAP_obj":
 				case "THUNK_obj":
 				case "Let_expr":
 				case "Letrec_expr":
@@ -119,6 +120,12 @@ export function build_ast(code: string): program {
 					constr = CON;
 					if (!constructors.includes(args[0].name)) throw new STGSyntaxError("Constructor doesn't exist", n.from, n.to);
 					if (args.length == 1) args.push([]);
+					break;
+				case "PAP_obj":
+					constr = PAP;
+					let ecall: call = args.pop();
+					args.push(ecall.f);
+					args.push(ecall.atoms);
 					break;
 				case "Alts": {
 					let alts: (algebraic_alt | default_alt)[] = args;

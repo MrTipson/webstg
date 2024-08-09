@@ -1,7 +1,7 @@
 import { styleTags, tags } from "@lezer/highlight"
 
 export const stgHighlight = styleTags({
-	"FUN THUNK CON": tags.typeName,
+	"FUN THUNK CON PAP": tags.typeName,
 	"let letrec in case of": tags.controlKeyword,
 	Literal: tags.number,
 	Identifier: tags.variableName,

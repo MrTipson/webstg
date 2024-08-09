@@ -10,13 +10,14 @@ Subconstructor { ~con Identifier | "(" Identifier+ ")" }
 
 Binding { Identifier "=" heap_object }
 
-heap_object { FUN_obj | CON_obj | THUNK_obj }
+heap_object { FUN_obj | CON_obj | THUNK_obj | PAP_obj }
 FUN_obj { kw<"FUN"> "(" FUN_args { Identifier+ } "->" expression ")" }
 CON_obj {
 	kw<"CON"> "(" Identifier CON_fields { atom+ } ")" |
 	kw<"CON"> Identifier
 }
 THUNK_obj { kw<"THUNK"> "(" expression ")" }
+PAP_obj { kw<"PAP"> "(" Call ")"}
 
 expression {
 	atom |
