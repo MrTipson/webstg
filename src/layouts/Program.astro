@@ -14,11 +14,11 @@ let simulated = simulate(prog, steps, eval_apply, garbage_collection);
 ---
 
 <div class="flex h-full font-semibold">
-	<div class="w-[30%] m-4">
-		<h1>{title}</h1>
-		<pre><code>{prog}</code></pre>
+	<div class="w-[30%] box-border p-4 sticky h-full flex flex-col">
+		<h1 class="text-2xl">{title}</h1>
+		<pre class="bg-accent px-2 py-1 overflow-auto"><code>{prog}</code></pre>
 	</div>
-	<div class="flex-grow p-4 h-full overflow-auto">
+	<div class="steps flex-grow p-4 h-full overflow-auto">
 		{
 			simulated.map((step, i) => (
 				<div class="pt-4" id={"step" + i}>
