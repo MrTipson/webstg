@@ -42,13 +42,14 @@ export class stg_machine {
 					expr = decl.name;
 				}
 				let obj = decl.obj;
+				obj.bind_name = decl.name.name;
 				// global thunks and functions dont have any free variables saved in the closure
 				if (obj instanceof CON) {
 					let atoms = obj.atoms.map(x => x instanceof literal ? x : this.env.find_value(x));
-					obj = new CON(obj.constr, atoms, obj.from, obj.to);
+					obj = new CON(obj.constr, atoms, obj.from, obj.to, decl.name.name);
 				} else if (obj instanceof PAP) {
 					let atoms = obj.atoms.map(x => x instanceof literal ? x : this.env.find_value(x));
-					obj = new PAP(obj.f, atoms, obj.from, obj.to);
+					obj = new PAP(obj.f, atoms, obj.from, obj.to, decl.name.name);
 				}
 				this.env.add_global(decl.name, this.h.alloc(obj));
 			}

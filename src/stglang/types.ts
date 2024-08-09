@@ -143,7 +143,7 @@ export class default_alt {
 
 export type heap_object = FUN | PAP | CON | THUNK | BLACKHOLE | INDIRECTION
 export class FUN {
-	constructor(public args: identifier[], public expr: expression, public env?: Map<string, literal>, public from: number = -1, public to: number = -1) { }
+	constructor(public args: identifier[], public expr: expression, public env?: Map<string, literal>, public from: number = -1, public to: number = -1, public bind_name: string = '') { }
 
 	public toString() {
 		let args = this.args.join(" ");
@@ -158,22 +158,22 @@ export class FUN {
 
 		return `FUN(${args} -> ${expr})`;
 	}
-	public heapInfo(): [string, literal[]] {
-		return ["FUN", this.env ? [...this.env.values()] : []];
+	public heapInfo(): [string, literal[], string] {
+		return ["FUN", this.env ? [...this.env.values()] : [], this.bind_name];
 	}
 }
 export class PAP {
-	constructor(public f: literal, public atoms: atom[], public from: number = -1, public to: number = -1) { }
+	constructor(public f: literal, public atoms: atom[], public from: number = -1, public to: number = -1, public bind_name: string = '') { }
 
 	public toString() {
 		return `PAP(${this.f} ${this.atoms.join(" ")})`;
 	}
-	public heapInfo(): [string, literal[]] {
-		return ["PAP", this.atoms as literal[]];
+	public heapInfo(): [string, literal[], string] {
+		return ["PAP", this.atoms as literal[], this.bind_name];
 	}
 }
 export class CON {
-	constructor(public constr: identifier, public atoms: atom[], public from: number = -1, public to: number = -1) { }
+	constructor(public constr: identifier, public atoms: atom[], public from: number = -1, public to: number = -1, public bind_name: string = '') { }
 
 	public toString() {
 		if (this.atoms.length === 0) {
@@ -181,38 +181,38 @@ export class CON {
 		}
 		return `CON(${this.constr} ${this.atoms.join(" ")})`;
 	}
-	public heapInfo(): [string, literal[]] {
-		return [this.constr.name, this.atoms as literal[]];
+	public heapInfo(): [string, literal[], string] {
+		return [this.constr.name, this.atoms as literal[], this.bind_name];
 	}
 }
 export class THUNK {
-	constructor(public expr: expression, public env: Map<string, literal> = new Map(), public from: number = -1, public to: number = -1) { }
+	constructor(public expr: expression, public env: Map<string, literal> = new Map(), public from: number = -1, public to: number = -1, public bind_name: string = '') { }
 
 	public toString() {
 		//return `THUNK(${this.expr}): ${[...this.env.entries()].map(([k, v]) => `${k}..${v}`).join(" ")}`;
 		return `THUNK(${this.expr})`;
 	}
-	public heapInfo(): [string, literal[]] {
-		return ["THUNK", [...this.env.values()]];
+	public heapInfo(): [string, literal[], string] {
+		return ["THUNK", [...this.env.values()], this.bind_name];
 	}
 }
 export class BLACKHOLE {
-	constructor(public thunk: THUNK, public from: number = -1, public to: number = -1) { }
+	constructor(public thunk: THUNK, public from: number = -1, public to: number = -1, public bind_name: string = '') { }
 	public toString() {
 		return "BLACKHOLE";
 	}
-	public heapInfo(): [string, literal[]] {
+	public heapInfo(): [string, literal[], string] {
 		let [_, refs] = this.thunk.heapInfo();
-		return ["BLACKHOLE", refs];
+		return ["BLACKHOLE", refs, this.bind_name];
 	}
 }
 
 export class INDIRECTION {
-	constructor(public addr: literal, public from: number = -1, public to: number = -1) { }
+	constructor(public addr: literal, public from: number = -1, public to: number = -1, public bind_name: string = '') { }
 	public toString() {
 		return `INDIRECTION ${this.addr}`;
 	}
-	public heapInfo(): [string, literal[]] {
-		return ["INDIRECTION", [this.addr]];
+	public heapInfo(): [string, literal[], string] {
+		return ["INDIRECTION", [this.addr], this.bind_name];
 	}
 }

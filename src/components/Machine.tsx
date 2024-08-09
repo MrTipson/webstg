@@ -17,6 +17,7 @@ export type STGSettings = {
 	garbage_collection: boolean,
 	eval_apply: boolean,
 	collapse_indirections: boolean,
+	bind_names: boolean,
 	run_limit: number
 }
 
@@ -58,6 +59,7 @@ export default function Machine() {
 		garbage_collection: true,
 		eval_apply: false,
 		collapse_indirections: true,
+		bind_names: false,
 		run_limit: 1000
 	});
 	const isDesktop = useMediaQuery("(min-width: 768px)");

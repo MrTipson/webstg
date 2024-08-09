@@ -130,6 +130,7 @@ export default function HeapView({ className, machine, settings }: {
 				variant: variant,
 				label: String(obj),
 				addr: i,
+				showBindNames: settings.bind_names,
 				obj: obj
 			},
 			position: { x: 100, y: 100 },
@@ -202,8 +203,8 @@ const heapNodeVariants = {
 	updated: " outline outline-green-500 outline-2",
 	allocated: " after:absolute after:content-['NEW'] after:-right-2 after:-bottom-3 after:text-yellow-400 after:font-semibold"
 };
-function HeapViewNode({ data }: { data: { addr: number, obj: heap_object, variant: keyof typeof heapNodeVariants } }) {
-	let [tag, values] = data.obj.heapInfo();
+function HeapViewNode({ data }: { data: { addr: number, obj: heap_object, variant: keyof typeof heapNodeVariants, showBindNames: boolean } }) {
+	let [tag, values, bind_name] = data.obj.heapInfo();
 
 	return (
 		<div className={"p-1 rounded-sm bg-primary-foreground min-w-16" + heapNodeVariants[data.variant]}>
@@ -225,6 +226,7 @@ function HeapViewNode({ data }: { data: { addr: number, obj: heap_object, varian
 					);
 				})}
 			</div>
+			{data.showBindNames && <div className="font-thin text-center text-muted-foreground absolute top-0 -translate-y-full">{bind_name}</div>}
 			<div className="font-semibold text-center">{`0x${data.addr.toString(16)}`}</div>
 			<Handle
 				type="target"

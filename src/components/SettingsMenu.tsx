@@ -15,7 +15,9 @@ import { Input } from "@/components/ui/input";
 export default function SettingsMenu({ settings, setSettings, setLoaded }: { settings: STGSettings, setSettings: Function, setLoaded: Function }) {
 	function onChange(change: Partial<STGSettings>) {
 		setSettings({ ...settings, ...change });
-		setLoaded(false);
+		if (typeof change.eval_apply === "boolean") {
+			setLoaded(false);
+		}
 	}
 	const current_model = settings.eval_apply ? "eval-apply" : "push-enter";
 
@@ -42,10 +44,13 @@ export default function SettingsMenu({ settings, setSettings, setLoaded }: { set
 						</RadioGroup>
 					</div>
 					<Label htmlFor="garbage-collection" className="text-lg font-thin">Garbage collection</Label>
-					<Switch id="garbage-collection" className="justify-self-end" checked={settings.garbage_collection} onCheckedChange={(val) => onChange({ garbage_collection: val })} />
+					<Switch id="garbage-collection" className="justify-self-center" checked={settings.garbage_collection} onCheckedChange={(val) => onChange({ garbage_collection: val })} />
 
 					<Label htmlFor="collapse-indirections" className="text-lg font-thin">Collapse indirections</Label>
-					<Switch id="collapse-indirections" className="justify-self-end" checked={settings.collapse_indirections} onCheckedChange={(val) => onChange({ collapse_indirections: val })} />
+					<Switch id="collapse-indirections" className="justify-self-center" checked={settings.collapse_indirections} onCheckedChange={(val) => onChange({ collapse_indirections: val })} />
+
+					<Label htmlFor="bind-names" className="text-lg font-thin">Show bind names</Label>
+					<Switch id="bind-names" className="justify-self-center" checked={settings.bind_names} onCheckedChange={(val) => onChange({ bind_names: val })} />
 
 					<Label htmlFor="run-limit" className="text-lg font-thin">Continue step limit</Label>
 					<Input id="run-limit" className="justify-self-end" defaultValue={settings.run_limit} onChange={({ target }) => Number(target.value) && onChange({ run_limit: Number(target.value) })} />

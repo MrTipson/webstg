@@ -9,7 +9,7 @@ import StackView from "./StackView";
 const heap_slot = `<slot id="HeapView"></slot>`;
 const stack_slot = `<slot id="StackView"></slot>`;
 
-export function MdMachine({ children, program, step, garbage_collection, eval_apply, collapse_indirections }:
+export function MdMachine({ children, program, step, garbage_collection, eval_apply, collapse_indirections, bind_names }:
 	PropsWithChildren & STGSettings & { program: string, step: number }) {
 	const ast = build_ast(program);
 	const machine = new stg_machine(ast, eval_apply = eval_apply, garbage_collection = garbage_collection);
@@ -17,6 +17,7 @@ export function MdMachine({ children, program, step, garbage_collection, eval_ap
 		garbage_collection: garbage_collection,
 		eval_apply: eval_apply,
 		collapse_indirections: collapse_indirections,
+		bind_names: bind_names,
 		run_limit: 1 // should not matter since machine isn't run
 	}
 	while (step > machine.step_number && machine.step());

@@ -33,6 +33,7 @@ reg({
 					let closure_env = [...env.current_local.entries()].filter(([k, _v]) => used.includes(k));
 					obj = new FUN(obj.args, obj.expr, new Map(closure_env));
 				}
+				obj.bind_name = bind.name.name;
 				let addr = h.alloc(obj);
 				env.add_local(bind.name, addr);
 			}
@@ -62,6 +63,7 @@ reg({
 				} else if (obj instanceof FUN) {
 					obj = new FUN(obj.args, obj.expr);
 				}
+				obj.bind_name = binds[i].name.name;
 				let addr = h.alloc(obj);
 				env.add_local(binds[i].name, addr);
 				objs[i] = obj;
@@ -153,7 +155,7 @@ reg({
 		let thunk = obj;
 		return function () {
 			env.replace_locals(thunk.env);
-			h.set(expr, new BLACKHOLE(thunk, thunk.from, thunk.to));
+			h.set(expr, new BLACKHOLE(thunk, thunk.from, thunk.to, thunk.bind_name));
 			s.push(new thunk_update(expr));
 			return thunk.expr;
 		};
@@ -198,7 +200,7 @@ reg({
 			s.peek() instanceof thunk_update)) return undefined;
 		return function () {
 			let cont = s.pop() as thunk_update;
-			h.set(cont.addr, new INDIRECTION(expr));
+			h.set(cont.addr, new INDIRECTION(expr, -1, -1, h.get(cont.addr)?.bind_name));
 			return expr;
 		};
 	}
