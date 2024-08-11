@@ -5,6 +5,7 @@
 	--syntax-keyword: rgb(15, 71, 176);
 	--syntax-number: rgb(172, 230, 139);
 	--syntax-error: 255, 0, 0;
+	--syntax-comment: rgb(0, 134, 0);
 	--current-expression: rgba(255, 255, 0, 0.35);
 	--value: rgb(102, 102, 102);
 }
@@ -31,6 +32,9 @@
 }
 .tok-number {
 	color: var(--syntax-number);
+}
+.tok-comment {
+	color: var(--syntax-comment);
 }
 .syntax-error {
 	border: 1px solid rgba(var(--syntax-error), 60%);
