@@ -47,7 +47,7 @@ function highlightSTG(program: string) {
 	<div class="relative flex bg-muted/50">
 		{
 			isStgLang ? (
-				<pre class="codeBlock"><code set:html={highlightSTG(code)} /></pre>
+				<pre class="codeBlock"><code set:html={highlightSTG(code.replaceAll('\r',''))} /></pre>
 			) : (
 				<Code
 					code={code}
