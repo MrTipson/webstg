@@ -1,37 +1,37 @@
-h1 { @apply mx-4 mt-8 text-4xl font-extrabold border-b border-b-muted }
-h2 { @apply mx-4 mt-4 text-2xl font-bold border-b border-b-muted w-fit }
-h3, h4, h5, h6 { @apply mx-4 mt-3 text-lg font-semibold }
+.md h1 { @apply mx-4 mt-8 text-4xl font-extrabold border-b border-b-muted }
+.md h2 { @apply mx-4 mt-4 text-2xl font-bold border-b border-b-muted w-fit }
+.md h3, .md h4, .md h5, .md h6 { @apply mx-4 mt-3 text-lg font-semibold }
 
-p {	@apply mx-4 my-2 text-muted-foreground }
-a {	@apply text-accent-foreground underline underline-offset-4 }
+.md p {	@apply mx-4 my-2 text-muted-foreground }
+.md a {	@apply text-accent-foreground underline underline-offset-4 }
 
-blockquote { @apply border-l-foreground border-l-2 px-2 py-1 bg-secondary my-4 }
-blockquote > p { @apply mx-0 mt-0 }
-blockquote > footer { @apply inline-block }
+.md blockquote { @apply border-l-foreground border-l-2 px-2 py-1 bg-secondary my-4 }
+.md blockquote > p { @apply mx-0 mt-0 }
+.md blockquote > footer { @apply inline-block }
 
-pre { @apply p-2 w-full}
-code { @apply bg-muted/50 px-1 py-0.5 }
-pre > code { @apply bg-transparent p-0 }
-pre.astro-code { @apply !bg-muted/50 }
+.md pre { @apply p-2 w-full}
+.md code { @apply bg-muted/50 px-1 py-0.5 }
+.md pre > code { @apply bg-transparent p-0 }
+.md pre.astro-code { @apply !bg-muted/50 }
 
-ul { @apply list-disc }
-ol { @apply list-decimal }
-ul, ol { @apply ml-4 text-muted-foreground list-inside }
-ul.contains-task-list { @apply list-none }
-.footnotes > ol { @apply list-outside }
-.footnotes { @apply border-t mt-8}
+.md ul { @apply list-disc }
+.md ol { @apply list-decimal }
+.md ul, .md ol { @apply ml-4 text-muted-foreground list-inside }
+.md ul.contains-task-list { @apply list-none }
+.md .footnotes > ol { @apply list-outside }
+.md .footnotes { @apply border-t mt-8}
 
-thead { @apply border-b border-b-foreground text-left}
-td,th { @apply px-3 py-1}
-td { @apply text-muted-foreground }
-tbody > tr { @apply border-b border-t-muted }
+.md thead { @apply border-b border-b-foreground text-left}
+.md td,.md th { @apply px-3 py-1}
+.md td { @apply text-muted-foreground }
+.md tbody > tr { @apply border-b border-t-muted }
 
-figure { @apply flex flex-col items-center my-8}
-figure p { @apply m-0 }
-figcaption { @apply mt-2}
+.md figure { @apply flex flex-col items-center my-8}
+.md figure p { @apply m-0 }
+.md figcaption { @apply mt-2}
 
-details { @apply text-muted-foreground border-l pl-2 }
-summary { @apply cursor-pointer relative }
-summary::before { @apply content-[''] absolute top-0 bottom-0 -left-8 w-2 h-2 my-auto border-b border-r -rotate-45 transition-transform duration-200 }
-details[open] summary::before { @apply rotate-45 }
-summary::marker { @apply content-none }
+.md details { @apply text-muted-foreground border-l pl-2 }
+.md summary { @apply cursor-pointer relative }
+.md summary::before { @apply content-[''] absolute top-0 bottom-0 -left-8 w-2 h-2 my-auto border-b border-r -rotate-45 transition-transform duration-200 }
+.md details[open] summary::before { @apply rotate-45 }
+.md summary::marker { @apply content-none }
