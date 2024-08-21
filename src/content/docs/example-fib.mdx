@@ -1,0 +1,142 @@
+---
+title: "Fibonacci"
+draft: false
+---
+export const fig = function (ref) {
+	if (!fig.count) {
+		fig.count = 0;
+	} 
+	if (!fig[ref]) {
+		fig[ref] = ++fig.count;
+	}
+	return fig[ref];
+};
+export const code = `data Number a = Num a
+data List a = Nil | Cons a (List a)
+nil = CON Nil
+plusInt = FUN(x y -> 
+	case x of {
+	Num i -> case y of {
+			Num j -> case  i +# j of {
+						x -> let result = CON(Num x)
+							in result;
+					};
+			};
+	}
+)
+zipWith = FUN(f x y -> 
+	case x of {
+	Nil  -> nil;
+	Cons hx tx -> case y of {
+				Nil  -> nil;
+				Cons hy ty -> let fxy = THUNK(f hx hy)
+									fxys = THUNK(zipWith f tx ty)
+									zippedList = CON(Cons fxy fxys)
+								in zippedList;
+				};
+	}
+)
+zero = CON(Num 0)
+one = CON(Num 1)
+-- let main = 0 : 1 : zipwith (+) fib (tail fib)
+main = THUNK(letrec	fib0 = CON(Cons zero fib1)
+					fib1 = CON(Cons one fib2)
+					fib2 = THUNK(zipWith plusInt fib0 fib1)
+			in fib0)
+`;
+
+# Fibonacci laziness
+In this example, we will examine the lazy behaviour of the `zipWith` implementation for the fibonacci sequence.
+You can also open this for yourself in the [simulator](/webstg/?step=87&program=eJx1kl9rgzAUxZ%2BTT3FhL4ZSqH3c6F4KY2PDvazsOW0jzbBaNLK4rd995yZqZX8ENf7Oyb3nBvfaacra49bUpGnFS9Jyz%2FTJNi4yW9AXrauywWcSsZIl6IrWzxnr8lS0zUPpQO42WeKpo%2FktSbHTjSFPVU6fUnBtyzzQrqci8LeRwzK7wveg4vIsFsZRbZq2cLFtwtu86i3Clr16E8k5vPl5lkp%2B2NOrdYc%2BXk7%2FBMRIjDEa9oWBD56c%2FyPzDy%2BuaO%2FIdUPa3Hdo%2BHK%2FyR7REpUO3RhXCKjNKA%2F5cu7mpjYoJ7MPhx7HDn24NBe4GDH%2FxRoTjcObupqc2ULJqjQTkCo5n4fER40yK1rQNaW4UfCdUyUzRbndUuI0psZKyd4Z02NrbXYCwmIaMvQFTPuUvJzqnAJseZGXvw5k%2BK9C7bEWejNQ30t4vCQ%3D&limit=87&e5=8&e16=10&e28=13&e41=15&m4=fig1&m15=fig2&m40=fig3&m59=fig4&m78=fig5&m87=fig8).
+> Note: Figures 6 and 7 are not marked in the simulator, but are 1 step further than figures 4 and 5, respectively.
+
+The basic idea of the implementation is using `zipWith` to traverse the sequence and generate the next element when necessary.
+In the STG language, this could be implemented like this:
+```stg
+// fib zipWith
+zero = CON(Num 0)
+one = CON(Num 1)
+-- let main = 0 : 1 : zipwith (+) fib (tail fib)
+main = THUNK(letrec	fib0 = CON(Cons zero fib1)
+					fib1 = CON(Cons one fib2)
+					fib2 = THUNK(zipWith plusInt fib0 fib1)
+			in fib0)
+```
+
+## Initial state
+As `main` is entered, the initial list is created, and a thunk is created for the `zipWith` call.
+<figure>
+	<MdMachine client:load step={4} program={code} garbage_collection collapse_indirections bind_names>
+		<heap/>
+	</MdMachine>
+	<figcaption>Figure {fig('initial')}</figcaption>
+</figure>
+
+## Expanding the sequence
+When the tail of `0x7` is entered, `zipWith` executes and allocates thunks on the heap, corresponding to the next element (`0x9`) and the spine (`0xa`) of the sequence.
+<figure>
+	<MdMachine client:load step={15} program={code} garbage_collection collapse_indirections bind_names entered_thunks={[[5,8]]}>
+		<heap/>
+	</MdMachine>
+	<figcaption>Figure {fig('expanding')}</figcaption>
+</figure>
+
+## Expanding it further
+Note that at this point, the calculation of the next element still hasn't been performed. In fact, as long as we are following the spine of the sequence, no element will be calculated.
+<figure>
+	<MdMachine client:load step={40} program={code} garbage_collection collapse_indirections bind_names entered_thunks={[[5,8],[16,10],[28,13]]}>
+		<heap/>
+	</MdMachine>
+	<figcaption>Figure {fig('expanding2')}</figcaption>
+</figure>
+
+## Triggering the calculations
+When we stop following the spine and enter one of the elements, the calculation(s) will finally be performed, and the thunk(s) will be updated.
+Entering an element is effectively calling the `plusInt` function:
+```stg
+// plusInt
+plusInt = FUN(x y -> 
+	case x of {
+	Num i -> case y of {
+			Num j -> case  i +# j of {
+						x -> let result = CON(Num x)
+							in result;
+					};
+			};
+	}
+)
+```
+
+Now we can check out what is happening with the stack. When we entered `0xf` an update frame was pushed on, and `plusInt` started executing with `x=0x9` and `y=0xc`.\
+Before `plusInt` starts to scrutinize `x`, it must save any other locals it still needs, and pushes them onto the stack alongside the case continuation (figure {fig('casex')}).\
+A similar thing happens when `y` becomes the scrutinee; `i` must be saved with the case continuation, and `y` is entered (figure {fig('casey')}).
+<figure>
+	<MdMachine client:load step={59} program={code} garbage_collection collapse_indirections bind_names entered_thunks={[[5,8],[16,10],[28,13], [41,15]]}>
+		<stack/>
+	</MdMachine>
+	<figcaption>Figure {fig('casex')}</figcaption>
+</figure>
+<figure>
+	<MdMachine client:load step={78} program={code} garbage_collection collapse_indirections bind_names entered_thunks={[[5,8],[16,10],[28,13], [41,15]]}>
+		<stack/>
+	</MdMachine>
+	<figcaption>Figure {fig('casey')}</figcaption>
+</figure>
+<figure>
+	<MdMachine client:load step={60} program={code} garbage_collection collapse_indirections bind_names entered_thunks={[[5,8],[16,10],[28,13], [41,15]]}>
+		<heap/>
+	</MdMachine>
+	<figcaption>Figure {fig('upd1')}: `0x9` is updated by an indirection to `0x12`.</figcaption>
+</figure>
+<figure>
+	<MdMachine client:load step={79} program={code} garbage_collection collapse_indirections bind_names entered_thunks={[[5,8],[16,10],[28,13], [41,15]]}>
+		<heap/>
+	</MdMachine>
+	<figcaption>Figure {fig('upd2')}: `0xc` is updated by an indirection to `0x13`</figcaption>
+</figure>
+<figure>
+	<MdMachine client:load step={87} program={code} garbage_collection collapse_indirections bind_names entered_thunks={[[5,8],[16,10],[28,13], [41,15]]}>
+		<heap/>
+	</MdMachine>
+	<figcaption>Figure {fig('upd3')}: `0xf` is updated by an indirection to `0x14`</figcaption>
+</figure>

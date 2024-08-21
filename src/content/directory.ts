@@ -16,13 +16,21 @@ export function loadDirectory(entries: SidebarEntry[]): SidebarEntry[] {
 	});
 }
 
-export const sidebar: SidebarEntry[] = loadDirectory([
+const isProd = import.meta.env.PROD;
+const devSidebar = loadDirectory(isProd ? [] : [{
+	label: 'My markdown files',
+	items: [
+		{ label: 'Markdown test', link: '/docs/markdown' },
+		{ label: 'Other file', link: '/docs/other' },
+	]
+}]);
+export const sidebar: SidebarEntry[] = devSidebar.concat(loadDirectory([
+	{ label: 'Welcome', link: '/docs' },
 	{
-		label: 'My markdown files',
+		label: 'Examples',
 		items: [
-			{ label: 'Markdown test', link: '/docs/markdown' },
-			{ label: 'Other file', link: '/docs/other' },
+			{ label: 'Fibonacci', link: '/docs/example-fib' },
 		]
 	},
 	{ label: 'WebSTG sandbox', link: '/live' },
-]);
+]));
