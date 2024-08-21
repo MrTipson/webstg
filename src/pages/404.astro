@@ -1,0 +1,15 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Config from "astro.config.mjs";
+const base = Config.base || "";
+---
+
+<Layout title="Page not found | WebSTG">
+	<div class="absolute inset-0 m-auto h-fit w-fit text-3xl p-4 rounded border border-muted text-center">
+		<div><span>Web</span><span class="font-bold">STG</span></div>
+		<div>
+			<span class="text-muted-foreground mr-2">404:</span><span>Page not found</span>
+		</div>
+		<div>Open the <a href={base+"/"} class="underline text-accent-foreground">simulator</a> or check out the <a href={base+"/docs/"} class="underline text-accent-foreground">docs</a>.</div>
+	</div>
+</Layout>
