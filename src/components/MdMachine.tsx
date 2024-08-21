@@ -6,8 +6,8 @@ import React from "react";
 import HeapView from "./HeapView";
 import StackView from "./StackView";
 
-const heap_slot = `<slot id="HeapView"></slot>`;
-const stack_slot = `<slot id="StackView"></slot>`;
+const heap_slot = `<stack></stack>`;
+const stack_slot = `<heap></heap>`;
 
 export function MdMachine({ children, program, step, garbage_collection, eval_apply, collapse_indirections, bind_names }:
 	PropsWithChildren & STGSettings & { program: string, step: number }) {
