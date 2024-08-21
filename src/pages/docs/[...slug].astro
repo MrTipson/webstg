@@ -5,10 +5,13 @@ import { sidebar } from "@/content/directory";
 
 export async function getStaticPaths() {
 	const blogEntries = await getCollection("docs");
-	return blogEntries.map((entry) => ({
-		params: { slug: entry.slug },
-		props: { entry },
-	}));
+	const isProd = import.meta.env.PROD;
+	return blogEntries
+		.filter((entry) => !isProd || !entry.data.draft)
+		.map((entry) => ({
+			params: { slug: entry.slug },
+			props: { entry },
+		}));
 }
 
 interface Props {
