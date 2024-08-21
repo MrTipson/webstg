@@ -28,14 +28,14 @@ zipWith = FUN(f x y ->
 				};
 	}
 )
-forcen = FUN(n list -> 
+take = FUN(n list -> 
 	case  n ># 0 of {
 	False  -> nil;
 	True  -> case list of {
 			Nil  -> nil;
 			Cons h t -> case h of {
 						x -> case  n -# 1 of {
-							n -> case forcen n t of {
+							n -> case take n t of {
 								y -> let result = CON(Cons x y)
 									in result;
 								};
@@ -51,7 +51,7 @@ fib = THUNK(letrec	fib0 = CON(Cons zero fib1)
 								in tmp)
 					fib2 = THUNK(zipWith plusInt fib0 fib1)
 			in fib2)
-main = THUNK(forcen 10 fib)`
+main = THUNK(take 10 fib)`
 	},
 	{
 		name: "Partial application",
