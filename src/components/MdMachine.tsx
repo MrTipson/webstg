@@ -6,13 +6,13 @@ import React from "react";
 import HeapView from "./HeapView";
 import StackView from "./StackView";
 
-const heap_slot = `<stack></stack>`;
-const stack_slot = `<heap></heap>`;
+const heap_slot = `<heap></heap>`;
+const stack_slot = `<stack></stack>`;
 
-export function MdMachine({ children, program, step, garbage_collection, eval_apply, collapse_indirections, bind_names }:
-	PropsWithChildren & STGSettings & { program: string, step: number }) {
+export function MdMachine({ children, program, step, garbage_collection, eval_apply, collapse_indirections, bind_names, entered_thunks }:
+	PropsWithChildren & STGSettings & { program: string, step: number, entered_thunks: [number, number][] }) {
 	const ast = build_ast(program);
-	const machine = new stg_machine(ast, eval_apply = eval_apply, garbage_collection = garbage_collection);
+	const machine = new stg_machine(ast, eval_apply = eval_apply, garbage_collection = garbage_collection, entered_thunks = entered_thunks);
 	const settings: STGSettings = {
 		garbage_collection: garbage_collection,
 		eval_apply: eval_apply,
@@ -27,12 +27,12 @@ export function MdMachine({ children, program, step, garbage_collection, eval_ap
 	let [element1, element2]: (JSX.Element | string)[] = ['', ''];
 	let [len1, len2] = [0, 0];
 	if (index1 !== -1) {
-		element1 = <HeapView className="h-[500px]" machine={machine} step={step} settings={settings} />
+		element1 = <HeapView className="my-2 h-[500px] md:w-2/3 md:mx-auto lg:1/2 border" machine={machine} step={step} settings={settings} />
 		len1 = heap_slot.length;
 	}
 	let index2 = str.indexOf(stack_slot);
 	if (index2 !== -1) {
-		element2 = <StackView className="h-fit" machine={machine} />
+		element2 = <StackView className="my-2 h-fit md:w-2/3 md:mx-auto lg:1/2 border" machine={machine} />
 		len2 = stack_slot.length;
 	}
 	if (index2 < index1) {
