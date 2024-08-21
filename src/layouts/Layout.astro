@@ -8,6 +8,8 @@ const { title } = Astro.props;
 import { ModeToggle } from "@/components/ui/ModeToggle";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/Icons";
+import Config from "astro.config.mjs";
+const base = Config.base || "";
 ---
 
 <!doctype html>
@@ -22,8 +24,9 @@ import Icon from "@/components/Icons";
 	</head>
 	<body class="grid grid-rows-[max-content_minmax(0,1fr)]">
 		<header class="bg-secondary flex justify-between px-6 py-2 row-span-1">
-			<div class="text-3xl">
-				<span>Web</span><span class="font-bold">STG</span>
+			<div class="flex items-center gap-8">
+				<a href={base+"/"} class="text-3xl"><span>Web</span><span class="font-bold">STG</span></a>
+				<a href={base+"/docs/"} class="text-muted-foreground"><span>Docs</span></a>
 			</div>
 			<div class="flex gap-1">
 				<Button variant="outline" size="icon">
