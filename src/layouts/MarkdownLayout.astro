@@ -5,6 +5,7 @@ import "@/styles/react_flow_overrides.css";
 import "@/styles/markdown.css";
 import type { MarkdownHeading } from "astro";
 import type { SidebarEntry } from "@/content/directory";
+import { List } from "lucide-react";
 
 interface Props {
 	title: string;
@@ -35,7 +36,10 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 
 <Layout title={title + " | WebSTG"}>
 	<div class="columns">
-		<nav class="sidebar scrollbar" set:html={constructSidebar(sidebar)} />
+		<nav id="sidebar" class="sidebar">
+			<div class="sidebarPullMark"><List/></div>
+			<div class="sidebarContent scrollbar" set:html={constructSidebar(sidebar)}/>
+		</nav>
 		<main class="content scrollbar md">
 			<slot />
 		</main>
@@ -57,16 +61,25 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 
 <style>
 	.sidebar {
-		@apply col-span-1 p-4 pt-12 text-muted-foreground no-underline overflow-auto;
+		@apply fixed top-0 bottom-0 -left-80 w-80 z-10 bg-secondary transition-all motion-reduce:transition-none;
+	}
+	.sidebar.open {
+		@apply left-0 border-r border-muted-foreground/50;
+	}
+	.sidebarContent {
+		@apply col-span-1 p-4 text-muted-foreground no-underline overflow-auto h-full;
+	}
+	.sidebarPullMark {
+		@apply top-20 block absolute left-full p-2 bg-secondary z-10 border-t border-r border-b border-muted-foreground/50;
 	}
 	.columns {
-		@apply grid grid-cols-6 h-full;
+		@apply relative flex h-full flex-col-reverse overflow-auto scroll-pt-2;
 	}
 	.content {
-		@apply relative col-span-4 p-8 overflow-auto scroll-pt-2;
+		@apply relative grow shrink px-12 scroll-pt-2;
 	}
 	.toc {
-		@apply col-span-1 p-4 pt-12 overflow-auto;
+		@apply shrink px-12 pt-12;
 	}
 	.scrollbar {
 		scrollbar-width: 4px;
@@ -81,11 +94,37 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 	.scrollbar::-webkit-scrollbar-track {
 		@apply bg-muted;
 	}
+
+	@media screen(md) {
+		.sidebar {
+			@apply static shrink bg-inherit shadow-none;
+		}
+		.sidebarPullMark {
+			@apply hidden;
+		}
+		.sidebarContent {
+			@apply pt-12;
+		}
+		.columns {
+			@apply flex-row overflow-hidden;
+		}
+		.content {
+			@apply overflow-auto;
+		}
+		.toc {
+			@apply px-4 overflow-auto;
+		}
+	}
 </style>
 <style is:global>
-	details { @apply text-muted-foreground border-l pl-2 }
+	details { @apply text-muted-foreground border-l border-muted-foreground pl-2 }
 	summary { @apply cursor-pointer relative }
-	summary::before { @apply content-[''] absolute top-0 bottom-0 -left-8 w-2 h-2 my-auto border-b border-r -rotate-45 transition-transform duration-200 }
+	summary::before { @apply content-[''] border-muted-foreground absolute top-0 bottom-0 -left-8 w-2 h-2 my-auto border-b border-r -rotate-45 transition-transform duration-200 }
 	details[open] summary::before { @apply rotate-45 }
 	summary::marker { @apply content-none }
 </style>
+
+<script>
+const sidebar = document.getElementById("sidebar");
+document.querySelector(".sidebarPullMark")?.addEventListener("click", () => sidebar?.classList.toggle("open"));
+</script>

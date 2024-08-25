@@ -30,6 +30,6 @@
 
 .md details { @apply text-muted-foreground border-l pl-2 }
 .md summary { @apply cursor-pointer relative }
-.md summary::before { @apply content-[''] absolute top-0 bottom-0 -left-8 w-2 h-2 my-auto border-b border-r -rotate-45 transition-transform duration-200 }
+.md summary::before { @apply content-[''] border-muted-foreground absolute top-0 bottom-0 -left-8 w-2 h-2 my-auto border-b border-r -rotate-45 transition-transform duration-200 }
 .md details[open] summary::before { @apply rotate-45 }
 .md summary::marker { @apply content-none }
