@@ -61,10 +61,10 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 
 <style>
 	.sidebar {
-		@apply fixed top-0 bottom-0 -left-80 w-80 z-10 bg-secondary transition-all motion-reduce:transition-none;
+		@apply fixed top-0 bottom-0 z-10 bg-secondary transition-all motion-reduce:transition-none -translate-x-full max-w-[80%];
 	}
 	.sidebar.open {
-		@apply left-0 border-r border-muted-foreground/50;
+		@apply border-r border-muted-foreground/50 translate-x-0;
 	}
 	.sidebarContent {
 		@apply col-span-1 p-4 text-muted-foreground no-underline overflow-auto h-full;

@@ -22,7 +22,8 @@ const base = Config.base || "";
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body class="grid grid-rows-[max-content_minmax(0,1fr)]">
+	<!-- bottom-0 ensures good behaviour with shadcn drawer -->
+	<body class="grid grid-rows-[max-content_minmax(0,1fr)] bottom-0">
 		<header class="bg-secondary flex justify-between px-6 py-2 row-span-1">
 			<div class="flex items-center gap-8">
 				<a href={base+"/"} class="text-3xl"><span>Web</span><span class="font-bold">STG</span></a>
@@ -37,7 +38,7 @@ const base = Config.base || "";
 				<ModeToggle client:load />
 			</div>
 		</header>
-		<div class="relative grow min-w-0">
+		<div class="relative min-w-0">
 			<slot />
 		</div>
 	</body>
