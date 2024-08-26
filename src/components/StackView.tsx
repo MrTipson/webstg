@@ -14,23 +14,20 @@ export default function StackView({ className, machine }: { className?: string, 
 						<p className="text-muted-foreground">
 							Most of the time it's populated with update frames (
 							<span className="text-green-500">Update</span>
-							<span className="px-1 m-1 rounded-sm bg-muted font-mono text-foreground">0x5</span>
+							<span className="px-1 m-1 rounded-sm bg-muted font-mono text-foreground">address</span>
 							) and case continuations
-							<span className="text-sm flex gap-2 items-center">
-								(<span className="text-orange-500">Case continuation</span>
-								<span className='flex flex-wrap items-center text-foreground'>
-									<span className="text-xs">Saved locals:</span>
-									<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono">x 5</span>
-								</span>),
-							</span>
+							(<span className="text-orange-500">Case continuation</span>
+							<span className='text-foreground'>
+								<span className="text-sm ml-1">Saved locals:</span>
+								<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono">...</span>
+							</span>),
 							while arguments for the push-enter (
 							<span className="text-blue-500">Argument</span>
-							<span className="px-1 m-1 rounded-sm bg-muted font-mono text-foreground">0x10</span>
+							<span className="px-1 m-1 rounded-sm bg-muted font-mono text-foreground">value</span>
 							) and eval-apply (
 							<span className="text-blue-500">Arguments</span>
-							<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono text-foreground">3</span>
-							<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono text-foreground">2</span>
-							<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono text-foreground">0x10</span>
+							<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono text-foreground">value</span>
+							<span className="px-1 m-1 rounded-sm bg-muted text-nowrap font-mono text-foreground">...</span>
 							) also appear for short periods of time.
 						</p>
 					</HelpPopover>
