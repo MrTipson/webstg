@@ -58,8 +58,8 @@ export default function Timeline({ className, width, markers, step, moveTo }:
 				markers.length > 0 &&
 				<div className="relative mx-2 h-8">
 					{markers.filter(([i, _]) => i <= limit).map(([i, name]) =>
-						<span key={i} onClick={() => moveTo(i)} className='absolute bottom-0 -translate-x-1/2 bg-secondary px-1.5 py-0.25 rounded cursor-pointer' style={{ left: calculateOffset(i, limit, width) }}>
-							<span className='w-0 h-0 border-transparent border-[5px] border-t-secondary absolute top-full left-0 right-0 m-auto' />
+						<span key={i} onClick={() => moveTo(i)} className='absolute bottom-0 -translate-x-1/2 bg-secondary px-1.5 py-0.25 rounded cursor-pointer border border-muted-foreground' style={{ left: calculateOffset(i, limit, width) }}>
+							<span className='w-0 h-0 border-transparent border-[5px] border-t-muted-foreground absolute top-full left-0 right-0 m-auto' />
 							{name}
 						</span>
 					)}
