@@ -7,7 +7,7 @@
 
 .md blockquote { @apply border-l-foreground border-l-2 px-2 py-1 bg-secondary my-4 }
 
-.md pre { @apply p-2 w-full}
+.md pre { @apply p-2 w-full bg-muted/50}
 .md code { @apply bg-muted/50 px-1 py-0.5 }
 .md pre > code { @apply bg-transparent p-0 }
 .md pre.astro-code { @apply !bg-muted/50 }

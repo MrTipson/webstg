@@ -44,7 +44,7 @@ function highlightSTG(program: string) {
 			</div>
 		)
 	}
-	<div class="relative flex bg-muted/50">
+	<div class="relative">
 		{
 			isStgLang ? (
 				<pre class="codeBlock"><code set:html={highlightSTG(code.replaceAll('\r',''))} /></pre>
@@ -74,10 +74,10 @@ function highlightSTG(program: string) {
 		@apply italic font-mono;
 	}
 	.codeBlock {
-		@apply !bg-transparent w-full;
+		@apply w-full overflow-auto pr-14 min-h-14;
 	}
 	.copyCode {
-		@apply m-2 shrink-0;
+		@apply absolute top-2 right-2;
 	}
 	.copyIcon {
 		@apply absolute pointer-events-none;
