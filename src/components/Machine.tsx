@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/resizable";
 import { Toaster } from "@/components/ui/toaster";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type STGSettings = {
 	garbage_collection: boolean,
@@ -66,40 +67,34 @@ export default function Machine() {
 
 	if (!isDesktop) {
 		return (
-			<div className="h-full w-full flex flex-col">
-				<PanelGroup direction="vertical">
-					<Panel defaultSize={30}>
-						<PanelGroup direction="horizontal">
-							<Panel defaultSize={70}>
-								<ProgramView machine={machine} setMachine={setMachine}
-									step={step} setStep={setStep}
-									loaded={loaded} setLoaded={setLoaded}
-									settings={settings} setSettings={setSettings}
-									breakpoints={breakpoints} setBreakpoints={setBreakpoints}
-									enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks}
-									isDesktop={isDesktop} className="h-full" />
-							</Panel>
-							{loaded &&
-								<>
-									<Handle withHandle />
-									<Panel defaultSize={30}><StackView machine={machine} className="h-full" /></Panel>
-								</>}
-						</PanelGroup>
-					</Panel>
-					<Handle withHandle />
-					<Panel defaultSize={60} className="flex flex-col justify-center">
-						{loaded &&
-							<HeapView machine={machine} className="h-full" step={step} settings={settings} />
-							||
-							<span className="text-center text-primary text-2xl font-bold">Load a program to begin simulation</span>
-						}
-					</Panel>
-				</PanelGroup>
-				{loaded &&
-					<Controls className="bg-background p-2 border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} isDesktop={isDesktop} enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks} />
-				}
+			<>
+				<div className="h-full w-full flex flex-col">
+					<Tabs defaultValue="program" className="flex flex-col grow relative">
+						<TabsList className="w-2/3 mx-auto mt-2 flex">
+							<TabsTrigger value="program" className="grow basis-0">Program</TabsTrigger>
+							{loaded && <>
+								<TabsTrigger value="heap" className="grow basis-0" disabled={!loaded}>Heap</TabsTrigger>
+								<TabsTrigger value="stack" className="grow basis-0" disabled={!loaded}>Stack</TabsTrigger>
+							</>}
+						</TabsList>
+						<TabsContent value="program" className="contents">
+							<ProgramView machine={machine} setMachine={setMachine}
+								step={step} setStep={setStep}
+								loaded={loaded} setLoaded={setLoaded}
+								settings={settings} setSettings={setSettings}
+								breakpoints={breakpoints} setBreakpoints={setBreakpoints}
+								enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks}
+								isDesktop={isDesktop} className="w-full h-0 grow" />
+						</TabsContent>
+						<TabsContent value="heap"><HeapView machine={machine} className="absolute w-full top-12 bottom-0" step={step} settings={settings} /></TabsContent>
+						<TabsContent value="stack" className="contents"><StackView machine={machine} className="w-full h-0 grow" /></TabsContent>
+					</Tabs>
+					{loaded &&
+						<Controls className="bg-background p-2 border" machine={machine} step={step} setStep={setStep} breakpoints={breakpoints} settings={settings} isDesktop={isDesktop} enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks} />
+					}
+				</div>
 				<Toaster />
-			</div>
+			</>
 		);
 	}
 

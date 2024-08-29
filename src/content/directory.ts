@@ -32,5 +32,5 @@ export const sidebar: SidebarEntry[] = devSidebar.concat(loadDirectory([
 			{ label: 'Fibonacci', link: '/docs/example-fib' },
 		]
 	},
-	{ label: 'WebSTG sandbox', link: '/live' },
+	{ label: 'WebSTG sandbox', link: '/' },
 ]));
