@@ -61,10 +61,10 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 
 <style>
 	.sidebar {
-		@apply fixed top-0 bottom-0 z-10 bg-secondary transition-all motion-reduce:transition-none -translate-x-full max-w-[80%];
+		@apply fixed top-0 bottom-0 z-10 bg-secondary motion-reduce:transition-none -translate-x-full max-w-[80%];
 	}
 	.sidebar.open {
-		@apply border-r border-muted-foreground/50 translate-x-0;
+		@apply border-r border-muted-foreground/50 translate-x-0 transition-all;
 	}
 	.sidebarContent {
 		@apply col-span-1 p-4 text-muted-foreground no-underline overflow-auto h-full;
@@ -97,7 +97,7 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 
 	@media screen(md) {
 		.sidebar {
-			@apply static shrink bg-inherit shadow-none;
+			@apply static shrink bg-inherit shadow-none transform-none;
 		}
 		.sidebarPullMark {
 			@apply hidden;
