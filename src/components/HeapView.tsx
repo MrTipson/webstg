@@ -108,7 +108,8 @@ export default function HeapView({ className, machine, settings }: {
 					labelBgBorderRadius: 4,
 					labelStyle: { fill: "hsl(var(--primary))" },
 					labelBgPadding: [4, 2],
-					labelBgStyle: { fill: "hsl(var(--muted))" }
+					labelBgStyle: { fill: "hsl(var(--muted))" },
+					style: { strokeDasharray: 5 },
 				});
 			} else {
 				edges.push({
@@ -219,7 +220,7 @@ function HeapViewNode({ data }: { data: { addr: number, obj: heap_object, varian
 									type="source"
 									position={Position.Top}
 									id={String(i)}
-									style={{ background: '#555' }}
+									style={{ background: '#555', top: "-10px" }}
 								/>
 							}
 						</span>
