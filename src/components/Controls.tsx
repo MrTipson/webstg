@@ -19,12 +19,12 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 	className?: string,
 	machine: stg_machine,
 	step: number,
-	setStep: Function,
+	setStep: React.Dispatch<typeof step>,
 	breakpoints: Map<number, number>,
 	settings: STGSettings,
 	isDesktop: boolean,
 	enteredThunks: [number, number][],
-	setEnteredThunks: Function,
+	setEnteredThunks: React.Dispatch<typeof enteredThunks>,
 }) {
 	const { toast } = useToast();
 	const [markers, setMarkers] = useState<Map<number, string>>(() => {
@@ -200,7 +200,7 @@ function MarkerPopover({ children }: React.PropsWithChildren) {
 	);
 }
 
-function ThunkPopover({ children, machine, enterThunk }: React.PropsWithChildren & { machine: stg_machine, enterThunk: Function }) {
+function ThunkPopover({ children, machine, enterThunk }: React.PropsWithChildren & { machine: stg_machine, enterThunk: (addr: number) => void }) {
 	const thunks = machine.h.current.map((x, i) => [x, i]).filter(([x, i]) => x instanceof THUNK) as [heap_object, number][];
 	return (
 		<Popover>

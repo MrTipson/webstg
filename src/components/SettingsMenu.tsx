@@ -11,8 +11,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import type { STGSettings } from "@/components/Machine";
 import { Input } from "@/components/ui/input";
+import type React from "react";
 
-export default function SettingsMenu({ settings, setSettings, setLoaded }: { settings: STGSettings, setSettings: Function, setLoaded: Function }) {
+export default function SettingsMenu({ settings, setSettings, setLoaded }: {
+	settings: STGSettings,
+	setSettings: React.Dispatch<typeof settings>,
+	setLoaded: React.Dispatch<boolean>,
+}) {
 	function onChange(change: Partial<STGSettings>) {
 		setSettings({ ...settings, ...change });
 		if (typeof change.eval_apply === "boolean") {

@@ -59,18 +59,18 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	{
 		className?: string,
 		machine: stg_machine,
-		setMachine: Function,
+		setMachine: React.Dispatch<typeof machine>,
 		step: number,
-		setStep: Function,
+		setStep: React.Dispatch<typeof step>,
 		loaded: boolean,
-		setLoaded: Function,
+		setLoaded: React.Dispatch<typeof loaded>,
 		settings: STGSettings,
-		setSettings: Function
+		setSettings: React.Dispatch<typeof settings>,
 		breakpoints: Map<number, number>,
-		setBreakpoints: Function,
+		setBreakpoints: React.Dispatch<typeof breakpoints>,
 		isDesktop: boolean,
 		enteredThunks: [number, number][],
-		setEnteredThunks: Function,
+		setEnteredThunks: React.Dispatch<typeof enteredThunks>,
 	}) {
 	const [selected, setSelected] = useState<string>('Sum foldl');
 	const [programText, setProgramText] = useState(() => {

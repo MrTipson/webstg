@@ -28,7 +28,7 @@ function calculateOffset(step: number, limit: number, width: number) {
 }
 
 export default function Timeline({ className, width, markers, step, moveTo }:
-	{ className?: string, width: number, markers: [number, string][], step: number, moveTo: Function }) {
+	{ className?: string, width: number, markers: [number, string][], step: number, moveTo: React.Dispatch<number> }) {
 	const [limit, setLimitOriginal] = useState(() => {
 		const searchParams = new URLSearchParams(location.search);
 		return Number(searchParams.get('limit')) || step;
