@@ -117,7 +117,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 			}
 		}
 		return result;
-	}, [breakpoints]);
+	}, [lineStarts, breakpoints]);
 
 	useEffect(() => currentExpressionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
 
