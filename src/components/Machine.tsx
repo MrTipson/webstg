@@ -120,7 +120,7 @@ export default function Machine() {
 					</>
 					|| // not loaded
 					<>
-						<Panel defaultSize={60} className="flex flex-col justify-center">
+						<Panel defaultSize={70} className="flex flex-col justify-center">
 							<span className="text-center text-primary text-2xl font-bold">Load a program to begin simulation</span>
 						</Panel>
 					</>
