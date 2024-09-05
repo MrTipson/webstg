@@ -211,7 +211,11 @@ function ThunkPopover({ children, machine, enterThunk }: React.PropsWithChildren
 			</PopoverTrigger>
 			<PopoverContent className="w-52 max-h-72 grid grid-rows-1">
 				<ScrollArea>
-					<h3>Thunks on the heap:</h3>
+					{
+						thunks.length > 0
+							? <h3>Thunks on the heap:</h3>
+							: <h3>No thunks on the heap</h3>
+					}
 					{thunks.map(([x, address], i) =>
 						<div key={i} className="contents">
 							<Button variant={'ghost'} className="w-full rounded-none justify-start" onClick={() => enterThunk(address)}>
