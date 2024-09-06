@@ -21,7 +21,7 @@ const devSidebar = loadDirectory(isProd ? [] : [{
 	label: 'My markdown files',
 	items: [
 		{ label: 'Markdown test', link: '/docs/markdown' },
-		{ label: 'Other file', link: '/docs/other' },
+		{ label: 'Embedded STG test', link: '/docs/mdtest' },
 	]
 }]);
 export const sidebar: SidebarEntry[] = devSidebar.concat(loadDirectory([
