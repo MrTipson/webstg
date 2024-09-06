@@ -8,3 +8,7 @@
 .react-flow__node * {
 	pointer-events: none !important;
 }
+/* Mitigate artifacts caused by panning the graph view */
+.react-flow__viewport {
+	will-change: transform;
+}
