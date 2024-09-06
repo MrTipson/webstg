@@ -2,9 +2,10 @@
 import "@/styles/global.css";
 interface Props {
 	title: string;
+	description: string;
 }
 
-const { title } = Astro.props;
+const { title, description } = Astro.props;
 import { ModeToggle } from "@/components/ui/ModeToggle";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/Icons";
@@ -16,11 +17,11 @@ const base = Config.base || "";
 <html lang="en" class="dark">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description" />
+		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
+		<title>{title + " | WebSTG"}</title>
 	</head>
 	<!-- bottom-0 ensures good behaviour with shadcn drawer -->
 	<body class="grid grid-rows-[max-content_minmax(0,1fr)] bottom-0">

@@ -9,10 +9,11 @@ import { List } from "lucide-react";
 
 interface Props {
 	title: string;
+	description: string;
 	headings: MarkdownHeading[];
 	sidebar: SidebarEntry[];
 }
-const { title, headings, sidebar } = Astro.props;
+const { title, description, headings, sidebar } = Astro.props;
 const tocPaddings = [undefined, "pl-0", "pl-4", "pl-8", "pl-8", "pl-8", "pl-8"];
 const linkStyle = "no-underline block text-muted-foreground ml-8 hover:text-foreground";
 const detailsStyle = "pl-2 ml-6";
@@ -34,7 +35,7 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 }
 ---
 
-<Layout title={title + " | WebSTG"}>
+<Layout title={title} description={description}>
 	<div class="columns">
 		<nav id="sidebar" class="sidebar">
 			<div class="sidebarPullMark"><List/></div>
