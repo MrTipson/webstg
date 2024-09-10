@@ -28,7 +28,7 @@ export default function Machine() {
 	// set machine is called *only* when a new program is loaded, but will be mutated while stepping
 	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(default_program, false, true));
 	const [loaded, setLoaded] = useState(false);
-	const [step, setStepOriginal] = useState(0);
+	const [step, setStepOriginal] = useState(Number(new URLSearchParams(location.search).get('step')) || 0);
 	const [breakpoints, setBreakpoints] = useState<Map<number, number>>(new Map());
 	const [enteredThunks, setEnteredThunksOriginal] = useState<[number, number][]>(() => {
 		const searchParams = new URLSearchParams(location.search);

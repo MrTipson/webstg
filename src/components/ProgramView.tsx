@@ -123,7 +123,6 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 
 	useEffect(() => {
 		const searchParams = new URLSearchParams(location.search);
-		step = Number(searchParams.get('step')) || 1;
 		if (!loaded && searchParams.has('program')) {
 			if (!loadMachine(programText, step)) {
 				toast({
