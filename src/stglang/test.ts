@@ -148,7 +148,7 @@ export let fib_prg: program = new program([
 				]))
 			)
 		])))),
-	new binding(new identifier("take"), new FUN([new identifier("n"), new identifier("list")],
+	new binding(new identifier("forcen"), new FUN([new identifier("n"), new identifier("list")],
 		new case_expr(new builtin_op(">#", [new identifier("n"), new literal(0)]), new alternatives([
 			new algebraic_alt(new identifier("False"), [], new identifier("nil")),
 			new algebraic_alt(new identifier("True"), [], new case_expr(new identifier("list"), new alternatives([
@@ -156,7 +156,7 @@ export let fib_prg: program = new program([
 				new algebraic_alt(new identifier("Cons"), [new identifier("h"), new identifier("t")],
 					new case_expr(new identifier("h"), new alternatives([], new default_alt(new identifier("x"),
 						new case_expr(new builtin_op("-#", [new identifier("n"), new literal(1)]), new alternatives([], new default_alt(new identifier("n"),
-							new case_expr(new call(new identifier("take"), [new identifier("n"), new identifier("t")]), new alternatives([], new default_alt(new identifier("y"),
+							new case_expr(new call(new identifier("forcen"), [new identifier("n"), new identifier("t")]), new alternatives([], new default_alt(new identifier("y"),
 								new let_expr([
 									new binding(new identifier("result"), new CON(new identifier("Cons"), [new identifier("x"), new identifier("y")]))
 								], new identifier("result")))))
@@ -173,7 +173,7 @@ export let fib_prg: program = new program([
 		], new identifier("tmp")))),
 		new binding(new identifier("fib2"), new THUNK(new call(new identifier("zipWith"), [new identifier("plusInt"), new identifier("fib0"), new identifier("fib1")])))
 	], new identifier("fib2")))),
-	new binding(new identifier("main"), new THUNK(new call(new identifier("take"), [new literal(10), new identifier("fib")])))
+	new binding(new identifier("main"), new THUNK(new call(new identifier("forcen"), [new literal(10), new identifier("fib")])))
 ]);
 
 export let fib = String(fib_prg);
