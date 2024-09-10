@@ -56,13 +56,29 @@ export default function Machine() {
 		const newUrl = `${location.pathname}?${searchParams.toString()}`;
 		history.replaceState(null, '', newUrl);
 	};
-	const [settings, setSettings] = useState<STGSettings>({
-		garbage_collection: true,
-		eval_apply: false,
-		collapse_indirections: true,
-		bind_names: false,
-		run_limit: 1000
+	const [settings, setSettingsOriginal] = useState<STGSettings>(() => {
+		const searchParams = new URLSearchParams(location.search);
+		return {
+			garbage_collection: true,
+			eval_apply: searchParams.has("ea") || false,
+			collapse_indirections: true,
+			bind_names: false,
+			run_limit: 1000
+		}
 	});
+	const setSettings = (newSettings: STGSettings) => {
+		setSettingsOriginal(newSettings);
+		const searchParams = new URLSearchParams(location.search);
+		if (newSettings.eval_apply !== searchParams.has("ea")) {
+			if (searchParams.has("ea")) {
+				searchParams.delete("ea");
+			} else {
+				searchParams.set("ea", "");
+			}
+			const newUrl = `${location.pathname}?${searchParams.toString()}`;
+			history.replaceState(null, '', newUrl);
+		}
+	};
 	const isDesktop = useMediaQuery("(min-width: 768px)");
 
 	if (!isDesktop) {
