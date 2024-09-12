@@ -151,10 +151,13 @@ export default function HeapView({ className, machine, settings }: {
 				<div className='flex flex-wrap gap-2 m-1 items-center'>
 					<h2 className="font-semibold text-xl m-3">Heap</h2>
 					<HelpPopover>
-						<p className='text-muted-foreground'>Heap view displays all allocated objects on the heap.</p><br />
-						<span className='font-semibold'>Garbage collection:</span>
-						<p className='text-muted-foreground'>If garbage collection is enabled, objects with no references are deleted.</p><br />
+						<p className='text-muted-foreground'>Heap view displays all allocated objects on the heap.</p>
 
+						<br />
+						<span className='font-semibold'>Garbage collection:</span>
+						<p className='text-muted-foreground'>If garbage collection is enabled, objects with no references are deleted.</p>
+
+						<br />
 						<span className='font-semibold'>Marked objects:</span>
 						<p className='text-muted-foreground'>Some objects may be additionally marked, such as:</p>
 						<ul className='list-disc list-inside text-muted-foreground'>
@@ -170,12 +173,19 @@ export default function HeapView({ className, machine, settings }: {
 								newly allocated object:
 								<span className={"relative inline-block px-3 rounded text-foreground" + heapNodeVariants["allocated"] + " after:text-xs after:-bottom-0.5"}>TEST</span>
 							</li>
-						</ul><br />
+						</ul>
 
+						<br />
 						<span className='font-semibold'>Indrections:</span>
 						<p className='text-muted-foreground'>When thunks are updated, they are replaced by an indirection,
 							which points to the new value (i.e. <span className='italic'>big value</span> model). For
 							better clarity, indirections are collapsed by default and replaced with a tag above the connection.
+						</p>
+
+						<br />
+						<span className='font-semibold'>Bind names:</span>
+						<p className='text-muted-foreground'>Bind names can be enabled in the settings, and will appear
+							above a heap object, indicating what was the name of the binding that allocated it.
 						</p>
 					</HelpPopover>
 				</div>
