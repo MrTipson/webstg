@@ -16,15 +16,16 @@ export function loadDirectory(entries: SidebarEntry[]): SidebarEntry[] {
 	});
 }
 
-const isProd = import.meta.env.PROD;
-const devSidebar = loadDirectory(isProd ? [] : [{
-	label: 'My markdown files',
-	items: [
-		{ label: 'Markdown test', link: '/docs/markdown' },
-		{ label: 'Embedded STG test', link: '/docs/mdtest' },
-	]
-}]);
-export const sidebar: SidebarEntry[] = devSidebar.concat(loadDirectory([
+const devSidebar = loadDirectory([
+	{
+		label: 'Dev markdown examples',
+		items: [
+			{ label: 'Markdown test', link: '/docs/markdown' },
+			{ label: 'Embedded STG test', link: '/docs/mdtest' },
+		]
+	},
+]);
+const prodSidebar = loadDirectory([
 	{ label: 'Welcome', link: '/docs' },
 	{
 		label: 'Examples',
@@ -33,4 +34,7 @@ export const sidebar: SidebarEntry[] = devSidebar.concat(loadDirectory([
 		]
 	},
 	{ label: 'WebSTG sandbox', link: '/' },
-]));
+]);
+
+const isProd = import.meta.env.PROD;
+export const sidebar: SidebarEntry[] = (isProd ? [] : devSidebar).concat(prodSidebar);
