@@ -68,7 +68,7 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 		@apply border-r border-muted-foreground/50 translate-x-0 transition-all;
 	}
 	.sidebarContent {
-		@apply col-span-1 p-4 text-muted-foreground no-underline overflow-auto h-full;
+		@apply p-4 text-muted-foreground no-underline overflow-auto h-full;
 	}
 	.sidebarPullMark {
 		@apply top-20 block absolute left-full p-2 bg-secondary z-10 border-t border-r border-b border-muted-foreground/50;
@@ -77,10 +77,10 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 		@apply relative flex h-full flex-col-reverse overflow-auto scroll-pt-2;
 	}
 	.content {
-		@apply relative grow shrink px-12 scroll-pt-2;
+		@apply relative grow shrink px-12 scroll-pt-2 basis-0;
 	}
 	.toc {
-		@apply shrink px-12 pt-12;
+		@apply shrink-[0.5] px-12 pt-12;
 	}
 	.scrollbar {
 		scrollbar-width: 4px;
@@ -98,7 +98,7 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 
 	@media screen(md) {
 		.sidebar {
-			@apply static shrink bg-inherit shadow-none transform-none;
+			@apply static shrink-[0.5] bg-inherit shadow-none transform-none;
 		}
 		.sidebarPullMark {
 			@apply hidden;
@@ -113,7 +113,7 @@ function constructSidebar(sidebar: SidebarEntry[]): string {
 			@apply overflow-auto;
 		}
 		.toc {
-			@apply px-4 overflow-auto;
+			@apply px-6 overflow-auto;
 		}
 	}
 </style>
