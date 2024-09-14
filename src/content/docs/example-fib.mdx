@@ -3,15 +3,8 @@ title: Fibonacci
 description: Going through the lazy generation of the fibonacci sequence using zipWith.
 draft: false
 ---
-export const fig = function (ref) {
-	if (!fig.count) {
-		fig.count = 0;
-	} 
-	if (!fig[ref]) {
-		fig[ref] = ++fig.count;
-	}
-	return fig[ref];
-};
+import useFigure from "../useFigure";
+export const fig = useFigure();
 export const code = `data Number a = Num a
 data List a = Nil | Cons a (List a)
 nil = CON Nil
