@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { stg_machine } from "@/stgmachine/machine";
-import { sum_prg } from "@/stglang/test";
 import ProgramView from "@/components/ProgramView";
 import StackView from "@/components/StackView";
 import HeapView from "@/components/HeapView";
@@ -13,6 +12,8 @@ import {
 import { Toaster } from "@/components/ui/toaster";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { build_ast } from "@/stglang/ASTBuilder";
+import type { InferEntrySchema } from "astro:content";
 
 export type STGSettings = {
 	garbage_collection: boolean,
@@ -22,11 +23,9 @@ export type STGSettings = {
 	run_limit: number
 }
 
-export const default_program = sum_prg;
-
-export default function Machine() {
+export default function Machine({ examples, default_program }: { examples: InferEntrySchema<"examples">[], default_program: string }) {
 	// set machine is called *only* when a new program is loaded, but will be mutated while stepping
-	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(default_program, false, true));
+	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(build_ast(examples.find(x => x.name === default_program)?.code as string), false, true));
 	const [loaded, setLoaded] = useState(false);
 	const [step, setStepOriginal] = useState(Number(new URLSearchParams(location.search).get('step')) || 0);
 	const [breakpoints, setBreakpoints] = useState<Map<number, number>>(new Map());
@@ -100,7 +99,8 @@ export default function Machine() {
 								settings={settings} setSettings={setSettings}
 								breakpoints={breakpoints} setBreakpoints={setBreakpoints}
 								enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks}
-								isDesktop={isDesktop} className="w-full h-0 grow" />
+								isDesktop={isDesktop} className="w-full h-0 grow"
+								examples={examples} default_program={default_program} />
 						</TabsContent>
 						<TabsContent value="heap"><HeapView machine={machine} className="absolute w-full top-12 bottom-0" step={step} settings={settings} /></TabsContent>
 						<TabsContent value="stack" className="contents"><StackView machine={machine} className="w-full h-0 grow" /></TabsContent>
@@ -124,7 +124,8 @@ export default function Machine() {
 						settings={settings} setSettings={setSettings}
 						breakpoints={breakpoints} setBreakpoints={setBreakpoints}
 						enteredThunks={enteredThunks} setEnteredThunks={setEnteredThunks}
-						isDesktop={isDesktop} className="h-full" />
+						isDesktop={isDesktop} className="h-full"
+						examples={examples} default_program={default_program} />
 				</Panel>
 				<Handle withHandle />
 				{loaded &&

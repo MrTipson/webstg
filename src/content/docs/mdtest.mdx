@@ -3,9 +3,9 @@ title: "Example with STG machine components"
 description: jsx components? In my markdown?
 draft: true
 ---
-import examples from "@/stglang/examples";
+import { getEntry } from "astro:content";
 
-export const code = examples.find(x => x.name === "Partial application").code;
+export const code = (await getEntry("examples", "partial-application")).data.code;
 
 # Hello world
 This is the first test of markdown based examples!

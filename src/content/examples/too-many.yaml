@@ -1,0 +1,11 @@
+name: Too many args
+code: |2
+  data Number a = Num a
+  plusN = FUN(n -> let f = FUN(a ->
+    case a of {
+      x -> case x +# n of {
+              y -> let result = CON(Num y)
+                    in result;
+           };
+      }) in f)
+  main = THUNK(plusN 1 2)

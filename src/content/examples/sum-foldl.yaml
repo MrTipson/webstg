@@ -1,0 +1,31 @@
+name: Sum foldl
+code: |2
+  data Number a = Num a
+  data List a = Nil | Cons a (List a)
+  nil = CON Nil
+  zero = CON(Num 0)
+  one = CON(Num 1)
+  two = CON(Num 2)
+  three = CON(Num 3)
+  plusInt = FUN(x y ->
+    case x of {
+      Num i -> case y of {
+                  Num j -> case i +# j of {
+                            x -> let result = CON(Num x)
+                                  in result;
+                          };
+                  };
+      }
+  )
+  foldl = FUN(f acc list -> 
+    case list of {
+      Nil  -> acc;
+      Cons h t -> let newAcc = THUNK(f acc h)
+                   in foldl f newAcc t;
+    }
+  )
+  sum = FUN(list -> foldl plusInt zero list)
+  list1 = CON(Cons one nil)
+  list2 = CON(Cons two list1)
+  list3 = CON(Cons three list2)
+  main = THUNK(sum list3)

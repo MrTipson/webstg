@@ -1,10 +1,16 @@
 ---
+import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Machine from "@/components/Machine.tsx";
 import "@/styles/syntax.css";
 import "@/styles/react_flow_overrides.css";
----
 
+const examples = (await getCollection("examples")).map(x => x.data);
+const default_program = "Sum foldl";
+if (!examples.find(x => x.name === default_program)) {
+	throw new Error("Default program not in examples")
+}
+---
 <Layout title="Simulator" description="Web based simulator of the STG machine">
-	<Machine client:only="react" />
+	<Machine client:only="react" default_program={default_program} examples={examples}/>
 </Layout>

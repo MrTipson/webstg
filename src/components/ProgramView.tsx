@@ -12,14 +12,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import examples from "@/stglang/examples";
 import { binding, case_eval, case_expr, FUN, identifier, let_expr, letrec_expr, literal, THUNK, type expression } from "@/stglang/types";
 import { Separator } from "@/components/ui/separator";
 import HelpPopover from "@/components/HelpPopover";
 import type { STGSettings } from "@/components/Machine";
 import SettingsMenu from "@/components/SettingsMenu";
-import { default_program } from "@/components/Machine";
 import { inflate, deflate } from 'pako';
+import type { InferEntrySchema } from "astro:content";
 
 function compress(txt: string) {
 	return btoa(Array.from(deflate(txt), (byte) => String.fromCodePoint(byte)).join(""));
@@ -55,7 +54,7 @@ function findExpression(lineStart: number, nextLineStart: number, expr: expressi
 	return undefined;
 }
 
-export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded, settings, setSettings, breakpoints, setBreakpoints, isDesktop, enteredThunks, setEnteredThunks }:
+export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded, settings, setSettings, breakpoints, setBreakpoints, isDesktop, enteredThunks, setEnteredThunks, examples, default_program }:
 	{
 		className?: string,
 		machine: stg_machine,
@@ -71,8 +70,10 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		isDesktop: boolean,
 		enteredThunks: [number, number][],
 		setEnteredThunks: React.Dispatch<typeof enteredThunks>,
+		examples: InferEntrySchema<"examples">[],
+		default_program: string,
 	}) {
-	const [selected, setSelected] = useState<string>('Sum foldl');
+	const [selected, setSelected] = useState<string>(default_program);
 	const [programText, setProgramText] = useState(() => {
 		const searchParams = new URLSearchParams(location.search);
 		const programParam = searchParams.get('program');
@@ -80,7 +81,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 			setSelected('');
 			return decompress(programParam);
 		} else {
-			return String(default_program);
+			return examples.find(x => x.name === default_program)?.code as string;
 		}
 	});
 	const [error, setError] = useState<{ from: number, to: number, step: number } | undefined>(undefined);

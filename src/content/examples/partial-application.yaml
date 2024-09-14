@@ -1,0 +1,43 @@
+name: Partial application
+code: |2
+  data Number a = Num a
+  data List a = Nil | Cons a (List a)
+  nil = CON Nil
+  map = FUN(f xs ->
+    case xs of {
+      Nil -> nil;
+      Cons y ys ->  let h = THUNK(f y)
+                        t = THUNK(map f ys)
+                        r = CON(Cons h t)
+                    in r;
+    }
+  )
+  times2 = FUN(x -> 
+    case x of {
+      Num x -> case  x *# 2 of {
+            x -> let result = CON(Num x)
+              in result;
+          };
+    }
+  )
+  times2list = THUNK(map times2)
+  forcelist = FUN(list ->
+    case list of {
+      Nil  -> nil;
+      Cons h t -> case h of {
+                    x -> case forcelist t of {
+                          y -> let result = CON(Cons x y)
+                            in result;
+                          };
+                    };
+    }
+  )
+  main = THUNK(let one = CON(Num 1)
+    two = CON(Num 2)
+    three = CON(Num 3)
+    list1 = CON(Cons one nil)
+    list2 = CON(Cons two list1)
+    list3 = CON(Cons three list2)
+    list_x2 = THUNK(times2list list3)
+    list_x4 = THUNK(times2list list_x2)
+  in forcelist list_x4)

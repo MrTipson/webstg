@@ -1,0 +1,7 @@
+name: Primitive operator
+code: |2 
+  data Number a = Num a
+  main = THUNK(case 2 +# 3 of {
+                x -> let result = CON(Num x)
+                      in result;
+  })
