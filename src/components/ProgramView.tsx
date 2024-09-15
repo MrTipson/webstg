@@ -20,22 +20,50 @@ import SettingsMenu from "@/components/SettingsMenu";
 import { inflate, deflate } from 'pako';
 import type { InferEntrySchema } from "astro:content";
 
+/**
+ * Compress input text using DEFLATE and encode it using base64
+ * @param txt Input text
+ * @returns Base64 encoded compressed text
+ */
 function compress(txt: string) {
 	return btoa(Array.from(deflate(txt), (byte) => String.fromCodePoint(byte)).join(""));
 }
 
+/**
+ * Decode input base64 and decompress it using INFLATE 
+ * @param txt Input encoded+compressed text
+ * @returns Decoded and decompressed text
+ */
 function decompress(txt: string) {
 	return inflate(Uint8Array.from(atob(txt), char => char.codePointAt(0) as number), { to: 'string' });
 }
 
+/**
+ * Helper function to find subexpression to which a breakpoint should be attached.
+ * @param lineStart Index of the first char in the current line
+ * @param nextLineStart Index of the first chat in the next line
+ * @param expr Expression we are examining
+ * @returns 
+ */
 function findExpression(lineStart: number, nextLineStart: number, expr: expression): expression | undefined {
 	if (expr instanceof let_expr || expr instanceof letrec_expr) {
-		let e = findExpression(lineStart, nextLineStart, expr.expr);
-		if (e) return e;
-	} else if (expr instanceof case_expr) {
+		// Body of let(rec) expression
 		let e = findExpression(lineStart, nextLineStart, expr.expr);
 		if (e) return e;
 
+		// Binds of let(rec) expression
+		for (const bind of expr.binds) {
+			if (bind.obj instanceof FUN || bind.obj instanceof THUNK) {
+				e = findExpression(lineStart, nextLineStart, bind.obj.expr);
+				if (e) return e;
+			}
+		}
+	} else if (expr instanceof case_expr) {
+		// Scrutinee
+		let e = findExpression(lineStart, nextLineStart, expr.expr);
+		if (e) return e;
+
+		// Alternatives
 		const exprs = [...expr.alts.named_alts.map(x => x.expr)];
 		if (expr.alts.default_alt) {
 			exprs.push(expr.alts.default_alt.expr);
@@ -54,25 +82,43 @@ function findExpression(lineStart: number, nextLineStart: number, expr: expressi
 	return undefined;
 }
 
-export default function ProgramView({ className, machine, setMachine, step, setStep, loaded, setLoaded, settings, setSettings, breakpoints, setBreakpoints, isDesktop, enteredThunks, setEnteredThunks, examples, default_program }:
-	{
-		className?: string,
-		machine: stg_machine,
-		setMachine: React.Dispatch<typeof machine>,
-		step: number,
-		setStep: React.Dispatch<typeof step>,
-		loaded: boolean,
-		setLoaded: React.Dispatch<typeof loaded>,
-		settings: STGSettings,
-		setSettings: React.Dispatch<typeof settings>,
-		breakpoints: Map<number, number>,
-		setBreakpoints: React.Dispatch<typeof breakpoints>,
-		isDesktop: boolean,
-		enteredThunks: [number, number][],
-		setEnteredThunks: React.Dispatch<typeof enteredThunks>,
-		examples: InferEntrySchema<"examples">[],
-		default_program: string,
-	}) {
+type ProgramViewProps = {
+	readonly className?: string,
+	readonly machine: stg_machine,
+	readonly step: number,
+	readonly loaded: boolean,
+	readonly settings: STGSettings,
+	readonly breakpoints: Map<number, number>,
+	readonly isDesktop: boolean,
+	readonly enteredThunks: [number, number][],
+	readonly examples: InferEntrySchema<"examples">[],
+	readonly default_program: string,
+
+	setMachine: React.Dispatch<stg_machine>,
+	setStep: React.Dispatch<number>,
+	setLoaded: React.Dispatch<boolean>,
+	setSettings: React.Dispatch<STGSettings>,
+	setBreakpoints: React.Dispatch<Map<number, number>>,
+	setEnteredThunks: React.Dispatch<[number, number][]>,
+}
+/**
+ * ProgramView component for fascilitating editing and loading of STG programs.
+ * During runtime, it also visualizes the enviroment and current expression.
+ * @param props.className Classes passed down by the parent
+ * @param props.machine stg_machine instance of the simulator
+ * @param props.step Current step of the simulation
+ * @param props.loaded Flag whether the program is currently loaded in the machine
+ * @param props.settings STG machine and visualization settings
+ * @param props.breakpoints Mapping for breakpoints. A breakpoint exists for expression e if breakpoints[e.from] === e.to
+ * @param props.isDesktop Flag whether the visualization is displaying the mobile layout
+ * @param props.enteredThunks Thunks which were manually entered after finishing execution. Entered thunk is a tuple [step, address]
+ * @param props.examples Examples used in the program editor
+ * @param props.default_program Which example (by name) is used by default
+ */
+export default function ProgramView(props: ProgramViewProps) {
+	const { className, machine, step, loaded, settings, breakpoints, isDesktop, enteredThunks, examples, default_program } = props;
+	const { setMachine, setStep, setLoaded, setSettings, setBreakpoints, setEnteredThunks } = props;
+
 	const [selected, setSelected] = useState<string>(default_program);
 	const [programText, setProgramText] = useState(() => {
 		const searchParams = new URLSearchParams(location.search);
@@ -92,6 +138,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 	const currentExpressionRef = useRef<HTMLSpanElement | undefined>(undefined);
 	const { toast } = useToast();
 
+	// Memoize line starts which are used for breakpoints
 	const lineStarts = useMemo(() => {
 		if (!loaded) {
 			return [];
@@ -107,6 +154,7 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		return starts;
 	}, [loaded]);
 
+	// Memoize breakpoint status which is used for displaying breakpoints
 	const breakPointIsActive = useMemo<boolean[]>(() => {
 		const spans = [...breakpoints.keys()].sort();
 		const result = new Array(lineStarts.length).fill(false);
@@ -120,8 +168,10 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		return result;
 	}, [lineStarts, breakpoints]);
 
+	// Scroll to the current 
 	useEffect(() => currentExpressionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
 
+	// Try to load program from URL if possible
 	useEffect(() => {
 		const searchParams = new URLSearchParams(location.search);
 		if (!loaded && searchParams.has('program')) {
@@ -136,10 +186,12 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 	}, []);
 
+	// Highlight the syntax, enviroment, current expression or error
 	let highlighted;
 	if (error) {
 		highlighted = highlight(programText, true, error.from, error.to, { className: "syntax-error" });
 	} else if (loaded) {
+		// Extract from and to indices for all enviroment entries, and main specifically
 		let mainfrom, mainto;
 		let enviroment = [
 			...machine.env.local_entries(),
@@ -180,6 +232,11 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		highlighted = highlight(programText);
 	}
 
+	/**
+	 * Parse program from code, load it into the STG machine and go to step
+	 * @param code STG program text
+	 * @param step Step number to go to
+	 */
 	function loadMachine(code: string, step: number) {
 		try {
 			const ast = build_ast(code);
@@ -218,6 +275,9 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 	}
 
+	/**
+	 * Toggle loaded state and synchronize program search param in url
+	 */
 	function toggleEditable() {
 		if (loaded) {
 			history.replaceState(null, '', location.pathname);
@@ -234,11 +294,21 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 	}
 
+	/**
+	 * Use lezer to emit styles for syntax, value annotatiosn and marks
+	 * @param code STG program source text
+	 * @param mark Flag for applying mark
+	 * @param markFrom Mark start index
+	 * @param markTo Mark end index
+	 * @param markProps Mark classes
+	 * @param valueAnnotations Annotations for values in the enviroment
+	 * @returns Marked code element
+	 */
 	function highlight(code: string,
 		mark = false, markFrom = -1, markTo = -1, markProps = {},
 		valueAnnotations: { from: number, to: number, value: string }[] = []) {
 		let children: any[] = [];
-		let tmpChildren: any[] = [];
+		let tmpChildren: any[] = []; // used for children inside a mark
 		let start = 0;
 		let inMark = false;
 
@@ -274,14 +344,20 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 					}
 				}
 			}
+
+			// Unstyled text
 			if (start < from) {
 				children.push(code.substring(start, from));
 			}
 			let text = code.substring(from, to);
+
 			// This will skip any annotations that might have been skipped
 			while (annotation && annotation.from < from) {
+				console.warn("Skipped annotation", annotation);
 				annotation = valueAnnotations.pop();
 			}
+
+			// Emit syntax with optional value annotation
 			if (annotation && annotation.from == from && annotation.to == to) {
 				children.push(React.createElement("span", { className: classes + " with-value", "data-value": annotation.value }, text));
 			} else {
@@ -304,8 +380,12 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		return React.createElement("code", undefined, ...children);
 	}
 
+	/**
+	 * Handler for example selector
+	 * @param s Name of example
+	 */
 	function selectExample(s: string) {
-		const selected = examples.filter(({ name }) => name === s)[0];
+		const selected = examples.find(({ name }) => name === s);
 		if (selected) {
 			setSelected(s);
 			setProgramText(selected.code);
@@ -314,6 +394,10 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 	}
 
+	/**
+	 * Handler for STG program input
+	 * @param e TextArea change event
+	 */
 	function inputHandler(e: ChangeEvent<HTMLTextAreaElement>) {
 		let code = e.target.value;
 		setSelected('');
@@ -321,6 +405,10 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		setError(undefined);
 	}
 
+	/**
+	 * Handler for setting a breakpoint
+	 * @param lineNumber 
+	 */
 	function setBreakpoint(lineNumber: number) {
 		const lineStart = lineStarts[lineNumber];
 		// Check if there is a breakpoint on this line already
@@ -332,9 +420,11 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 				return;
 			}
 		}
+		// Find binding which contains the line
 		for (const decl of machine.prog.decls) {
 			if (lineStart >= decl.from && lineStart < decl.to && decl instanceof binding) {
 				if (decl.obj instanceof FUN || decl.obj instanceof THUNK) {
+					// Try to find expression at exact line, but fallback if it was not found
 					const expr = findExpression(lineStart, lineStarts[lineNumber + 1], decl.obj.expr) ||
 						findExpression(decl.from, decl.to, decl.obj.expr);
 					if (expr) {
@@ -348,6 +438,12 @@ export default function ProgramView({ className, machine, setMachine, step, setS
 		}
 	}
 
+	/**
+	 * Handler for keyboard events inside the editor. Used to override default behaviour
+	 * concerning tab focus. Tab inserts a tabulator (\t), and focus for keyboard navigation is
+	 * restored using escape.
+	 * @param e Keyboard event to handle
+	 */
 	function keyDownHandler(e: BaseSyntheticEvent & KeyboardEvent) {
 		switch (e.key) {
 			case 'Tab': // Change behaviour so tab doesn't move to next element

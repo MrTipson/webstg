@@ -5,6 +5,10 @@ import type { PropsWithChildren } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
+/**
+ * Generic component for placing the help popover. Appears as a drawer in mobile.
+ * @param props.children Content that should be placed in the help window
+ */
 export default function HelpPopover({ children }: PropsWithChildren) {
 	const isDesktop = useMediaQuery("(min-width: 768px)");
 	if (isDesktop) {

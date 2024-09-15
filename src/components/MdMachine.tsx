@@ -1,18 +1,42 @@
-import type { PropsWithChildren } from "react";
-import { type STGSettings } from "./Machine";
+import { type STGSettings } from "@/components/Machine";
 import { build_ast } from "@/stglang/ASTBuilder";
 import { stg_machine } from "@/stgmachine/machine";
 import React from "react";
-import HeapView from "./HeapView";
-import StackView from "./StackView";
+import HeapView from "@/components/HeapView";
+import StackView from "@/components/StackView";
 
 const heap_slot = `<heap></heap>`;
 const stack_slot = `<stack></stack>`;
 
-export function MdMachine({ children, program, step, garbage_collection, eval_apply, collapse_indirections, bind_names, entered_thunks }:
-	PropsWithChildren & STGSettings & { program: string, step: number, entered_thunks: [number, number][] }) {
+type MdMachineProps = STGSettings & {
+	readonly children: React.ReactNode,
+	readonly program: string,
+	readonly step: number,
+	readonly entered_thunks: [number, number][],
+}
+/**
+ * Main component of the simulator for the markdown pages. You can only use it 
+ * for the <stack/> and <heap/> elements, or include additional markdown content.
+ * Each can only be used **once**.
+ * @param props.children Markdown content
+ * @param props.program Program that is loaded in the STG machine
+ * @param props.step Which step should the STG machine be at
+ * @param props.entered_thunks Any additional thunks that should be entered during runtime
+ * @example
+ * ```
+ * // blog-post.mdx
+ * <MdMachine client:load step={176} program={code} garbage_collection collapse_indirections>
+ *		# Hello
+ *		... md content
+ *		<stack/>
+ *		<heap/>
+ *	</MdMachine>
+ * ```
+ */
+export function MdMachine(props: MdMachineProps) {
+	const { children, program, step, garbage_collection, eval_apply, collapse_indirections, bind_names, entered_thunks } = props;
 	const ast = build_ast(program);
-	const machine = new stg_machine(ast, eval_apply = eval_apply, garbage_collection = garbage_collection, entered_thunks = entered_thunks);
+	const machine = new stg_machine(ast, eval_apply, garbage_collection, entered_thunks);
 	const settings: STGSettings = {
 		garbage_collection: garbage_collection,
 		eval_apply: eval_apply,

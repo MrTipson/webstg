@@ -46,15 +46,9 @@ function highlightSTG(program: string) {
 	}
 	<div class="relative">
 		{
-			isStgLang ? (
-				<pre class="codeBlock"><code set:html={highlightSTG(code.replaceAll('\r',''))} /></pre>
-			) : (
-				<Code
-					code={code}
-					lang={lang || "plaintext"}
-					class="codeBlock"
-				/>
-			)
+			isStgLang 
+			&& <pre class="codeBlock"><code set:html={highlightSTG(code.replaceAll('\r',''))} /></pre>
+			|| <Code code={code} lang={lang || "plaintext"} class="codeBlock"/>
 		}
 		<Button size={"icon"} variant={"outline"} className="copyCode">
 			<Copy size={20} className="copyIcon" />

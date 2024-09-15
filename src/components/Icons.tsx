@@ -8,6 +8,10 @@ const variants = {
 			fill="currentColor"></path>
 	</svg>
 }
+/**
+ * Helper component for using custom svg icons
+ * @param props.variant Variant of the icon component
+ */
 export default function Icon({ variant }: { variant: keyof typeof variants }) {
 	return variants[variant];
 }

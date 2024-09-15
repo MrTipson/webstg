@@ -3,7 +3,13 @@ import { thunk_update, type stack_object, case_cont, pending_arg, apply_args } f
 import { Separator } from "@/components/ui/separator";
 import HelpPopover from "@/components/HelpPopover";
 
-export default function StackView({ className, machine }: { className?: string, machine: stg_machine }) {
+type StackViewProps = {
+	readonly className?: string,
+	readonly machine: stg_machine,
+}
+export default function StackView(props: StackViewProps) {
+	const { className, machine } = props;
+
 	return (
 		<div className={className}>
 			<div className="h-full w-full flex flex-col">

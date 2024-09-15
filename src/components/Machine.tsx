@@ -20,9 +20,16 @@ export type STGSettings = {
 	eval_apply: boolean,
 	collapse_indirections: boolean,
 	bind_names: boolean,
-	run_limit: number
+	run_limit: number,
 }
 
+/**
+ * Main component for the STG machine simulator
+ * 
+ * *Note: Examples are passed as props because they are loaded as content/data collections on the server* 
+ * @param props.examples Examples used in the program editor
+ * @param props.default_program Which example (by name) is used by default
+ */
 export default function Machine({ examples, default_program }: { examples: InferEntrySchema<"examples">[], default_program: string }) {
 	// set machine is called *only* when a new program is loaded, but will be mutated while stepping
 	const [machine, setMachine] = useState<stg_machine>(() => new stg_machine(build_ast(examples.find(x => x.name === default_program)?.code as string), false, true));

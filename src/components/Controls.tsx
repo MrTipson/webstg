@@ -15,19 +15,36 @@ import type { STGSettings } from "@/components/Machine";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
-export default function Controls({ className, machine, step, setStep, breakpoints, settings, isDesktop, enteredThunks, setEnteredThunks }: {
-	className?: string,
-	machine: stg_machine,
-	step: number,
-	setStep: React.Dispatch<typeof step>,
-	breakpoints: Map<number, number>,
-	settings: STGSettings,
-	isDesktop: boolean,
-	enteredThunks: [number, number][],
-	setEnteredThunks: React.Dispatch<typeof enteredThunks>,
-}) {
+type ControlsProps = {
+	readonly className?: string,
+	readonly machine: stg_machine,
+	readonly step: number,
+	readonly breakpoints: Map<number, number>,
+	readonly settings: STGSettings,
+	readonly isDesktop: boolean,
+	readonly enteredThunks: [number, number][],
+
+	setStep: React.Dispatch<number>,
+	setEnteredThunks: React.Dispatch<[number, number][]>,
+}
+/** 
+ * Control panel for the visualization. Contains step controls, timeline and rule explanation.
+ * @param props.className Classes passed down from the parent
+ * @param props.machine stg_machine instance for the simulator
+ * @param props.step Current step state of the simulation
+ * @param props.breakpoints Mapping for breakpoints. A breakpoint exists for expression e if breakpoints[e.from] === e.to
+ * @param props.settings Settings for the stg_machine and visualization
+ * @param props.isDesktop Flag to choose which layout to use
+ * @param props.enteredThunks Thunks which were manually entered after finishing execution. Entered thunk is a tuple [step, address]
+ * 
+ * @param props.setStep Setter for the step state
+ * @param props.setEnteredThunks Setter for entered thunks
+ * */
+export default function Controls(props: ControlsProps) {
+	const { className, machine, step, setStep, breakpoints, settings, isDesktop, enteredThunks, setEnteredThunks } = props;
 	const { toast } = useToast();
-	const [markers, setMarkers] = useState<Map<number, string>>(() => {
+	// Markers are mappings from steps to labels.
+	const [markers, setMarkers] = useState<ReadonlyMap<number, string>>(() => {
 		const searchParams = new URLSearchParams(location.search);
 		const markers = new Map();
 		for (let key of searchParams.keys()) {
@@ -39,6 +56,7 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 		}
 		return markers;
 	});
+	// Setup keyboard shortcuts for stepping
 	useEffect(() => {
 		function keyboardHandler(event: KeyboardEvent) {
 			if (event.key == "ArrowLeft") {
@@ -51,11 +69,22 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 		return () => document.removeEventListener("keydown", keyboardHandler);
 	})
 
+	/**
+	 * Enter another thunk after execution has finished
+	 * @param thunk Thunk address to enter
+	 */
 	function enterThunk(thunk: number) {
 		machine.enter_thunk(thunk);
 		setEnteredThunks([...enteredThunks, [machine.step_number, thunk]]);
 		setStep(machine.step_number);
 	}
+	/**
+	 * Move execution from current step to newStep (can be forwards or backwards).
+	 * > Only updates the visualization *once*.
+	 * 
+	 * > *Also logs the machine instance to the console for easier inspection.*
+	 * @param newStep Step to move to
+	 */
 	function moveTo(newStep: number) {
 		try {
 			while (newStep > machine.step_number && machine.step());
@@ -71,6 +100,14 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 		}
 	}
 
+	/**
+	 * Step forward, but stop if:
+	 * - run_limit steps have elapsed
+	 * - a breakpoint is reached
+	 * - execution is finished
+	 * 
+	 * Only updates the visualization *once*.
+	 */
 	function run() {
 		try {
 			let stepLimit = settings.run_limit;
@@ -91,6 +128,7 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 		setStep(machine.step_number);
 	}
 
+	// Find next matching rule
 	let definition, explanation;
 	let expr = machine.expr;
 	try {
@@ -105,6 +143,10 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 		}
 	}
 
+	/**
+	 * Handle changes to the markers and update the state
+	 * @param event Change event to handle
+	 */
 	function onChangeMarker(event: React.ChangeEvent<HTMLInputElement>) {
 		const value = event.target.value;
 		const newMarkers = new Map(markers);
@@ -185,6 +227,10 @@ export default function Controls({ className, machine, step, setStep, breakpoint
 	);
 }
 
+/**
+ * Popover for the marker input field
+ * @param props.children Elements to put inside the popover
+ */
 function MarkerPopover({ children }: React.PropsWithChildren) {
 	return (
 		<Popover>
@@ -200,7 +246,22 @@ function MarkerPopover({ children }: React.PropsWithChildren) {
 	);
 }
 
-function ThunkPopover({ children, machine, enterThunk }: React.PropsWithChildren & { machine: stg_machine, enterThunk: (addr: number) => void }) {
+type ThunkPopoverProps = {
+	readonly children: React.ReactNode,
+	readonly machine: stg_machine,
+
+	enterThunk: (addr: number) => void
+}
+/**
+ * Popover for selecting thunk to enter
+ * 
+ * *Entering thunks is only available when execution of the machine is finished*
+ * @param props.children Contents of the button that triggers the popover
+ * @param props.machine stg_machine instance of the simulator
+ * @param props.enterThunk Handler for when thunk is selected
+ */
+function ThunkPopover(props: ThunkPopoverProps) {
+	const { children, machine, enterThunk } = props;
 	const thunks = machine.h.current.map((x, i) => [x, i]).filter(([x, i]) => x instanceof THUNK) as [heap_object, number][];
 	return (
 		<Popover>
@@ -213,8 +274,8 @@ function ThunkPopover({ children, machine, enterThunk }: React.PropsWithChildren
 				<ScrollArea>
 					{
 						thunks.length > 0
-							? <h3>Thunks on the heap:</h3>
-							: <h3>No thunks on the heap</h3>
+						&& <h3>Thunks on the heap:</h3>
+						|| <h3>No thunks on the heap</h3>
 					}
 					{thunks.map(([x, address], i) =>
 						<div key={i} className="contents">

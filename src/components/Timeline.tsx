@@ -1,6 +1,11 @@
 import { Slider } from "@/components/ui/slider"
 import { useMemo, useState } from "react";
 
+/**
+ * Helper to calculate tick locations such that around 10 ticks will be on the timeline
+ * @param limit Maximum step displayed on the timeline
+ * @returns Tick locations
+ */
 function calculateTicks(limit: number) {
 	const gap = Math.max(1, Math.ceil((limit - 1) / 10));
 
@@ -23,12 +28,36 @@ function calculateTicks(limit: number) {
 	return ticks;
 }
 
+/**
+ * Helper to calculate x offset relative to the slider start
+ * @param step Step to calculate offset for
+ * @param limit Maximum step displayed on the timeline
+ * @param width Width of the slider
+ * @returns x offset for the given step
+ */
 function calculateOffset(step: number, limit: number, width: number) {
 	return limit === 1 ? 0 : Math.round((step - 1) / (limit - 1) * (width - 16));
 }
 
-export default function Timeline({ className, width, markers, step, moveTo }:
-	{ className?: string, width: number, markers: [number, string][], step: number, moveTo: React.Dispatch<number> }) {
+type TimelineProps = {
+	readonly className?: string,
+	readonly width: number,
+	readonly markers: [number, string][],
+	readonly step: number,
+
+	moveTo: React.Dispatch<number>,
+}
+/**
+ * Timeline component to show step progression, and markers
+ * @param props.className Classes passed down by the parent
+ * @param props.width Width of the timeline component
+ * @param props.markers Markers to display
+ * @param props.step Current step
+ * @param props.moveTo Function that moves the machine to given step
+ */
+export default function Timeline(props: TimelineProps) {
+	const { className, width, markers, step, moveTo } = props;
+
 	const [limit, setLimitOriginal] = useState(() => {
 		const searchParams = new URLSearchParams(location.search);
 		return Number(searchParams.get('limit')) || step;
@@ -41,12 +70,18 @@ export default function Timeline({ className, width, markers, step, moveTo }:
 		history.replaceState(null, '', newUrl);
 	};
 
+	// Memoize ticks if limit doesn't change
 	const ticks = useMemo(() => calculateTicks(limit), [limit]);
 
 	if (step > limit) {
 		setLimit(step);
 	}
 
+	/**
+	 * Handler for slider change
+	 * *Note: we only use 1 slider thumb*
+	 * @param value Values of the slider thumbs
+	 */
 	function changeHandler(value: number[]) {
 		moveTo(value[0]);
 	}
