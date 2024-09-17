@@ -1,5 +1,5 @@
 import { FUN, PAP, THUNK, call, literal, type expression, identifier } from "@/stglang/types";
-import { register_rule, type Rule } from "@/stgmachine/evaluation_rules/types";
+import { register_rule, type Rule } from "@/stgmachine/evaluation_rules/utils";
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import { apply_args, type stack } from "@/stgmachine/stack";

@@ -1,3 +1,10 @@
+/*
+ *	This grammar is a bit chaotic because of some extra constraints from the build_ast and ambiguities.
+ *	For more info about the grammar syntax see https://lezer.codemirror.net/docs/guide/#writing-a-grammar
+ *
+ *	Mainly, some excess wrapping is used such that the builder can enter/leave these nodes (e.g. Generic_types).
+ */
+
 @top Program { (Binding | Datatype)* }
 
 kw<term> { @specialize[@name={term}]<Identifier, term> }

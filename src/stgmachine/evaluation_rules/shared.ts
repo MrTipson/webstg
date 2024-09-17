@@ -2,7 +2,7 @@ import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, 
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import { case_cont, thunk_update, type stack } from "@/stgmachine/stack";
-import { register_rule, used_vars, type Rule } from "@/stgmachine/evaluation_rules/types";
+import { register_rule, used_vars, type Rule } from "@/stgmachine/evaluation_rules/utils";
 
 export const rules = new Array<Rule>();
 let reg = (x: Rule) => register_rule(rules, x);

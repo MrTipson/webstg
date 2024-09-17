@@ -1,7 +1,14 @@
 import { parser } from "./parser.js"
 import { identifier, literal, program, datatype, constructor, binding, call, builtin_op, let_expr, letrec_expr, case_expr, alternatives, algebraic_alt, default_alt, FUN, CON, THUNK, PAP } from "@/stglang/types";
 
+/** Exception that is passed on from the parser */
 export class STGSyntaxError extends Error {
+	/**
+	 * Create an exception
+	 * @param m Message
+	 * @param from Start index of the offending source text
+	 * @param to End index of the offending source text
+	 */
 	constructor(m: string, public from: number, public to: number) {
 		super(m);
 		// https://github.com/microsoft/TypeScript-wiki/blob/81fe7b91664de43c02ea209492ec1cea7f3661d0/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
@@ -9,16 +16,25 @@ export class STGSyntaxError extends Error {
 	}
 }
 
+/**
+ * Parse the source and construct an abstract syntax tree
+ * 
+ * *Note: We also type check the constructors to help the user.
+ * Since STG would normally be used as an intermediary representation,
+ * type checking would not be necessary, since the program would have been type checked already.*
+ * @param code Source program text
+ */
 export function build_ast(code: string): program {
 	const tree = parser.parse(code);
 
-	let stack: any = [];
-	let args: any = [];
+	let stack: any = []; // used to save pending args when entering another node
+	let args: any = []; // accumulate arguments for parent node
 
 	let ast: program | undefined;
 	let constructors: string[] = [];
 	// let datatypes = [];
 	tree.iterate({
+		// Entering accumulates leaves and 
 		enter(n) {
 			switch (n.name) {
 				case "Datatype":
@@ -59,6 +75,7 @@ export function build_ast(code: string): program {
 				case "⚠": throw new STGSyntaxError("Unexpected token", n.from, n.to);
 			}
 		},
+		// Leaving collects arguments and constructs AST node. Result is typically pushed back on to arguments
 		leave(n) {
 			let constr;
 			switch (n.name) {

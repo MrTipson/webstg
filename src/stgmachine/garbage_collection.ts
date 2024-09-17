@@ -3,12 +3,16 @@ import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import { case_cont, pending_arg, thunk_update, type stack, apply_args } from "@/stgmachine/stack";
 
+/**
+ * Simple tracing garbage collection implementation (i.e. mark and sweep)
+ * @params Current state of the machine
+ */
 export function rungc(expr: expression, env: enviroment, s: stack, h: heap) {
+	// Start with all the local/global enviroment binds
 	let roots = [...env.current_local.values(), ...env.current_global.values()];
 	let flags: boolean[] = [];
 
 	// Some rules return expressions which should still be considered 'live'
-	// Other expressions should be covered by the local/global enviroment
 	if (expr instanceof literal) {
 		roots.push(expr);
 	} else if (expr instanceof call) {
@@ -22,6 +26,7 @@ export function rungc(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (expr.val instanceof literal) roots.push(expr.val);
 	}
 
+	// Inspect stack objects for pointers
 	let stack_objs = s.peekn(s.current.length);
 	for (let obj of stack_objs) {
 		if (obj instanceof case_cont) {
@@ -43,6 +48,7 @@ export function rungc(expr: expression, env: enviroment, s: stack, h: heap) {
 		}
 	}
 
+	// Loop through the roots and add whatever is reachable for further inspection
 	let ref: literal | undefined;
 	while (ref = roots.pop()) {
 		let obj = h.get(ref);
@@ -74,6 +80,7 @@ export function rungc(expr: expression, env: enviroment, s: stack, h: heap) {
 		}
 	}
 
+	// Clear all of the unreachable objects
 	for (let i = 0; i < flags.length; i++) {
 		if (!flags[i]) {
 			let addr = new literal(i, true);

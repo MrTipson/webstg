@@ -2,6 +2,7 @@ import { type heap_object, literal } from "@/stglang/types";
 
 export class heap {
 	step: number = 0;
+	// Index of next free slot
 	i: number = 0;
 	// Current state of the heap
 	current: (heap_object | undefined)[] = [];
