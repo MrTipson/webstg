@@ -262,7 +262,7 @@ type ThunkPopoverProps = {
  */
 function ThunkPopover(props: ThunkPopoverProps) {
 	const { children, machine, enterThunk } = props;
-	const thunks = machine.h.current.map((x, i) => [x, i]).filter(([x, i]) => x instanceof THUNK) as [heap_object, number][];
+	const thunks = machine.h.current.map((x, i) => [x, i]).filter(([x, _]) => x instanceof THUNK) as [heap_object, number][];
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
@@ -277,7 +277,7 @@ function ThunkPopover(props: ThunkPopoverProps) {
 						&& <h3>Thunks on the heap:</h3>
 						|| <h3>No thunks on the heap</h3>
 					}
-					{thunks.map(([x, address], i) =>
+					{thunks.map(([_, address], i) =>
 						<div key={i} className="contents">
 							<Button variant={'ghost'} className="w-full rounded-none justify-start" onClick={() => enterThunk(address)}>
 								{`0x${address.toString(16)}`}

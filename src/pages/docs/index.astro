@@ -1,9 +1,9 @@
 ---
 import MarkdownLayout from "@/layouts/MarkdownLayout.astro";
-import { getEntryBySlug } from "astro:content";
+import { getEntry } from "astro:content";
 import { sidebar } from "@/content/directory";
 
-const entry = await getEntryBySlug("docs", "index");
+const entry = await getEntry("docs", "index");
 const { Content, headings } = await entry.render();
 ---
 

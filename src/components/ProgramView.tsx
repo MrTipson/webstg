@@ -360,6 +360,7 @@ export default function ProgramView(props: ProgramViewProps) {
 			// Emit syntax with optional value annotation
 			if (annotation && annotation.from == from && annotation.to == to) {
 				children.push(React.createElement("span", { className: classes + " with-value", "data-value": annotation.value }, text));
+				annotation = valueAnnotations.pop();
 			} else {
 				children.push(React.createElement("span", { className: classes }, text));
 			}
@@ -412,7 +413,7 @@ export default function ProgramView(props: ProgramViewProps) {
 	function setBreakpoint(lineNumber: number) {
 		const lineStart = lineStarts[lineNumber];
 		// Check if there is a breakpoint on this line already
-		for (const [start, end] of breakpoints.entries()) {
+		for (const start of breakpoints.keys()) {
 			if (lineStart <= start && lineStarts[lineNumber + 1] > start) {
 				const newBreakpoints = new Map(breakpoints);
 				newBreakpoints.delete(start);
