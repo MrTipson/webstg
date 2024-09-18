@@ -95,14 +95,14 @@ export default function HeapView(props: HeapViewProps) {
 		let numVals: number = 0;
 		if (obj instanceof THUNK) {
 			numVals = obj.env.size;
-			outnodes = [...obj.env.values()].map(x => x.val);
+			outnodes = [...obj.env.values()].filter(x => x.isAddr).map(x => x.val);
 		} else if (obj instanceof BLACKHOLE) {
 			numVals = obj.thunk.env.size;
-			outnodes = [...obj.thunk.env.values()].map(x => x.val);
+			outnodes = [...obj.thunk.env.values()].filter(x => x.isAddr).map(x => x.val);
 		} else if (obj instanceof FUN) {
 			if (obj.env) {
 				numVals = obj.env.size;
-				outnodes = [...obj.env.values()].map(x => x.val);
+				outnodes = [...obj.env.values()].filter(x => x.isAddr).map(x => x.val);
 			}
 		} else if (obj instanceof CON || obj instanceof PAP) {
 			// all atoms should be literals already, but we check anyways
