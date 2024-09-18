@@ -1,0 +1,50 @@
+name: Comparing folds
+code: |2
+  data Number a = Num a
+  data List a = Nil | Cons a (List a)
+  data Bool = True | False
+
+  seq = FUN(a b -> case a of { _ -> b	})
+  foldl = FUN(f acc l ->
+    case l of {
+      Nil -> acc;
+      Cons h t -> let fh = THUNK(f acc h)
+              ft = THUNK(foldl f fh t)
+            in ft
+    })
+  foldl_ = FUN(f acc l ->
+    case l of {
+      Nil -> acc;
+      Cons h t -> let fh = THUNK(f acc h)
+              ft = THUNK(foldl_ f fh t)
+            in seq fh ft
+    })
+  foldr = FUN(f acc l ->
+    case l of {
+      Nil -> acc;
+      Cons h t -> let ft = THUNK(foldr f acc t)
+              fh = THUNK(f ft h)
+            in fh
+    })
+  zero = CON(Num 0)
+  plusInt = FUN(a b -> 
+      case a of { Num va -> 
+        case b of { Num vb ->
+          case va +# vb of {
+            vab -> let r = CON(Num vab) in r
+          }
+        }
+      })
+  nil = CON Nil
+  range = FUN(start step end ->
+    case start <# end of { 
+      True -> let h = CON(Num start)
+            t = THUNK(case start +# step of {
+                  val -> range val step end
+              })
+            r = CON(Cons h t)
+          in r;
+      False -> nil
+    })
+  main = THUNK(let l = THUNK(range 0 1 5)
+          in foldr plusInt zero l)
