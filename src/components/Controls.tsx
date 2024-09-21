@@ -11,6 +11,7 @@ import { ArrowLeft, ArrowRight, Flag, Play } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { macros } from "@/stgmachine/evaluation_rules/utils";
 import type { STGSettings } from "@/components/Machine";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -179,7 +180,7 @@ export default function Controls(props: ControlsProps) {
 							<span className="font-semibold text-lg">Next rule: </span>
 							<span className="text-muted-foreground">{explanation}</span>
 						</summary>
-						<div className="bg-muted p-1 rounded"><Latex children={definition} /></div>
+						<div className="bg-muted p-1 rounded text-3xl"><Latex children={definition} macros={macros} /></div>
 					</details>
 				</div>
 				||

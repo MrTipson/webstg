@@ -2,6 +2,49 @@ import { let_expr, type expression, literal, case_expr, letrec_expr, call, built
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import type { stack } from "@/stgmachine/stack";
+import type { Macros } from "react-latex-next/dist/renderLatex";
+
+// Latex helpers
+export const frac = (top: string) => (bottom: string) => `$ {${top}} \\over {${bottom}} $`.replaceAll(";", ";\\ ");
+export const macros: Macros = {
+	"\\DATA": "\\texttt{data}",
+	"\\FUN": "\\texttt{FUN}",
+	"\\CON": "\\texttt{CON}",
+	"\\PAP": "\\texttt{PAP}",
+	"\\THUNK": "\\texttt{THUNK}",
+	"\\BLACKHOLE": "\\texttt{BLACKHOLE}",
+	"\\INDIRECTION": "\\texttt{INDIRECTION}",
+	"\\LET": "\\texttt{let}",
+	"\\LETREC": "\\texttt{letrec}",
+	"\\CASE": "\\texttt{case}",
+	"\\OF": "\\texttt{of}",
+	"\\IN": "\\texttt{in}",
+	"\\LPAREN": "\\texttt{(}",
+	"\\RPAREN": "\\texttt{)}",
+	"\\LBRACE": "\\texttt{\\{}",
+	"\\RBRACE": "\\texttt{\\}}",
+	"\\SEMIC": "\\texttt{;}",
+	"\\OR": "\\texttt{|}",
+	"\\EQU": "\\texttt{==\\#}",
+	"\\NEQ": "\\texttt{!=\\#}",
+	"\\LTH": "\\texttt{<\\#}",
+	"\\GTH": "\\texttt{>\\#}",
+	"\\LEQ": "\\texttt{<=\\#}",
+	"\\GEQ": "\\texttt{>=\\#}",
+	"\\MUL": "\\texttt{*\\#}",
+	"\\DIV": "\\texttt{/\\#}",
+	"\\MOD": "\\texttt{\\%\\#}",
+	"\\ADD": "\\texttt{+\\#}",
+	"\\SUB": "\\texttt{-\\#}",
+	"\\IS": "\\texttt{=\\#}",
+	"\\ARROW": "\\texttt{->}",
+	"\\Sexpr": "\\texttt{expr}",
+	"\\Ss": "\\texttt{s}",
+	"\\SH": "\\texttt{H}",
+	"\\SENV": "\\texttt{env}",
+	"\\SGLENV": "\\texttt{env}_\\texttt{G}",
+	"\\SLENV": "\\texttt{env}_\\texttt{L}",
+}
 
 export function register_rule(ruleset: Array<Rule>, rule: Rule) {
 	ruleset.push(rule);

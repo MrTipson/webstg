@@ -1,5 +1,5 @@
 import { call, literal, type expression, FUN, PAP } from "@/stglang/types";
-import { register_rule, type Rule } from "@/stgmachine/evaluation_rules/utils";
+import { register_rule, type Rule, frac } from "@/stgmachine/evaluation_rules/utils";
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import { pending_arg, type stack } from "@/stgmachine/stack";
@@ -9,7 +9,9 @@ let reg = (x: Rule) => register_rule(rules, x);
 
 reg({
 	name: "PUSH",
-	definition: "$f^k \\, a_1 \\ldots a_m$; $s$; $H \\: \\Rightarrow \\: f$; Arg $a_1 \\ldots \\, $Arg $a_m:s$; $H$",
+	definition: frac
+		(`f^k\\ a_1 \\ldots a_m; \\Ss; \\SH; \\SLENV`)
+		(`f; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_m:\\Ss; \\SH; \\SLENV`),
 	explanation: "Push function arguments onto the stack",
 	match(expr: expression, env: enviroment, s: stack, _h: heap) {
 		if (!(expr instanceof call)) return undefined;
@@ -26,8 +28,9 @@ reg({
 
 reg({
 	name: "FENTER",
-	definition: "$f$; Arg $a_1 \\ldots$ Arg $a_n:s$; $H[f \\mapsto \\mathtt{FUN}(x_1 \\ldots x_n \\rightarrow e)] \\:" +
-		"\\Rightarrow \\: e[a_1/x_1 \\ldots a_n/x_n]$; $s$; $H$",
+	definition: frac
+		(`f; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_n:\\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e); \\SLENV`)
+		(`e; \\Ss; \\SH; \\SLENV[x_i \\mapsto a_i]`),
 	explanation: "Collect function arguments off the stack and enter function body",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal)) return undefined;
@@ -48,8 +51,9 @@ reg({
 
 reg({
 	name: "PAP1",
-	definition: "$f$; Arg $a_1 \\ldots $ Arg $a_m:s$; $H[f \\mapsto \\mathtt{FUN}(x_1 \\ldots x_n \\rightarrow e)] \\:" +
-		"\\Rightarrow \\: p$; $s$; $H[p \\mapsto \\mathtt{PAP}(f \\, a_1 \\ldots a_m)] \\quad \\mathit{1 \\le m \\lt n}$",
+	definition: frac
+		(`f; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_m:\\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e); \\SLENV`)
+		(`p; \\Ss; \\SH[p] = \\PAP(f\\ a_1 \\ldots a_m);\\SLENV \\quad \\mathit{1 \\le m < n}`),
 	explanation: "Construct partial application",
 	match(expr: expression, _env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal)) return undefined;
@@ -70,8 +74,9 @@ reg({
 
 reg({
 	name: "PENTER",
-	definition: "$f$; Arg $a_{n+1}:s$; $H[f \\mapsto \\mathtt{PAP}(g \\, a_1 \\ldots a_n)] \\: \\Rightarrow" +
-		"\\: g$; Arg $a_1 \\ldots$ Arg $a_n:$ Arg $a_{n+1}:s$; $H$",
+	definition: frac
+		(`f; \\texttt{Arg}\\ a_{n+1}:\\Ss; \\SH[f] = \\mathtt{PAP}(g\\ a_1 \\ldots a_n); \\SLENV`)
+		(`g; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_n: \\texttt{Arg}\\ a_{n+1}:\\Ss; \\SH; \\SLENV`),
 	explanation: "Enter partial application and push combined arguments onto the stack",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal)) return undefined;

@@ -2,14 +2,16 @@ import { let_expr, type expression, case_expr, identifier, CON, literal, THUNK, 
 import type { enviroment } from "@/stgmachine/enviroment";
 import type { heap } from "@/stgmachine/heap";
 import { case_cont, thunk_update, type stack } from "@/stgmachine/stack";
-import { register_rule, used_vars, type Rule } from "@/stgmachine/evaluation_rules/utils";
+import { register_rule, used_vars, type Rule, frac } from "@/stgmachine/evaluation_rules/utils";
 
 export const rules = new Array<Rule>();
 let reg = (x: Rule) => register_rule(rules, x);
 
 reg({
 	name: "LET",
-	definition: "let $x = obj$ in $e$; $s$; $H \\: \\Rightarrow \\: e[x'/x]$; $s$; $H[x'\\mapsto obj]$",
+	definition: frac
+		(`\\texttt{let}\\ x = obj\\ \\IN\\ e ; \\Ss ; \\SH; \\SLENV`)
+		(`e; \\Ss; \\SH[a] = obj; \\SLENV[x \\mapsto a]`),
 	explanation: "Allocate objects on the heap and bind their addresses to names in the local enviroment",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof let_expr)) return undefined;
@@ -44,7 +46,9 @@ reg({
 
 reg({
 	name: "LETREC",
-	definition: "letrec $x = obj$ in $e$; $s$; $H \\: \\Rightarrow \\: e[x'/x]$; $s$; $H[x'\\mapsto obj]$",
+	definition: frac
+		(`\\texttt{letrec}\\ x = obj\\ \\IN\\ e ; \\Ss ; \\SH; \\SLENV`)
+		(`e; \\Ss; \\SH[a] = obj; \\SLENV[x \\mapsto a]`),
 	explanation: "Allocate objects on the heap and bind their addresses to names in the local enviroment",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof letrec_expr)) return undefined;
@@ -85,8 +89,9 @@ reg({
 
 reg({
 	name: "CASECON",
-	definition: "case $v$ of $\\{\\ldots ; C\\, x_1 \\ldots x_n \\rightarrow e;\\ldots\\}$; $s$; $H[v \\mapsto \\mathtt{CON}(C\\ a_1\\ldots a_n)] \\:" +
-		"\\Rightarrow \\: e[a_1/x_1 \\ldots a_n/x_n]$; $s$; $H$",
+	definition: frac
+		(`\\CASE\\ v\\ \\OF \\LBRACE\\ldots ; C\\, x_1 \\ldots x_n\\ \\ARROW\\ e;\\ldots\\RBRACE; \\Ss; \\SH[v] = \\CON(C\\ a_1\\ldots a_n); \\SLENV`)
+		(`e; \\Ss; \\SH; \\SLENV[x_i \\mapsto a_i]`),
 	explanation: "Match object to constructor alternative",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof case_eval)) return undefined;
@@ -111,7 +116,9 @@ reg({
 
 reg({
 	name: "CASEANY",
-	definition: "case $v$ of $\\{\\ldots ; x \\rightarrow e\\}$; $s$; $H \\: \\Rightarrow \\: e[v/x]$; $s$; $H$",
+	definition: frac
+		(`\\CASE\\ v\\ \\OF \\LBRACE\\ldots ; x\\ \\ARROW\\ e\\RBRACE; \\Ss; \\SH; \\SLENV`)
+		(`e; \\Ss; \\SH; \\SLENV[x \\mapsto v]`),
 	explanation: "Match object to default alternative",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof case_eval)) return undefined;
@@ -130,7 +137,9 @@ reg({
 
 reg({
 	name: "CASE",
-	definition: "case $e$ of $\\{ \\ldots \\}$; $s$; $H \\: \\Rightarrow \\: e$; case $\\bullet$ of $\\{ \\ldots \\}:s$; $H$",
+	definition: frac
+		(`\\CASE\\ e\\ \\OF \\LBRACE \\ldots \\RBRACE; \\Ss; \\SH; \\SLENV`)
+		(`e; (\\CASE \\bullet \\OF \\LBRACE \\ldots \\RBRACE, \\SLENV):\\Ss; \\SH; \\SLENV`),
 	explanation: "Evaluate case scrutinee and push continuation onto stack",
 	match(expr: expression, env: enviroment, s: stack, _h: heap) {
 		if (!(expr instanceof case_expr)) return undefined;
@@ -146,7 +155,9 @@ reg({
 
 reg({
 	name: "THUNK",
-	definition: "$x$; $s$; $H[x \\mapsto \\mathtt{THUNK} \\, e] \\: \\Rightarrow \\: e$; Upd $x \\, \\bullet :s$; $H[x \\mapsto \\mathtt{BLACKHOLE}]$",
+	definition: frac
+		(`x; \\Ss; \\SH[x] = \\THUNK (e, \\SENV'); \\SLENV`)
+		(`e; \\texttt{Upd x}\\ \\bullet :\\Ss; \\SH[x] = \\BLACKHOLE; \\SLENV \\leftarrow \\SENV'`),
 	explanation: "Enter a thunk and push an update frame onto the stack",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal)) return undefined;
@@ -164,7 +175,9 @@ reg({
 
 reg({
 	name: "INDIRECTION",
-	definition: "$x$; $s$; $H[x \\mapsto \\mathtt{INDIRECTION} \\, y] \\: \\Rightarrow \\: y$; $s$; $H$",
+	definition: frac
+		(`x; \\Ss; \\SH[x] = \\INDIRECTION\\ y; \\SLENV`)
+		(`y; \\Ss; \\SH; \\SLENV`),
 	explanation: "Follow an indirection",
 	match(expr: expression, _env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof literal && expr.isAddr)) return undefined;
@@ -177,7 +190,9 @@ reg({
 
 reg({
 	name: "RET",
-	definition: "$v$; case $\\bullet$ of $\\{ \\ldots \\}:s$; $H \\: \\Rightarrow \\:$ case $v$ of $\\{ \\ldots \\}$; $s$; $H$",
+	definition: frac
+		(`v; (\\CASE \\bullet \\OF \\{ \\ldots \\}, \\SENV'):\\Ss; \\SH; \\SLENV`)
+		(`\\CASE\\ v\\ \\OF \\{ \\ldots \\}; \\Ss; \\SH; \\SLENV \\leftarrow \\SENV'`),
 	explanation: "Pop case continuation off the stack",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal &&
@@ -193,7 +208,9 @@ reg({
 
 reg({
 	name: "UPDATE",
-	definition: "$y$; Upd $x \\, \\bullet :s$; $H \\: \\Rightarrow \\: y$; $s$; $H[x \\mapsto \\mathtt{INDIRECTION} \\, y]$",
+	definition: frac
+		(`y; \\texttt{Upd x}\\ \\bullet :\\Ss; \\SH; \\SLENV`)
+		(`y; \\Ss; \\SH[x] = \\INDIRECTION\\ y; \\SLENV`),
 	explanation: "Pop update frame and update thunk with an indirection",
 	match(expr: expression, _env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal &&
@@ -208,8 +225,9 @@ reg({
 
 reg({
 	name: "KNOWNCALL",
-	definition: "$f^n \\, a_1 \\ldots a_n$; $s$; $H[f \\mapsto \\mathtt{FUN}(x_1 \\ldots x_n \\rightarrow e)]$$\\:" +
-		"\\Rightarrow \\: e[a_1/x_1 \\ldots a_n/x_n]$; $s$; $H$",
+	definition: frac
+		(`f^n\\ a_1 \\ldots a_n; \\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e); \\SLENV`)
+		(`e; \\Ss; \\SH; \\SLENV \\leftarrow [x_i \\mapsto a_i]`),
 	explanation: "Call to a known function",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof call && expr.known)) return undefined;
@@ -231,7 +249,9 @@ reg({
 
 reg({
 	name: "PRIMOP",
-	definition: "$\\oplus a_1 \\ldots a_n$; $s$; $H \\: \\Rightarrow \\: a$; $s$; $H$",
+	definition: frac
+		(`\\begin{array}{c} \\scriptstyle a_1\\ op\\ a_2; \\Ss; \\SH; \\SLENV \\\\ \\tiny op\\ \\IN\\ \\{ \\ADD,\\SUB,\\MUL,\\DIV,\\MOD,\\GEQ,\\GTH,\\EQU,\\LTH,\\LEQ,\\NEQ \\} \\end{array}`)
+		(`a; \\Ss; \\SH; \\SLENV`),
 	explanation: "Apply primitive operation to arguments",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof builtin_op)) return undefined;
