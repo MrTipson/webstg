@@ -11,15 +11,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import type { STGSettings } from "@/components/Machine";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import type React from "react";
 
 type SettingsMenuProps = {
 	readonly settings: STGSettings,
 	readonly setSettings: React.Dispatch<STGSettings>,
+	readonly loaded: boolean,
 	readonly setLoaded: React.Dispatch<boolean>,
 }
 export default function SettingsMenu(props: SettingsMenuProps) {
-	const { settings, setSettings, setLoaded } = props;
+	const { settings, setSettings, loaded, setLoaded } = props;
+	const { toast } = useToast();
 
 	/**
 	 * Helper for handling partial change in the settings
@@ -27,8 +30,14 @@ export default function SettingsMenu(props: SettingsMenuProps) {
 	 */
 	function onChange(change: Partial<STGSettings>) {
 		setSettings({ ...settings, ...change });
-		if (typeof change.eval_apply === "boolean") {
+		if (typeof change.eval_apply === "boolean" || typeof change.garbage_collection === "boolean") {
 			setLoaded(false);
+			if (loaded) {
+				toast({
+					title: 'Machine unloaded',
+					description: 'State cannot be retained when changing evaluation model or garbage collection settings.',
+				});
+			}
 		}
 	}
 

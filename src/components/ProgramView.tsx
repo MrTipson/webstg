@@ -494,7 +494,7 @@ export default function ProgramView(props: ProgramViewProps) {
 					</Select>
 				}
 				<Button onClick={toggleEditable}>{loaded ? "Edit" : "Load"}</Button>
-				<SettingsMenu settings={settings} setSettings={setSettings} setLoaded={setLoaded} />
+				<SettingsMenu settings={settings} setSettings={setSettings} loaded={loaded} setLoaded={setLoaded} />
 			</div>
 			<Separator />
 			<div className="relative grow m-2 overflow-y-auto p-2 flex flex-col">
