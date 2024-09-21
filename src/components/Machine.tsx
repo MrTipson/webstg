@@ -65,8 +65,8 @@ export default function Machine({ examples, default_program }: { examples: Infer
 	const [settings, setSettingsOriginal] = useState<STGSettings>(() => {
 		const searchParams = new URLSearchParams(location.search);
 		return {
-			garbage_collection: true,
-			eval_apply: searchParams.has("ea") || false,
+			garbage_collection: !searchParams.has("nogc"),
+			eval_apply: searchParams.has("ea"),
 			collapse_indirections: true,
 			bind_names: false,
 			run_limit: 1000
@@ -81,9 +81,17 @@ export default function Machine({ examples, default_program }: { examples: Infer
 			} else {
 				searchParams.set("ea", "");
 			}
-			const newUrl = `${location.pathname}?${searchParams.toString()}`;
-			history.replaceState(null, '', newUrl);
 		}
+		const gc = !searchParams.has("nogc");
+		if (newSettings.garbage_collection !== gc) {
+			if (gc) {
+				searchParams.set("nogc", "");
+			} else {
+				searchParams.delete("nogc");
+			}
+		}
+		const newUrl = `${location.pathname}?${searchParams.toString()}`;
+		history.replaceState(null, '', newUrl);
 	};
 	const isDesktop = useMediaQuery("(min-width: 768px)");
 
