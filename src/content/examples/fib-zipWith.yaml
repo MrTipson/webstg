@@ -48,5 +48,5 @@ code: |2
   fib = THUNK(letrec	fib0 = CON(Cons zero fib1)
                       fib1 = CON(Cons one fib2)
                       fib2 = THUNK(zipWith plusInt fib0 fib1)
-              in fib2)
+              in fib0)
   main = THUNK(forcen 10 fib)
