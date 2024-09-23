@@ -129,7 +129,7 @@ export default function HeapView(props: HeapViewProps) {
 					labelStyle: { fill: "hsl(var(--primary))" },
 					labelBgPadding: [4, 2],
 					labelBgStyle: { fill: "hsl(var(--muted))" },
-					style: { strokeDasharray: 5 },
+					style: { strokeDasharray: 5, ...updatedNode === o && { stroke: "#22c55e" } }, // same as update outline
 				});
 			} else {
 				edges.push({
