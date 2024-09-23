@@ -219,7 +219,7 @@ export default function Controls(props: ControlsProps) {
 					</p><br />
 					<span className="font-semibold">Controls:</span>
 					<p className="text-muted-foreground">
-						Arrows step the simulation by one, while the continue goes forward for
+						The arrow buttons move the simulation one step at a time, while the continue button goes forward for
 						<span className="italic"> step_limit</span> steps and stops at breakpoints.
 					</p><br />
 				</HelpPopover>
