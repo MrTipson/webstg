@@ -201,7 +201,7 @@ export default function HeapView(props: HeapViewProps) {
 						</ul>
 
 						<br />
-						<span className='font-semibold'>Indrections:</span>
+						<span className='font-semibold'>Indirections:</span>
 						<p className='text-muted-foreground'>When thunks are updated, they are replaced by an indirection,
 							which points to the new value (i.e. <span className='italic'>big value</span> model). For
 							better clarity, indirections are collapsed by default and replaced with a tag above the connection.
