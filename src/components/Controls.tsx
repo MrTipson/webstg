@@ -134,15 +134,15 @@ export default function Controls(props: ControlsProps) {
 	let expr = machine.expr;
 	try {
 		if (expr instanceof identifier) expr = machine.env.find_value(expr);
-	} catch (e) { } // error should get reported by ProgramView
-	for (let rule of machine.ruleset) {
-		let result = rule.match(expr, machine.env, machine.s, machine.h);
-		if (result) {
-			definition = rule.definition;
-			explanation = rule.explanation;
-			break;
+		for (let rule of machine.ruleset) {
+			let result = rule.match(expr, machine.env, machine.s, machine.h);
+			if (result) {
+				definition = rule.definition;
+				explanation = rule.explanation;
+				break;
+			}
 		}
-	}
+	} catch (e) { } // error should get reported by ProgramView
 
 	/**
 	 * Handle changes to the markers and update the state
