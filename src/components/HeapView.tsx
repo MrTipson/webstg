@@ -120,7 +120,7 @@ export default function HeapView(props: HeapViewProps) {
 			// Indirections get styled differently if collapsing is enabled
 			if (settings.collapse_indirections && outObj instanceof INDIRECTION) {
 				edges.push({
-					id: `e${i}-${outObj.addr.val}`,
+					id: `e${i}${sourceHandle}-${outObj.addr.val}`,
 					source: String(i),
 					target: String(outObj.addr.val),
 					sourceHandle: String(sourceHandle++),
@@ -133,7 +133,7 @@ export default function HeapView(props: HeapViewProps) {
 				});
 			} else {
 				edges.push({
-					id: `e${i}-${o}`,
+					id: `e${i}${sourceHandle}-${o}`,
 					source: String(i),
 					target: String(o),
 					sourceHandle: String(sourceHandle++)
