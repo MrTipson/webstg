@@ -170,7 +170,7 @@ export default function Controls(props: ControlsProps) {
 				<summary className="text-center">
 					Step <span className="font-semibold">{machine.step_number}</span>
 				</summary>
-				<Timeline className={"m-auto " + (isDesktop ? "w-[500px]" : "w-[300px]")} width={isDesktop ? 500 : 300} step={step} moveTo={moveTo} markers={[...markers.entries()]}></Timeline>
+				<Timeline className={"m-auto " + (isDesktop ? "w-[500px]" : "w-[300px]")} width={isDesktop ? 500 : 300} step={step} moveTo={moveTo} markers={[...markers.entries()]} enteredThunks={enteredThunks}></Timeline>
 			</details>
 			<div className="text-center p-2">
 				<details open>

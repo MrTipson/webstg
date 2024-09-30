@@ -1,5 +1,5 @@
 import { Slider } from "@/components/ui/slider"
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 /**
  * Helper to calculate tick locations such that around 10 ticks will be on the timeline
@@ -44,6 +44,7 @@ type TimelineProps = {
 	readonly width: number,
 	readonly markers: [number, string][],
 	readonly step: number,
+	readonly enteredThunks: [number, number][],
 
 	moveTo: React.Dispatch<number>,
 }
@@ -56,7 +57,7 @@ type TimelineProps = {
  * @param props.moveTo Function that moves the machine to given step
  */
 export default function Timeline(props: TimelineProps) {
-	const { className, width, markers, step, moveTo } = props;
+	const { className, width, markers, step, moveTo, enteredThunks, } = props;
 
 	const [limit, setLimitOriginal] = useState(() => {
 		const searchParams = new URLSearchParams(location.search);
@@ -69,6 +70,12 @@ export default function Timeline(props: TimelineProps) {
 		const newUrl = `${location.pathname}?${searchParams.toString()}`;
 		history.replaceState(null, '', newUrl);
 	};
+	// If a different thunk is entered, 'forget' about the future timeline
+	useEffect(() => {
+		if (limit > step) {
+			setLimit(step);
+		}
+	}, [enteredThunks])
 
 	// Memoize ticks if limit doesn't change
 	const ticks = useMemo(() => calculateTicks(limit), [limit]);
