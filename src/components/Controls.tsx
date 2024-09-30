@@ -172,20 +172,24 @@ export default function Controls(props: ControlsProps) {
 				</summary>
 				<Timeline className={"m-auto " + (isDesktop ? "w-[500px]" : "w-[300px]")} width={isDesktop ? 500 : 300} step={step} moveTo={moveTo} markers={[...markers.entries()]}></Timeline>
 			</details>
-			{
-				definition &&
-				<div className="text-center p-2">
-					<details open>
+			<div className="text-center p-2">
+				<details open>
+					{
+						definition &&
+						<>
+							<summary>
+								<span className="font-semibold text-lg">Next rule: </span>
+								<span className="text-muted-foreground">{explanation}</span>
+							</summary>
+							<div className="bg-muted p-1 rounded text-3xl"><Latex children={definition} macros={macros} /></div>
+						</>
+						||
 						<summary>
-							<span className="font-semibold text-lg">Next rule: </span>
-							<span className="text-muted-foreground">{explanation}</span>
+							<span className="font-semibold text-lg text-center p-2">No matching rule</span>
 						</summary>
-						<div className="bg-muted p-1 rounded text-3xl"><Latex children={definition} macros={macros} /></div>
-					</details>
-				</div>
-				||
-				<div className="font-semibold text-lg text-center p-2">No matching rule</div>
-			}
+					}
+				</details>
+			</div>
 			<div className={"flex gap-x-1 justify-center"}>
 				<MarkerPopover>
 					<p>Set marker name or leave empty to remove marker.</p>
