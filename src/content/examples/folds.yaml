@@ -4,7 +4,6 @@ code: |2
   data List a = Nil | Cons a (List a)
   data Bool = True | False
 
-  seq = FUN(a b -> case a of { _ -> b	})
   foldl = FUN(f acc l ->
     case l of {
       Nil -> acc;
@@ -15,9 +14,9 @@ code: |2
   foldl_ = FUN(f acc l ->
     case l of {
       Nil -> acc;
-      Cons h t -> let fh = THUNK(f acc h)
-              ft = THUNK(foldl_ f fh t)
-            in seq fh ft
+      Cons h t -> case f acc h of {
+          acc_ -> foldl_ f acc_ t
+        }
     })
   foldr = FUN(f acc l ->
     case l of {
