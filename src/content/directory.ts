@@ -27,6 +27,7 @@ const devSidebar = loadDirectory([
 ]);
 const prodSidebar = loadDirectory([
 	{ label: 'Welcome', link: '/docs' },
+	{ label: 'Evaluation rules', link: '/docs/rules' },
 	{
 		label: 'Examples',
 		items: [

@@ -1,0 +1,36 @@
+---
+title: Evaluation ruels
+description: Evaluation rules used by the simulator.
+draft: false
+---
+import React from "react";
+import { rules as shared } from "@/stgmachine/evaluation_rules/shared";
+import { rules as eval_apply } from "@/stgmachine/evaluation_rules/eval-apply";
+import { rules as push_enter } from "@/stgmachine/evaluation_rules/push-enter";
+import { macros } from "@/stgmachine/evaluation_rules/utils";
+import Latex from "react-latex-next";
+
+export function render_rule(rule) {
+	// Much cursed, very wow
+	const rendered = Latex({ macros: macros, children: rule.definition });
+	return <div class="text-center">
+		<h2>{rule.name}</h2>
+		<span class="text-3xl ml-3 text-muted-foreground" set:html={rendered.props.dangerouslySetInnerHTML.__html}/>
+		<p>{rule.explanation}</p>
+	</div>;
+
+}
+
+# Evaluation rules
+## Shared rules
+{shared.map(render_rule)}
+
+***
+
+## Push/Enter rules
+{push_enter.map(render_rule)}
+
+***
+
+## Eval/Apply rules
+{eval_apply.map(render_rule)}
