@@ -238,7 +238,7 @@ reg({
 		let fun_obj = obj;
 		return function () {
 			let call_args = expr.atoms.map(x => x instanceof literal ? x : env.find_value(x));
-			env.clear_locals();
+			env.replace_locals(fun_obj.env);
 			for (let i = 0; i < fun_obj.args.length; i++) {
 				env.add_local(fun_obj.args[i], call_args[i]);
 			}

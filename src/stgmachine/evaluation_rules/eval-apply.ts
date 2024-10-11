@@ -21,6 +21,7 @@ reg({
 			obj.args.length == expr.atoms.length)) return undefined;
 		let fun = obj;
 		return function () {
+			env.replace_locals(fun.env);
 			for (let i = 0; i < expr.atoms.length; i++) {
 				env.add_local(fun.args[i], expr.atoms[i]);
 			}
@@ -43,6 +44,7 @@ reg({
 			obj.args.length < expr.atoms.length)) return undefined;
 		let fun = obj;
 		return function () {
+			env.replace_locals(fun.env);
 			for (let i = 0; i < fun.args.length; i++) {
 				env.add_local(fun.args[i], expr.atoms[i]);
 			}

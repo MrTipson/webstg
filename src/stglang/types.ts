@@ -143,7 +143,7 @@ export class default_alt {
 
 export type heap_object = FUN | PAP | CON | THUNK | BLACKHOLE | INDIRECTION
 export class FUN {
-	constructor(public args: identifier[], public expr: expression, public env?: Map<string, literal>, public from: number = -1, public to: number = -1, public bind_name: string = '') { }
+	constructor(public args: identifier[], public expr: expression, public env: Map<string, literal> = new Map(), public from: number = -1, public to: number = -1, public bind_name: string = '') { }
 
 	public toString() {
 		let args = this.args.join(" ");
