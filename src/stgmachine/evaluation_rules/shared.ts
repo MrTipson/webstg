@@ -10,8 +10,8 @@ let reg = (x: Rule) => register_rule(rules, x);
 reg({
 	name: "LET",
 	definition: frac
-		(`\\texttt{let}\\ x = obj\\ \\IN\\ e ; \\Ss ; \\SH; \\SLENV`)
-		(`e; \\Ss; \\SH[a] = obj; \\SLENV[x \\mapsto a]`),
+		(`\\texttt{let}\\ x = obj\\ \\IN\\ e ; \\Ss ; \\SH; \\SENV`)
+		(`e; \\Ss; \\SH[a] = obj; \\SENV[x \\mapsto a] \\quad \\text{where } a = addr(obj)`),
 	explanation: "Allocate objects on the heap and bind their addresses to names in the local enviroment",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof let_expr)) return undefined;
@@ -47,8 +47,8 @@ reg({
 reg({
 	name: "LETREC",
 	definition: frac
-		(`\\texttt{letrec}\\ x = obj\\ \\IN\\ e ; \\Ss ; \\SH; \\SLENV`)
-		(`e; \\Ss; \\SH[a] = obj; \\SLENV[x \\mapsto a]`),
+		(`\\texttt{letrec}\\ x = obj\\ \\IN\\ e ; \\Ss ; \\SH; \\SENV`)
+		(`e; \\Ss; \\SH[a] = obj; \\SENV[x \\mapsto a] \\quad \\text{where } a = addr(obj)`),
 	explanation: "Allocate objects on the heap and bind their addresses to names in the local enviroment",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof letrec_expr)) return undefined;
@@ -90,8 +90,8 @@ reg({
 reg({
 	name: "CASECON",
 	definition: frac
-		(`\\CASE\\ v\\ \\OF \\LBRACE\\ldots ; C\\, x_1 \\ldots x_n\\ \\ARROW\\ e;\\ldots\\RBRACE; \\Ss; \\SH[v] = \\CON(C\\ a_1\\ldots a_n); \\SLENV`)
-		(`e; \\Ss; \\SH; \\SLENV[x_i \\mapsto a_i]`),
+		(`\\CASE\\ v\\ \\OF \\LBRACE\\ldots ; C\\, x_1 \\ldots x_n\\ \\ARROW\\ e;\\ldots\\RBRACE; \\Ss; \\SH[v] = \\CON(C\\ a_1\\ldots a_n); \\SENV`)
+		(`e; \\Ss; \\SH; \\SENV[x_1 \\mapsto a_1 \\ldots x_n \\mapsto a_n]`),
 	explanation: "Match object to constructor alternative",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof case_eval)) return undefined;
@@ -117,8 +117,8 @@ reg({
 reg({
 	name: "CASEANY",
 	definition: frac
-		(`\\CASE\\ v\\ \\OF \\LBRACE\\ldots ; x\\ \\ARROW\\ e\\RBRACE; \\Ss; \\SH; \\SLENV`)
-		(`e; \\Ss; \\SH; \\SLENV[x \\mapsto v]`),
+		(`\\CASE\\ v\\ \\OF \\LBRACE\\ldots ; x\\ \\ARROW\\ e\\RBRACE; \\Ss; \\SH; \\SENV`)
+		(`e; \\Ss; \\SH; \\SENV[x \\mapsto v]`),
 	explanation: "Match object to default alternative",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof case_eval)) return undefined;
@@ -138,8 +138,8 @@ reg({
 reg({
 	name: "CASE",
 	definition: frac
-		(`\\CASE\\ e\\ \\OF \\LBRACE \\ldots \\RBRACE; \\Ss; \\SH; \\SLENV`)
-		(`e; (\\CASE \\bullet \\OF \\LBRACE \\ldots \\RBRACE, \\SLENV):\\Ss; \\SH; \\SLENV`),
+		(`\\CASE\\ e\\ \\OF \\LBRACE \\ldots \\RBRACE; \\Ss; \\SH; \\SENV`)
+		(`e; (\\CASE \\bullet \\OF \\LBRACE \\ldots \\RBRACE, \\SENV):\\Ss; \\SH; \\SENV`),
 	explanation: "Evaluate case scrutinee and push continuation onto stack",
 	match(expr: expression, env: enviroment, s: stack, _h: heap) {
 		if (!(expr instanceof case_expr)) return undefined;
@@ -156,8 +156,8 @@ reg({
 reg({
 	name: "THUNK",
 	definition: frac
-		(`x; \\Ss; \\SH[x] = \\THUNK (e, \\SENV'); \\SLENV`)
-		(`e; \\texttt{Upd x}\\ \\bullet :\\Ss; \\SH[x] = \\BLACKHOLE; \\SLENV \\leftarrow \\SENV'`),
+		(`x; \\Ss; \\SH[x] = \\THUNK (e, \\SENV'); \\SENV`)
+		(`e; \\texttt{Upd x}\\ \\bullet :\\Ss; \\SH[x] = \\BLACKHOLE; \\SENV'`),
 	explanation: "Enter a thunk and push an update frame onto the stack",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal)) return undefined;
@@ -176,8 +176,8 @@ reg({
 reg({
 	name: "INDIRECTION",
 	definition: frac
-		(`x; \\Ss; \\SH[x] = \\INDIRECTION\\ y; \\SLENV`)
-		(`y; \\Ss; \\SH; \\SLENV`),
+		(`x; \\Ss; \\SH[x] = \\INDIRECTION\\ y; \\SENV`)
+		(`y; \\Ss; \\SH; \\SENV`),
 	explanation: "Follow an indirection",
 	match(expr: expression, _env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof literal && expr.isAddr)) return undefined;
@@ -191,8 +191,8 @@ reg({
 reg({
 	name: "RET",
 	definition: frac
-		(`v; (\\CASE \\bullet \\OF \\{ \\ldots \\}, \\SENV'):\\Ss; \\SH; \\SLENV`)
-		(`\\CASE\\ v\\ \\OF \\{ \\ldots \\}; \\Ss; \\SH; \\SLENV \\leftarrow \\SENV'`),
+		(`v; (\\CASE \\bullet \\OF \\{ \\ldots \\}, \\SENV'):\\Ss; \\SH; \\SENV`)
+		(`\\CASE\\ v\\ \\OF \\{ \\ldots \\}; \\Ss; \\SH; \\SENV'`),
 	explanation: "Pop case continuation off the stack",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal &&
@@ -209,8 +209,8 @@ reg({
 reg({
 	name: "UPDATE",
 	definition: frac
-		(`y; \\texttt{Upd x}\\ \\bullet :\\Ss; \\SH; \\SLENV`)
-		(`y; \\Ss; \\SH[x] = \\INDIRECTION\\ y; \\SLENV`),
+		(`y; \\texttt{Upd x}\\ \\bullet :\\Ss; \\SH; \\SENV`)
+		(`y; \\Ss; \\SH[x] = \\INDIRECTION\\ y; \\SENV`),
 	explanation: "Pop update frame and update thunk with an indirection",
 	match(expr: expression, _env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal &&
@@ -226,8 +226,8 @@ reg({
 reg({
 	name: "KNOWNCALL",
 	definition: frac
-		(`f^n\\ a_1 \\ldots a_n; \\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e); \\SLENV`)
-		(`e; \\Ss; \\SH; \\SLENV \\leftarrow [x_i \\mapsto a_i]`),
+		(`f^n\\ a_1 \\ldots a_n; \\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e, \\SENV_f); \\SENV`)
+		(`e; \\Ss; \\SH; \\SENV_f[x_1 \\mapsto a_1 \\ldots x_n \\mapsto a_n]`),
 	explanation: "Call to a known function",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof call && expr.known)) return undefined;
@@ -250,8 +250,8 @@ reg({
 reg({
 	name: "PRIMOP",
 	definition: frac
-		(`\\begin{array}{c} \\scriptstyle a_1\\ op\\ a_2; \\Ss; \\SH; \\SLENV \\\\ \\tiny op\\ \\IN\\ \\{ \\ADD,\\SUB,\\MUL,\\DIV,\\MOD,\\GEQ,\\GTH,\\EQU,\\LTH,\\LEQ,\\NEQ \\} \\end{array}`)
-		(`a; \\Ss; \\SH; \\SLENV`),
+		(`\\begin{array}{c} \\scriptstyle a_1\\ op\\ a_2; \\Ss; \\SH; \\SENV \\\\ \\tiny op\\ \\IN\\ \\{ \\ADD,\\SUB,\\MUL,\\DIV,\\MOD,\\GEQ,\\GTH,\\EQU,\\LTH,\\LEQ,\\NEQ \\} \\end{array}`)
+		(`\\begin{array}{c} \\scriptstyle a; \\Ss; \\SH; \\SENV \\\\ \\text{\\tiny where $a$ is the result of the primitive operation over $a_1$ and $a_2$}\\end{array}`),
 	explanation: "Apply primitive operation to arguments",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof builtin_op)) return undefined;

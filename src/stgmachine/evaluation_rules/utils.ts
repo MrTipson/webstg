@@ -42,8 +42,6 @@ export const macros: Macros = {
 	"\\Ss": "\\texttt{s}",
 	"\\SH": "\\texttt{H}",
 	"\\SENV": "\\texttt{env}",
-	"\\SGLENV": "\\texttt{env}_\\texttt{G}",
-	"\\SLENV": "\\texttt{env}_\\texttt{L}",
 }
 
 export function register_rule(ruleset: Array<Rule>, rule: Rule) {

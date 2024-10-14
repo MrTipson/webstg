@@ -10,8 +10,8 @@ let reg = (x: Rule) => register_rule(rules, x);
 reg({
 	name: "PUSH",
 	definition: frac
-		(`f^k\\ a_1 \\ldots a_m; \\Ss; \\SH; \\SLENV`)
-		(`f; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_m:\\Ss; \\SH; \\SLENV`),
+		(`f^k\\ a_1 \\ldots a_m; \\Ss; \\SH; \\SENV`)
+		(`f; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_m:\\Ss; \\SH; \\SENV`),
 	explanation: "Push function arguments onto the stack",
 	match(expr: expression, env: enviroment, s: stack, _h: heap) {
 		if (!(expr instanceof call)) return undefined;
@@ -29,8 +29,8 @@ reg({
 reg({
 	name: "FENTER",
 	definition: frac
-		(`f; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_n:\\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e); \\SLENV`)
-		(`e; \\Ss; \\SH; \\SLENV[x_i \\mapsto a_i]`),
+		(`f; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_n:\\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e, \\SENV_f); \\SENV`)
+		(`e; \\Ss; \\SH; \\SENV_f[x_1 \\mapsto a_1 \\ldots x_n \\mapsto x_n]`),
 	explanation: "Collect function arguments off the stack and enter function body",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal)) return undefined;
@@ -53,8 +53,8 @@ reg({
 reg({
 	name: "PAP1",
 	definition: frac
-		(`f; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_m:\\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e); \\SLENV`)
-		(`p; \\Ss; \\SH[p] = \\PAP(f\\ a_1 \\ldots a_m);\\SLENV \\quad \\mathit{1 \\le m < n}`),
+		(`f; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_m:\\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e, \\SENV_f); \\SENV`)
+		(`p; \\Ss; \\SH[p] = \\PAP(f\\ a_1 \\ldots a_m);\\SENV \\quad \\mathit{1 \\le m < n}`),
 	explanation: "Construct partial application",
 	match(expr: expression, _env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal)) return undefined;
@@ -76,8 +76,8 @@ reg({
 reg({
 	name: "PENTER",
 	definition: frac
-		(`f; \\texttt{Arg}\\ a_{n+1}:\\Ss; \\SH[f] = \\mathtt{PAP}(g\\ a_1 \\ldots a_n); \\SLENV`)
-		(`g; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_n: \\texttt{Arg}\\ a_{n+1}:\\Ss; \\SH; \\SLENV`),
+		(`f; \\texttt{Arg}\\ a_{n+1}:\\Ss; \\SH[f] = \\mathtt{PAP}(g\\ a_1 \\ldots a_n); \\SENV`)
+		(`g; \\texttt{Arg}\\ a_1: \\ldots :\\texttt{Arg}\\ a_n: \\texttt{Arg}\\ a_{n+1}:\\Ss; \\SH; \\SENV`),
 	explanation: "Enter partial application and push combined arguments onto the stack",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof literal)) return undefined;

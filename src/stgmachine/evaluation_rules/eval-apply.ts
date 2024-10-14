@@ -10,8 +10,8 @@ let reg = (x: Rule) => register_rule(rules, x);
 reg({
 	name: "EXACT",
 	definition: frac
-		(`f^\\bullet\\ a_1 \\ldots a_n; \\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e); \\SLENV`)
-		(`e; \\Ss; \\SH; \\SLENV[x_i \\mapsto a_i]`),
+		(`f^\\bullet\\ a_1 \\ldots a_n; \\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e, \\SENV_f); \\SENV`)
+		(`e; \\Ss; \\SH; \\SENV_f[x_1 \\mapsto a_1 \\ldots x_n \\mapsto a_n]`),
 	explanation: "Call of an unknown function with a matching number of arguments",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof call)) return undefined;
@@ -33,8 +33,8 @@ reg({
 reg({
 	name: "CALLK",
 	definition: frac
-		(`f^k\\ a_1 \\ldots a_m; \\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e); \\SLENV`)
-		(`e; (\\bullet\\ a_{n+1} \\ldots a_m):\\Ss; \\SH; \\SLENV[x_i \\mapsto a_i] \\quad m > n`),
+		(`f^k\\ a_1 \\ldots a_m; \\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e, \\SENV_f); \\SENV`)
+		(`e; (\\bullet\\ a_{n+1} \\ldots a_m):\\Ss; \\SH; \\SENV_f[x_1 \\mapsto a_1 \\ldots x_n \\mapsto a_n] \\quad m > n`),
 	explanation: "Function call with too many arguments, the excess of which is pushed onto the stack",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof call)) return undefined;
@@ -60,8 +60,8 @@ reg({
 reg({
 	name: "PAP2",
 	definition: frac
-		(`f^k\\ a_1 \\ldots a_m; \\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e); \\SLENV`)
-		(`p; \\Ss; \\SH[p] = \\PAP(f\\ a_1 \\ldots a_m); \\SLENV \\quad m < n`),
+		(`f^k\\ a_1 \\ldots a_m; \\Ss; \\SH[f] = \\FUN(x_1 \\ldots x_n \\rightarrow e, \\SENV_f); \\SENV`)
+		(`p; \\Ss; \\SH[p] = \\PAP(f\\ a_1 \\ldots a_m); \\SENV \\quad m < n`),
 	explanation: "Function call with too few arguments, a partial application is constructed",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof call)) return undefined;
@@ -76,8 +76,8 @@ reg({
 reg({
 	name: "TCALL",
 	definition: frac
-		(`f^\\bullet\\ a_1 \\ldots a_m; \\Ss; \\SH[f] = \\THUNK(e, \\SENV'); \\SLENV`)
-		(`f; (\\bullet\\ a_1 \\ldots a_m):\\Ss; \\SH; \\SLENV`),
+		(`f^\\bullet\\ a_1 \\ldots a_m; \\Ss; \\SH[f] = \\THUNK(e, \\SENV'); \\SENV`)
+		(`f; (\\bullet\\ a_1 \\ldots a_m):\\Ss; \\SH; \\SENV`),
 	explanation: "Calling a thunk (it may return a PAP or FUN, so the arguments must be pushed onto the stack)",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(expr instanceof call)) return undefined;
@@ -93,8 +93,8 @@ reg({
 reg({
 	name: "PCALL",
 	definition: frac
-		(`f^k\\ a_{n+1} \\ldots a_m; \\Ss; \\SH[f] = \\PAP(g\\ a_1 \\ldots a_n); \\SLENV`)
-		(`g^\\bullet\\ a_1 \\ldots a_n\\ a_{n+1} \\ldots a_m; \\Ss; \\SH; \\SLENV`),
+		(`f^k\\ a_{n+1} \\ldots a_m; \\Ss; \\SH[f] = \\PAP(g\\ a_1 \\ldots a_n); \\SENV`)
+		(`g^\\bullet\\ a_1 \\ldots a_n\\ a_{n+1} \\ldots a_m; \\Ss; \\SH; \\SENV`),
 	explanation: "Providing additional arguments to a partial application",
 	match(expr: expression, env: enviroment, _s: stack, h: heap) {
 		if (!(expr instanceof call)) return undefined;
@@ -109,8 +109,8 @@ reg({
 reg({
 	name: "RETFUN",
 	definition: frac
-		(`f; (\\bullet\\ a_1 \\ldots a_n):\\Ss; \\SH[f] \\in \\{\\FUN, \\PAP\\}; \\SLENV`)
-		(`f^\\bullet\\ a_1 \\ldots a_n; \\Ss; \\SH; \\SLENV`),
+		(`f; (\\bullet\\ a_1 \\ldots a_n):\\Ss; \\SH[f] \\in \\{\\FUN, \\PAP\\}; \\SENV`)
+		(`f^\\bullet\\ a_1 \\ldots a_n; \\Ss; \\SH; \\SENV`),
 	explanation: "Construct a function call with returned function (or partial application) and arguments from stack",
 	match(expr: expression, env: enviroment, s: stack, h: heap) {
 		if (!(s.peek() instanceof apply_args)) return undefined;
