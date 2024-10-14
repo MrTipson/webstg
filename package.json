@@ -11,10 +11,10 @@
 		"prebuild": "lezer-generator src/stglang/stglang.grammar -o src/stglang/parser"
 	},
 	"dependencies": {
-		"@astrojs/check": "^0.9.3",
-		"@astrojs/mdx": "^3.1.7",
+		"@astrojs/check": "^0.9.4",
+		"@astrojs/mdx": "^3.1.8",
 		"@astrojs/react": "^3.6.2",
-		"@astrojs/tailwind": "^5.1.1",
+		"@astrojs/tailwind": "^5.1.2",
 		"@dagrejs/dagre": "^1.0.4",
 		"@lezer/generator": "^1.6.0",
 		"@lezer/highlight": "^1.2.0",
@@ -34,7 +34,7 @@
 		"@radix-ui/react-toast": "^1.1.5",
 		"@types/react": "^18.2.55",
 		"@types/react-dom": "^18.2.19",
-		"astro": "^4.15.9",
+		"astro": "^4.16.3",
 		"astro-auto-import": "^0.4.2",
 		"astro-mdx-code-blocks": "^0.0.6",
 		"class-variance-authority": "^0.7.0",
