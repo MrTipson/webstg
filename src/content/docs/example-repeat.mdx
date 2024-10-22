@@ -1,0 +1,66 @@
+---
+title: Repeat
+description: Comparing the naiive and efficient implementations of repeat
+draft: false
+---
+import useFigure from "../useFigure";
+export const fig = useFigure();
+export const naiive = `
+data Number a = Num a
+data List a = Nil | Cons a (List a)
+repeat_naiive = FUN(x -> let t = THUNK(repeat_naiive x)
+							 l = CON(Cons x t) in l)
+n = CON(Num 42)
+main = THUNK(repeat_naiive n)
+`
+export const efficient = `
+data Number a = Num a
+data List a = Nil | Cons a (List a)
+repeat = FUN(x -> letrec l = CON(Cons x l) in l)
+n = CON(Num 42)
+main = THUNK(repeat n)
+`
+
+# Repeat
+Implementing repeat in Haskell can be quite straightforward, but if not careful, you can end up with memory inefficient code.
+Trying to do the same in STG makes the inefficiency quite obvious, with the efficient implementation almost being more natural to write.
+Lets take a look.
+
+## Naiive
+[Simulator link](/webstg/?step=10&program=eJx1jrEKAjEQRGvzFVNmCxux1eZABCU2Xi0rl2Iht8rdKin8eBNjY%2BFUu4%2FHMAMbIzzGa5zA2NQT7IZKjzJbY5LwQnfTuby%2BYXJTvEe2i7LIMxZr1wefsdwiRYMVcN734eB%2FtUxu0YJUlO4U%2FKc3wwiiSOT0y%2BuS9YrcyKJ%2F2pTeoh84qQ%3D%3D&limit=10&e6=3)
+
+Here, the spine of the repeated list is **generated** by function calls, which creates new objects on the heap.
+```haskell
+// naiive
+repeat x = x : repeat x
+```
+```stg
+repeat = FUN(x -> let t = THUNK(repeat_naiive x)
+					  l = CON(Cons x t)
+				  in l)
+```
+<figure>
+	<MdMachine client:load step={5} program={naiive} garbage_collection collapse_indirections bind_names>
+		<heap/>
+	</MdMachine>
+	<figcaption>Figure {fig('naiive')}</figcaption>
+</figure>
+
+## Efficient
+[Simulator link](/webstg/?step=5&program=eJzjSkksSVTwK81NSi1SSFSwBTEVErnAoj6ZxSUQscwchRoF5%2Fy8YiBXAyKsyVWUWpCaWAKUdgv106hQ0LVTyEktKUpNVsgBijn7%2B2mANVQo5GgqZOYBSa48qDjIChMjTa7cxEyQUIhHqJ%2B3BtS0PE0Aj1MrBg%3D%3D&limit=5)
+
+But we don't really need to generate the spine. Since the value of the repeated element is always the same, *the spine can stay the same as well*.
+```haskell
+// efficient
+repeat x = let r = x : r in r
+```
+```stg
+repeat = FUN(x -> letrec l = CON(Cons x l)
+				  in l)
+```
+<figure>
+	<MdMachine client:load step={5} program={efficient} garbage_collection collapse_indirections bind_names>
+		<heap/>
+	</MdMachine>
+	<figcaption>Figure {fig('efficient')}</figcaption>
+</figure>

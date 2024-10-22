@@ -32,6 +32,7 @@ const prodSidebar = loadDirectory([
 		label: 'Examples',
 		items: [
 			{ label: 'Fibonacci', link: '/docs/example-fib' },
+			{ label: 'Repeat', link: '/docs/example-repeat' },
 		]
 	},
 	{ label: 'WebSTG sandbox', link: '/' },
