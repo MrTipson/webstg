@@ -21,9 +21,10 @@ reg({
 			obj.args.length == expr.atoms.length)) return undefined;
 		let fun = obj;
 		return function () {
+			let args = expr.atoms.map<literal>(x => x instanceof literal ? x : env.find_value(x));
 			env.replace_locals(fun.env);
 			for (let i = 0; i < expr.atoms.length; i++) {
-				env.add_local(fun.args[i], expr.atoms[i]);
+				env.add_local(fun.args[i], args[i]);
 			}
 			return fun.expr;
 		};
@@ -44,14 +45,12 @@ reg({
 			obj.args.length < expr.atoms.length)) return undefined;
 		let fun = obj;
 		return function () {
+			let args = expr.atoms.map<literal>(x => x instanceof literal ? x : env.find_value(x));
 			env.replace_locals(fun.env);
 			for (let i = 0; i < fun.args.length; i++) {
-				env.add_local(fun.args[i], expr.atoms[i]);
+				env.add_local(fun.args[i], args[i]);
 			}
-			let args = expr.atoms
-				.slice(fun.args.length, expr.atoms.length)
-				.map<literal>(x => x instanceof literal ? x : env.find_value(x));
-			s.push(new apply_args(args))
+			s.push(new apply_args(args.slice(fun.args.length, expr.atoms.length)));
 			return fun.expr;
 		};
 	}
